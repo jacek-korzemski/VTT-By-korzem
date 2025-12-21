@@ -170,7 +170,4 @@ echo.
 echo  ========================================
 echo.
 
-:: Otwórz folder build
-start "" "build"
-
 pause

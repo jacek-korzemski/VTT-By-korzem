@@ -192,22 +192,22 @@ try {
                     ]);
                     break;
 
+                case 'rolls':
+                    $rollsFile = __DIR__ . '/data/rolls.json';
+                    if (file_exists($rollsFile)) {
+                        $rolls = json_decode(file_get_contents($rollsFile), true);
+                    } else {
+                        $rolls = [];
+                    }
+                    $rolls = array_slice($rolls, -50);
+                    echo json_encode(['success' => true, 'rolls' => $rolls]);
+                    break;
+
                 default:
                     http_response_code(400);
                     echo json_encode(['success' => false, 'error' => 'Unknown action']);
             }
             break;
-
-            case 'rolls':
-                $rollsFile = __DIR__ . '/data/rolls.json';
-                if (file_exists($rollsFile)) {
-                    $rolls = json_decode(file_get_contents($rollsFile), true);
-                } else {
-                    $rolls = [];
-                }
-                $rolls = array_slice($rolls, -50);
-                echo json_encode(['success' => true, 'rolls' => $rolls]);
-                break;
 
         case 'POST':
             $input = json_decode(file_get_contents('php://input'), true);
@@ -372,52 +372,52 @@ try {
                     echo json_encode(['success' => true, 'enabled' => $state['fogOfWar']['enabled'], 'version' => $state['version']]);
                     break;
 
+                case 'roll':
+                    // Zapisz nowy rzut
+                    $rollsFile = __DIR__ . '/data/rolls.json';
+                    if (file_exists($rollsFile)) {
+                        $rolls = json_decode(file_get_contents($rollsFile), true);
+                    } else {
+                        $rolls = [];
+                    }
+                    
+                    $newRoll = [
+                        'id' => generateId(),
+                        'player' => htmlspecialchars(substr($input['player'] ?? 'Anonim', 0, 20)),
+                        'dice' => $input['dice'] ?? [],
+                        'modifier' => intval($input['modifier'] ?? 0),
+                        'total' => intval($input['total'] ?? 0),
+                        'timestamp' => $input['timestamp'] ?? (time() * 1000)
+                    ];
+                    
+                    $rolls[] = $newRoll;
+                    
+                    // Zachowaj tylko ostatnie 100 rzutów
+                    if (count($rolls) > 100) {
+                        $rolls = array_slice($rolls, -100);
+                    }
+                    
+                    file_put_contents($rollsFile, json_encode($rolls, JSON_PRETTY_PRINT));
+                    
+                    // Zwiększ wersję stanu żeby inni gracze dostali update
+                    $state = getState();
+                    $state = saveState($state);
+                    
+                    echo json_encode(['success' => true, 'roll' => $newRoll, 'version' => $state['version']]);
+                    break;
+
+                case 'clear-rolls':
+                    // Wyczyść historię rzutów
+                    $rollsFile = __DIR__ . '/data/rolls.json';
+                    file_put_contents($rollsFile, json_encode([], JSON_PRETTY_PRINT));
+                    echo json_encode(['success' => true]);
+                    break;
+
                 default:
                     http_response_code(400);
                     echo json_encode(['success' => false, 'error' => 'Unknown action']);
             }
             break;
-
-            case 'roll':
-                // Zapisz nowy rzut
-                $rollsFile = __DIR__ . '/data/rolls.json';
-                if (file_exists($rollsFile)) {
-                    $rolls = json_decode(file_get_contents($rollsFile), true);
-                } else {
-                    $rolls = [];
-                }
-                
-                $newRoll = [
-                    'id' => generateId(),
-                    'player' => htmlspecialchars(substr($input['player'] ?? 'Anonim', 0, 20)),
-                    'dice' => $input['dice'] ?? [],
-                    'modifier' => intval($input['modifier'] ?? 0),
-                    'total' => intval($input['total'] ?? 0),
-                    'timestamp' => $input['timestamp'] ?? (time() * 1000)
-                ];
-                
-                $rolls[] = $newRoll;
-                
-                // Zachowaj tylko ostatnie 100 rzutów
-                if (count($rolls) > 100) {
-                    $rolls = array_slice($rolls, -100);
-                }
-                
-                file_put_contents($rollsFile, json_encode($rolls, JSON_PRETTY_PRINT));
-                
-                // Zwiększ wersję stanu żeby inni gracze dostali update
-                $state = getState();
-                $state = saveState($state);
-                
-                echo json_encode(['success' => true, 'roll' => $newRoll, 'version' => $state['version']]);
-                break;
-
-            case 'clear-rolls':
-                // Wyczyść historię rzutów
-                $rollsFile = __DIR__ . '/data/rolls.json';
-                file_put_contents($rollsFile, json_encode([], JSON_PRETTY_PRINT));
-                echo json_encode(['success' => true]);
-                break;
 
         default:
             http_response_code(405);
