@@ -1,0 +1,158 @@
+<?php
+session_start();
+
+define('VTT_PASSWORD', '{{PASSWORD}}');
+
+function loadEnv($path) {
+    if (!file_exists($path)) return [];
+    $env = [];
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || $line[0] === '#') continue;
+        $parts = explode('=', $line, 2);
+        if (count($parts) === 2) {
+            $env[trim($parts[0])] = trim(trim($parts[1]), '"\'');
+        }
+    }
+    return $env;
+}
+
+$error = '';
+
+if (isset($_GET['logout'])) {
+    unset($_SESSION['vtt_authenticated']);
+    header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?'));
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
+    if ($_POST['password'] === VTT_PASSWORD) {
+        $_SESSION['vtt_authenticated'] = true;
+        header('Location: ' . $_SERVER['REQUEST_URI']);
+        exit;
+    } else {
+        $error = 'Nieprawidłowe hasło!';
+    }
+}
+
+if (!isset($_SESSION['vtt_authenticated']) || $_SESSION['vtt_authenticated'] !== true):
+?>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTT - Logowanie</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 { margin-bottom: 0.5rem; color: #e94560; font-size: 2rem; }
+        .subtitle { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
+        .error {
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid #e94560;
+            color: #ff6b6b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        form { display: flex; flex-direction: column; gap: 1rem; }
+        input[type="password"] {
+            padding: 0.875rem 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input[type="password"]:focus { outline: none; border-color: #e94560; }
+        input[type="password"]::placeholder { color: #666; }
+        button {
+            padding: 0.875rem;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover { background: #ff6b6b; }
+        button:active { transform: scale(0.98); }
+        .dice { font-size: 3rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="dice">🎲</div>
+        <h1>Simple VTT</h1>
+        <p class="subtitle">Wprowadź hasło aby kontynuować</p>
+        <?php if ($error): ?>
+            <div class="error"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form method="POST">
+            <input type="password" name="password" placeholder="Hasło..." required autofocus>
+            <button type="submit">Wejdź do gry</button>
+        </form>
+    </div>
+</body>
+</html>
+<?php
+exit;
+endif;
+?>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple VTT</title>
+    <script type="module" crossorigin src="{{BASE_PATH}}assets/index.js"></script>
+    <link rel="stylesheet" crossorigin href="{{BASE_PATH}}assets/index.css">
+    <style>
+        .logout-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+            padding: 0.5rem 1rem;
+            background: rgba(233, 69, 96, 0.8);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: #e94560; }
+    </style>
+</head>
+<body>
+    <a href="?logout=1" class="logout-btn">🚪 Wyloguj</a>
+    <div id="root"></div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Blokada dostępu do .env
+<FilesMatch "^\.env">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Blokada dostępu do plików danych
+<FilesMatch "state\.json$|rolls\.json$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Blokada listowania katalogów
+Options -Indexes

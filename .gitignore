@@ -1,0 +1,38 @@
+# Env files
+.env
+.env.local
+.env.production
+
+# Backend data (ale nie .gitkeep)
+backend/data/*
+!backend/data/.gitkeep
+
+# Backend assets (ale nie .gitkeep)
+backend/assets/map/*
+backend/assets/tokens/*
+backend/assets/backgrounds/*
+!backend/assets/map/.gitkeep
+!backend/assets/tokens/.gitkeep
+!backend/assets/backgrounds/.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Build output
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
