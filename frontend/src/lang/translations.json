@@ -1,0 +1,128 @@
+{
+  "en": {
+    "app": {
+      "title": "Simple VTT",
+      "loading": "Loading..."
+    },
+    "sidebar": {
+      "clearMap": "Clear map",
+      "clearMapConfirm": "Are you sure you want to clear the entire map (including background)?",
+      "backgrounds": "Map Background",
+      "backgroundsEmpty": "No backgrounds. Add images to",
+      "backgroundActive": "Active:",
+      "backgroundRemove": "Remove background",
+      "fog": "Fog of War",
+      "fogEnable": "Enable fog of war",
+      "fogEdit": "Edit fog",
+      "fogEditActive": "✓ Edit mode",
+      "fogReveal": "Reveal",
+      "fogHide": "Hide",
+      "fogBrush": "Brush:",
+      "fogGmOpacity": "50% opacity (GM preview)",
+      "fogRevealAll": "Reveal all",
+      "fogHideAll": "Hide all",
+      "mapElements": "Map Elements",
+      "eraser": "Element eraser",
+      "tokens": "Tokens",
+      "noAssets": "No assets",
+      "selectTool": "Click element to select",
+      "clickToDeselect": "Click again to deselect",
+      "hintLeftRight": "LMB = action | RMB = remove"
+    },
+    "zoom": {
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "reset": "Reset (100%)"
+    },
+    "dice": {
+      "title": "Dice Roll",
+      "playerPlaceholder": "Your name...",
+      "addDie": "Click die to add",
+      "modifier": "Modifier:",
+      "roll": "Roll!",
+      "rolling": "Rolling...",
+      "history": "Roll history",
+      "historyEmpty": "No rolls yet",
+      "now": "now",
+      "minutesAgo": "m ago",
+      "hoursAgo": "h ago"
+    },
+    "login": {
+      "title": "Simple VTT",
+      "subtitle": "Enter password to continue",
+      "placeholder": "Password...",
+      "submit": "Enter game",
+      "error": "Invalid password!",
+      "logout": "Logout"
+    },
+    "tools": {
+      "fogActive": "Fog: {mode} (r: {size})",
+      "fogReveal": "revealing",
+      "fogHide": "hiding",
+      "eraserActive": "Eraser active"
+    }
+  },
+  "pl": {
+    "app": {
+      "title": "Simple VTT",
+      "loading": "Ładowanie..."
+    },
+    "sidebar": {
+      "clearMap": "Wyczyść mapę",
+      "clearMapConfirm": "Czy na pewno chcesz wyczyścić całą mapę (wraz z tłem)?",
+      "backgrounds": "Tło mapy",
+      "backgroundsEmpty": "Brak teł. Dodaj obrazki do",
+      "backgroundActive": "Aktywne:",
+      "backgroundRemove": "Usuń tło",
+      "fog": "Mgła Wojny",
+      "fogEnable": "Włącz mgłę wojny",
+      "fogEdit": "Edytuj mgłę",
+      "fogEditActive": "✓ Tryb edycji",
+      "fogReveal": "Odkryj",
+      "fogHide": "Zakryj",
+      "fogBrush": "Pędzel:",
+      "fogGmOpacity": "50% opacity (podgląd MG)",
+      "fogRevealAll": "Odkryj wszystko",
+      "fogHideAll": "Zakryj wszystko",
+      "mapElements": "Elementy mapy",
+      "eraser": "Gumka elementów",
+      "tokens": "Tokeny",
+      "noAssets": "Brak elementów",
+      "selectTool": "Kliknij element aby wybrać",
+      "clickToDeselect": "Kliknij ponownie aby odznaczyć",
+      "hintLeftRight": "LPM = akcja | PPM = usuń"
+    },
+    "zoom": {
+      "zoomOut": "Oddal",
+      "zoomIn": "Przybliż",
+      "reset": "Reset (100%)"
+    },
+    "dice": {
+      "title": "Rzut Kośćmi",
+      "playerPlaceholder": "Twoje imię...",
+      "addDie": "Kliknij kość aby dodać",
+      "modifier": "Modyfikator:",
+      "roll": "Rzuć!",
+      "rolling": "Rzucam...",
+      "history": "Historia rzutów",
+      "historyEmpty": "Brak rzutów",
+      "now": "teraz",
+      "minutesAgo": "m temu",
+      "hoursAgo": "h temu"
+    },
+    "login": {
+      "title": "Simple VTT",
+      "subtitle": "Wprowadź hasło aby kontynuować",
+      "placeholder": "Hasło...",
+      "submit": "Wejdź do gry",
+      "error": "Nieprawidłowe hasło!",
+      "logout": "Wyloguj"
+    },
+    "tools": {
+      "fogActive": "Mgła: {mode} (r: {size})",
+      "fogReveal": "odkrywanie",
+      "fogHide": "zakrywanie",
+      "eraserActive": "Gumka aktywna"
+    }
+  }
+}

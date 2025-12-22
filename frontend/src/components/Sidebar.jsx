@@ -1,5 +1,5 @@
-import React from 'react'
 import CollapsibleSection from './CollapsibleSection'
+import { t } from '../lang';
 
 function Sidebar({ 
   isOpen,
@@ -11,7 +11,6 @@ function Sidebar({
   selectedType,
   isEraserActive,
   hasMapElements,
-  
   fogOfWar,
   fogEditMode,
   fogRevealMode,
@@ -24,7 +23,6 @@ function Sidebar({
   onSetFogGmOpacity,
   onFogRevealAll,
   onFogHideAll,
-  
   onSelectAsset,
   onToggleEraser,
   onSetBackground,
@@ -32,7 +30,7 @@ function Sidebar({
   onClear,
   basePath,
   zoomLevel,
-  onZoomChange,
+  onZoomChange
 }) {
   const isSelected = (asset, type) => {
     return selectedAsset?.id === asset.id && selectedType === type
@@ -44,34 +42,36 @@ function Sidebar({
     return currentBackground?.src === bg.src
   }
 
-  
   const getActiveTool = () => {
-    if (fogEditMode) return `☁️ Mgła: ${fogRevealMode ? 'odkrywanie' : 'zakrywanie'} (r: ${fogBrushSize})`
-    if (isEraserActive) return '🧹 Gumka aktywna'
-    if (selectedAsset) return `${selectedAsset.name} (${selectedType === 'map' ? 'mapa' : 'token'})`
+    if (fogEditMode) {
+      const mode = fogRevealMode ? t('tools.fogReveal') : t('tools.fogHide')
+      return t('tools.fogActive', { mode, size: fogBrushSize })
+    }
+    if (isEraserActive) return `🧹 ${t('tools.eraserActive')}`
+    if (selectedAsset) return `${selectedAsset.name} (${selectedType === 'map' ? t('sidebar.mapElements').toLowerCase() : t('sidebar.tokens').toLowerCase()})`
     return null
   }
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
-        <h1>🎲 Simple VTT</h1>
+        <h1>🎲 {t('app.title')}</h1>
         <button className="clear-btn" onClick={onClear}>
-          🗑️ Wyczyść mapę
+          🗑️ {t('sidebar.clearMap')}
         </button>
       </div>
 
       <div className="sidebar-sections">
         {/* Tła */}
-        <CollapsibleSection title="Tło mapy" icon="🖼️" defaultOpen={false}>
+        <CollapsibleSection title={t('sidebar.backgrounds')} icon="🖼️" defaultOpen={false}>
           {currentBackground && (
             <div className="current-background">
-              <span className="current-bg-label">Aktywne:</span>
+              <span className="current-bg-label">{t('sidebar.backgroundActive')}</span>
               <span className="current-bg-name">{currentBackground.name}</span>
               <button 
                 className="remove-bg-btn" 
                 onClick={onRemoveBackground}
-                title="Usuń tło"
+                title={t('sidebar.backgroundRemove')}
               >
                 ✕
               </button>
@@ -81,7 +81,7 @@ function Sidebar({
           <div className="background-list">
             {backgroundAssets.length === 0 && (
               <p className="no-assets">
-                Brak teł. Dodaj obrazki do<br/>
+                {t('sidebar.backgroundsEmpty')}<br/>
                 <code>backend/assets/backgrounds/</code>
               </p>
             )}
@@ -90,7 +90,7 @@ function Sidebar({
                 key={bg.id}
                 className={`background-item ${isCurrentBackground(bg) ? 'active' : ''}`}
                 onClick={() => !isCurrentBackground(bg) && onSetBackground(bg)}
-                title={`${bg.filename} (${bg.gridWidth}×${bg.gridHeight} kratek)`}
+                title={`${bg.filename} (${bg.gridWidth}×${bg.gridHeight})`}
               >
                 <span className="bg-icon">🗺️</span>
                 <span className="bg-name">{bg.name}</span>
@@ -103,8 +103,8 @@ function Sidebar({
 
         {/* Mgła Wojny */}
         <CollapsibleSection 
-          title="Mgła Wojny" 
-          icon="☁️" 
+          title={t('sidebar.fog')} 
+          icon="🌫️" 
           defaultOpen={false}
           badge={fogOfWar.enabled ? 'ON' : null}
         >
@@ -114,9 +114,8 @@ function Sidebar({
                 type="checkbox" 
                 checked={fogOfWar.enabled} 
                 onChange={(e) => onToggleFog(e.target.checked)}
-                style={{marginTop: '16px'}}
               />
-              <span>Włącz mgłę wojny</span>
+              <span>{t('sidebar.fogEnable')}</span>
             </label>
 
             {fogOfWar.enabled && (
@@ -126,7 +125,7 @@ function Sidebar({
                     className={`fog-edit-btn ${fogEditMode ? 'active' : ''}`}
                     onClick={onToggleFogEdit}
                   >
-                    {fogEditMode ? '✓ Tryb edycji' : '✏️ Edytuj mgłę'}
+                    {fogEditMode ? t('sidebar.fogEditActive') : `✏️ ${t('sidebar.fogEdit')}`}
                   </button>
                 </div>
 
@@ -137,18 +136,18 @@ function Sidebar({
                         className={fogRevealMode ? 'active' : ''} 
                         onClick={() => onSetFogRevealMode(true)}
                       >
-                        🔦 Odkryj
+                        🔦 {t('sidebar.fogReveal')}
                       </button>
                       <button 
                         className={!fogRevealMode ? 'active' : ''} 
                         onClick={() => onSetFogRevealMode(false)}
                       >
-                        🌑 Zakryj
+                        🌑 {t('sidebar.fogHide')}
                       </button>
                     </div>
 
                     <div className="fog-brush-size">
-                      <label>Pędzel: {fogBrushSize}</label>
+                      <label>{t('sidebar.fogBrush')} {fogBrushSize}</label>
                       <input 
                         type="range" 
                         min="1" 
@@ -164,18 +163,17 @@ function Sidebar({
                         checked={fogGmOpacity}
                         onChange={(e) => onSetFogGmOpacity(e.target.checked)}
                       />
-                      <span>50% opacity (podgląd MG)</span>
+                      <span>{t('sidebar.fogGmOpacity')}</span>
                     </label>
                   </div>
                 )}
 
-                <h2 style={{color: 'red'}}>DangerZone!</h2>
                 <div className="fog-actions">
                   <button onClick={onFogRevealAll} className="fog-action-btn">
-                    ☀️ Odkryj wszystko
+                    ☀️ {t('sidebar.fogRevealAll')}
                   </button>
                   <button onClick={onFogHideAll} className="fog-action-btn">
-                    🌑 Zakryj wszystko
+                    🌑 {t('sidebar.fogHideAll')}
                   </button>
                 </div>
               </>
@@ -185,7 +183,7 @@ function Sidebar({
 
         {/* Elementy mapy */}
         <CollapsibleSection 
-          title="Elementy mapy" 
+          title={t('sidebar.mapElements')} 
           icon="🏠" 
           defaultOpen={true}
           badge={mapAssets.length || null}
@@ -196,14 +194,14 @@ function Sidebar({
               onClick={onToggleEraser}
             >
               <span className="eraser-icon">🧹</span>
-              <span className="eraser-label">Gumka elementów</span>
+              <span className="eraser-label">{t('sidebar.eraser')}</span>
               {isEraserActive && <span className="eraser-active">✓</span>}
             </div>
           )}
           
           <div className="asset-grid">
             {mapAssets.length === 0 && (
-              <p className="no-assets">Brak elementów</p>
+              <p className="no-assets">{t('sidebar.noAssets')}</p>
             )}
             {mapAssets.map(asset => (
               <div
@@ -221,14 +219,14 @@ function Sidebar({
 
         {/* Tokeny */}
         <CollapsibleSection 
-          title="Tokeny" 
+          title={t('sidebar.tokens')} 
           icon="🎭" 
           defaultOpen={true}
           badge={tokenAssets.length || null}
         >
           <div className="asset-grid">
             {tokenAssets.length === 0 && (
-              <p className="no-assets">Brak tokenów</p>
+              <p className="no-assets">{t('sidebar.noAssets')}</p>
             )}
             {tokenAssets.map(asset => (
               <div
@@ -245,12 +243,13 @@ function Sidebar({
         </CollapsibleSection>
       </div>
 
+      {/* Zoom Controls */}
       <div className="zoom-controls">
         <button 
           className="zoom-btn"
           onClick={() => onZoomChange(zoomLevel - 0.1)}
           disabled={zoomLevel <= 0.4}
-          title="Oddal"
+          title={t('zoom.zoomOut')}
         >
           🔍−
         </button>
@@ -269,14 +268,14 @@ function Sidebar({
           className="zoom-btn"
           onClick={() => onZoomChange(zoomLevel + 0.1)}
           disabled={zoomLevel >= 1.4}
-          title="Przybliż"
+          title={t('zoom.zoomIn')}
         >
           🔍+
         </button>
         <button
           className="zoom-btn zoom-reset"
           onClick={() => onZoomChange(1)}
-          title="Reset (100%)"
+          title={t('zoom.reset')}
         >
           ⟲
         </button>
@@ -284,10 +283,13 @@ function Sidebar({
 
       <div className="sidebar-footer">
         <p>
-          {getActiveTool() || '🖱️ Wybierz narzędzie'}
+          {getActiveTool() || `🖱️ ${t('sidebar.selectTool')}`}
         </p>
         <p className="hint">
-          LPM = akcja | PPM = usuń
+          {selectedAsset || isEraserActive || fogEditMode
+            ? t('sidebar.clickToDeselect')
+            : t('sidebar.hintLeftRight')
+          }
         </p>
       </div>
     </aside>

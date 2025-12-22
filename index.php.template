@@ -3,21 +3,6 @@ session_start();
 
 define('VTT_PASSWORD', '{{PASSWORD}}');
 
-function loadEnv($path) {
-    if (!file_exists($path)) return [];
-    $env = [];
-    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if (empty($line) || $line[0] === '#') continue;
-        $parts = explode('=', $line, 2);
-        if (count($parts) === 2) {
-            $env[trim($parts[0])] = trim(trim($parts[1]), '"\'');
-        }
-    }
-    return $env;
-}
-
 $error = '';
 
 if (isset($_GET['logout'])) {
@@ -32,18 +17,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
         header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
     } else {
-        $error = 'Nieprawidłowe hasło!';
+        $error = '{{LOGIN_ERROR}}';
     }
 }
 
 if (!isset($_SESSION['vtt_authenticated']) || $_SESSION['vtt_authenticated'] !== true):
 ?>
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="{{LANG}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VTT - Logowanie</title>
+    <title>{{LOGIN_TITLE}}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -108,14 +93,14 @@ if (!isset($_SESSION['vtt_authenticated']) || $_SESSION['vtt_authenticated'] !==
 <body>
     <div class="login-container">
         <div class="dice">🎲</div>
-        <h1>Simple VTT</h1>
-        <p class="subtitle">Wprowadź hasło aby kontynuować</p>
+        <h1>{{LOGIN_TITLE}}</h1>
+        <p class="subtitle">{{LOGIN_SUBTITLE}}</p>
         <?php if ($error): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         <form method="POST">
-            <input type="password" name="password" placeholder="Hasło..." required autofocus>
-            <button type="submit">Wejdź do gry</button>
+            <input type="password" name="password" placeholder="{{LOGIN_PLACEHOLDER}}" required autofocus>
+            <button type="submit">{{LOGIN_SUBMIT}}</button>
         </form>
     </div>
 </body>
@@ -125,11 +110,11 @@ exit;
 endif;
 ?>
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="{{LANG}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple VTT</title>
+    <title>{{APP_TITLE}}</title>
     <script type="module" crossorigin src="{{BASE_PATH}}assets/index.js"></script>
     <link rel="stylesheet" crossorigin href="{{BASE_PATH}}assets/index.css">
     <style>
@@ -152,7 +137,7 @@ endif;
     </style>
 </head>
 <body>
-    <a href="?logout=1" class="logout-btn">🚪 Wyloguj</a>
+    <a href="?logout=1" class="logout-btn">🚪 {{LOGOUT}}</a>
     <div id="root"></div>
 </body>
 </html>

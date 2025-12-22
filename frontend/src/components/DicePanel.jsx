@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { t } from '../lang'
 
 const DICE_TYPES = [
   { type: 'd4', sides: 4, color: '#e74c3c' },
@@ -11,25 +12,22 @@ const DICE_TYPES = [
 ]
 
 function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
-  const [selectedDice, setSelectedDice] = useState([]) // [{type, sides, id}]
+  const [selectedDice, setSelectedDice] = useState([])
   const [modifier, setModifier] = useState(0)
   const [playerName, setPlayerName] = useState('')
   const [isRolling, setIsRolling] = useState(false)
 
-  // Załaduj nazwę gracza z localStorage
   useEffect(() => {
     const saved = localStorage.getItem('vtt_player_name')
     if (saved) setPlayerName(saved)
   }, [])
 
-  // Zapisz nazwę gracza do localStorage
   const handleNameChange = useCallback((e) => {
     const name = e.target.value
     setPlayerName(name)
     localStorage.setItem('vtt_player_name', name)
   }, [])
 
-  // Dodaj kość
   const addDie = useCallback((dieType) => {
     setSelectedDice(prev => [...prev, {
       ...dieType,
@@ -37,24 +35,20 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
     }])
   }, [])
 
-  // Usuń kość
   const removeDie = useCallback((id) => {
     setSelectedDice(prev => prev.filter(d => d.id !== id))
   }, [])
 
-  // Wyczyść wszystkie kości
   const clearDice = useCallback(() => {
     setSelectedDice([])
     setModifier(0)
   }, [])
 
-  // Rzuć kośćmi
   const rollDice = useCallback(() => {
     if (selectedDice.length === 0) return
 
     setIsRolling(true)
 
-    // Symuluj animację
     setTimeout(() => {
       const rolls = selectedDice.map(die => ({
         type: die.type,
@@ -65,7 +59,7 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
       const total = rolls.reduce((sum, r) => sum + r.result, 0) + modifier
 
       const rollData = {
-        player: playerName || 'Anonim',
+        player: playerName || 'Anonymous',
         dice: rolls,
         modifier: modifier,
         total: total,
@@ -77,7 +71,6 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
     }, 500)
   }, [selectedDice, modifier, playerName, onRoll])
 
-  // Zlicz kości według typu
   const getDiceCounts = () => {
     const counts = {}
     selectedDice.forEach(d => {
@@ -86,7 +79,6 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
     return counts
   }
 
-  // Formatuj rzut do wyświetlenia
   const formatRoll = (roll) => {
     const diceCounts = {}
     roll.dice.forEach(d => {
@@ -106,45 +98,40 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
     return formula
   }
 
-  // Czas temu
   const timeAgo = (timestamp) => {
     const seconds = Math.floor((Date.now() - timestamp) / 1000)
-    if (seconds < 60) return 'teraz'
+    if (seconds < 60) return t('dice.now')
     const minutes = Math.floor(seconds / 60)
-    if (minutes < 60) return `${minutes}m temu`
+    if (minutes < 60) return `${minutes}${t('dice.minutesAgo')}`
     const hours = Math.floor(minutes / 60)
-    return `${hours}h temu`
+    return `${hours}${t('dice.hoursAgo')}`
   }
 
   return (
     <>
-      {/* Toggle button */}
       <button 
         className={`dice-panel-toggle ${isOpen ? 'open' : ''}`}
         onClick={onToggle}
-        title="Panel kości"
+        title={t('dice.title')}
       >
         🎲
       </button>
 
-      {/* Panel */}
       <div className={`dice-panel ${isOpen ? 'open' : ''}`}>
         <div className="dice-panel-header">
-          <h2>🎲 Rzut Kośćmi</h2>
+          <h2>🎲 {t('dice.title')}</h2>
         </div>
 
-        {/* Nazwa gracza */}
         <div className="dice-player-name">
           <input
             type="text"
-            placeholder="Twoje imię..."
+            placeholder={t('dice.playerPlaceholder')}
             value={playerName}
             onChange={handleNameChange}
             maxLength={20}
           />
         </div>
 
-        {/* Wybór kości */}
         <div className="dice-types">
           {DICE_TYPES.map(die => (
             <button
@@ -152,17 +139,16 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
               className="dice-type-btn"
               style={{ '--dice-color': die.color }}
               onClick={() => addDie(die)}
-              title={`Dodaj ${die.type}`}
+              title={`${t('dice.addDie').split(' ')[0]} ${die.type}`}
             >
               {die.type}
             </button>
           ))}
         </div>
 
-        {/* Wybrane kości */}
         <div className="dice-selected">
           {selectedDice.length === 0 ? (
-            <p className="dice-placeholder">Kliknij kość aby dodać</p>
+            <p className="dice-placeholder">{t('dice.addDie')}</p>
           ) : (
             <div className="dice-pool">
               {selectedDice.map(die => (
@@ -171,7 +157,6 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
                   className="die-chip"
                   style={{ '--dice-color': DICE_TYPES.find(d => d.type === die.type)?.color }}
                   onClick={() => removeDie(die.id)}
-                  title="Kliknij aby usunąć"
                 >
                   {die.type}
                 </span>
@@ -180,7 +165,6 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           )}
         </div>
 
-        {/* Podsumowanie */}
         {selectedDice.length > 0 && (
           <div className="dice-summary">
             {Object.entries(getDiceCounts()).map(([type, count]) => (
@@ -189,9 +173,8 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           </div>
         )}
 
-        {/* Modyfikator */}
         <div className="dice-modifier">
-          <label>Modyfikator:</label>
+          <label>{t('dice.modifier')}</label>
           <div className="modifier-controls">
             <button onClick={() => setModifier(m => m - 1)}>−</button>
             <input
@@ -203,14 +186,13 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           </div>
         </div>
 
-        {/* Przyciski akcji */}
         <div className="dice-actions">
           <button 
             className="roll-btn"
             onClick={rollDice}
             disabled={selectedDice.length === 0 || isRolling}
           >
-            {isRolling ? '🎲 Rzucam...' : '🎲 Rzuć!'}
+            {isRolling ? `🎲 ${t('dice.rolling')}` : `🎲 ${t('dice.roll')}`}
           </button>
           <button 
             className="clear-btn"
@@ -221,12 +203,11 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           </button>
         </div>
 
-        {/* Historia rzutów */}
         <div className="dice-history">
-          <h3>Historia rzutów</h3>
+          <h3>{t('dice.history')}</h3>
           <div className="history-list">
             {rollHistory.length === 0 ? (
-              <p className="history-empty">Brak rzutów</p>
+              <p className="history-empty">{t('dice.historyEmpty')}</p>
             ) : (
               rollHistory.slice().reverse().map((roll, idx) => (
                 <div key={roll.id || idx} className="history-item">

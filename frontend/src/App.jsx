@@ -9,6 +9,7 @@ import {
 } from './utils/fogBitmap'
 import DicePanel from './components/DicePanel'
 import { BASE_PATH, API_BASE } from '../config'
+import { t } from './lang';
 
 function App() {
   const [background, setBackground] = useState(null)
@@ -307,7 +308,7 @@ function App() {
 
   
   const handleClear = useCallback(() => {
-    if (!confirm('Czy na pewno chcesz wyczyścić całą mapę (wraz z tłem)?')) return
+    if (!confirm(t('sidebar.clearMapConfirm'))) return
 
     fetch(`${API_BASE}?action=clear`, {
       method: 'POST',
@@ -429,7 +430,7 @@ function App() {
   }, [])
 
   if (isLoading) {
-    return <div className="loading">Ładowanie...</div>
+    return <div className="loading">{t('app.loading')}</div>
   }
 
   return (
