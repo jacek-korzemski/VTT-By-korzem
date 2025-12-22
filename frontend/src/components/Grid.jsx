@@ -282,6 +282,7 @@ function Grid({
             brushSize={fogBrushSize}
             revealMode={fogRevealMode}
             onBitmapChange={onFogBitmapChange}
+            zoomLevel={zoomLevel}
           />
         </div>
       </div>
