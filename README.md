@@ -44,7 +44,8 @@ Przykłady:
 build.bat                                                   # default password: 2137, default path: /vtt/room1/
 build.bat {my_custom-password}                              # setup custom password
 build.bat {my_custom-password} /game/                       # setup custom password and path  
-build.bat {my_custom-password} /game/ https://domain.com    # setup custom password, path and allowed origins
+build.bat {my_custom-password} /game/ en                    # setup custom password, path and language (pl or en)
+build.bat {my_custom-password} /game/ en https://domain.com # setup custom password, path, language and allowed origins
 
 ## If built was sucessful
 
