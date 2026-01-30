@@ -60,6 +60,22 @@
       "fogReveal": "revealing",
       "fogHide": "hiding",
       "eraserActive": "Eraser active"
+    },
+    "scenes": {
+      "title": "Scenes",
+      "add": "Add Scene",
+      "rename": "Rename",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete scene \"{name}\"?",
+      "namePlaceholder": "Scene name...",
+      "current": "Current scene",
+      "switchTo": "Click to switch"
+    },
+    "ping": {
+      "tool": "Attention Ping",
+      "toolHint": "Click on map to focus all players there",
+      "active": "Click on map to ping"
     }
   },
   "pl": {
@@ -123,6 +139,22 @@
       "fogReveal": "odkrywanie",
       "fogHide": "zakrywanie",
       "eraserActive": "Gumka aktywna"
+    },
+    "scenes": {
+      "title": "Sceny",
+      "add": "Dodaj scenę",
+      "rename": "Zmień nazwę",
+      "duplicate": "Duplikuj",
+      "delete": "Usuń",
+      "deleteConfirm": "Czy na pewno chcesz usunąć scenę \"{name}\"?",
+      "namePlaceholder": "Nazwa sceny...",
+      "current": "Aktualna scena",
+      "switchTo": "Kliknij aby przełączyć"
+    },
+    "ping": {
+      "tool": "Przyciągnij uwagę",
+      "toolHint": "Kliknij na mapę aby przenieść widok graczy",
+      "active": "Kliknij na mapę aby wysłać ping"
     }
   }
 }

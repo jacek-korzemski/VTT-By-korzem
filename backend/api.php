@@ -2,7 +2,7 @@
 session_start();
 
 // ============================================
-// initialize from .env
+// Ładowanie konfiguracji z .env
 // ============================================
 function loadEnv($path) {
     if (!file_exists($path)) return [];
@@ -18,7 +18,6 @@ function loadEnv($path) {
         if (count($parts) === 2) {
             $key = trim($parts[0]);
             $value = trim($parts[1]);
-            // Usuń cudzysłowy jeśli są
             $value = trim($value, '"\'');
             $env[$key] = $value;
         }
@@ -51,34 +50,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+// ============================================
+// Helpers
+// ============================================
+
 $dataFile = __DIR__ . '/data/state.json';
 
 if (!file_exists(__DIR__ . '/data')) {
     mkdir(__DIR__ . '/data', 0755, true);
 }
 
-if (!file_exists($dataFile)) {
-    $initialState = [
+function generateId() {
+    return uniqid('', true);
+}
+
+function createEmptyScene($name = 'New Scene') {
+    return [
+        'id' => 'scene_' . generateId(),
+        'name' => $name,
         'background' => null,
         'fogOfWar' => ['enabled' => false, 'data' => null],
         'mapElements' => [],
-        'tokens' => [],
-        'lastUpdate' => time(),
-        'version' => 0
+        'tokens' => []
     ];
-    file_put_contents($dataFile, json_encode($initialState, JSON_PRETTY_PRINT));
 }
 
 function getState() {
     global $dataFile;
+    
+    if (!file_exists($dataFile)) {
+        $defaultScene = createEmptyScene('Scene 1');
+        $initialState = [
+            'activeSceneId' => $defaultScene['id'],
+            'scenes' => [$defaultScene],
+            'lastUpdate' => time(),
+            'version' => 0
+        ];
+        file_put_contents($dataFile, json_encode($initialState, JSON_PRETTY_PRINT));
+        return $initialState;
+    }
+    
     $content = file_get_contents($dataFile);
     $state = json_decode($content, true);
     
-    if (!isset($state['background'])) {
-        $state['background'] = null;
-    }
-    if (!isset($state['fogOfWar'])) {
-        $state['fogOfWar'] = ['enabled' => false, 'data' => null];
+    // Migracja ze starego formatu (bez scen)
+    if (!isset($state['scenes'])) {
+        $scene = createEmptyScene('Scene 1');
+        $scene['background'] = $state['background'] ?? null;
+        $scene['fogOfWar'] = $state['fogOfWar'] ?? ['enabled' => false, 'data' => null];
+        $scene['mapElements'] = $state['mapElements'] ?? [];
+        $scene['tokens'] = $state['tokens'] ?? [];
+        
+        $state = [
+            'activeSceneId' => $scene['id'],
+            'scenes' => [$scene],
+            'lastUpdate' => $state['lastUpdate'] ?? time(),
+            'version' => $state['version'] ?? 0
+        ];
     }
     
     return $state;
@@ -92,9 +120,41 @@ function saveState($state) {
     return $state;
 }
 
-function generateId() {
-    return uniqid('', true);
+function getActiveScene(&$state) {
+    foreach ($state['scenes'] as &$scene) {
+        if ($scene['id'] === $state['activeSceneId']) {
+            return $scene;
+        }
+    }
+    // Fallback - pierwsza scena
+    if (!empty($state['scenes'])) {
+        $state['activeSceneId'] = $state['scenes'][0]['id'];
+        return $state['scenes'][0];
+    }
+    return null;
 }
+
+function updateActiveScene(&$state, $updatedScene) {
+    foreach ($state['scenes'] as $idx => $scene) {
+        if ($scene['id'] === $state['activeSceneId']) {
+            $state['scenes'][$idx] = $updatedScene;
+            return;
+        }
+    }
+}
+
+function getSceneById(&$state, $sceneId) {
+    foreach ($state['scenes'] as &$scene) {
+        if ($scene['id'] === $sceneId) {
+            return $scene;
+        }
+    }
+    return null;
+}
+
+// ============================================
+// API
+// ============================================
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
@@ -105,7 +165,24 @@ try {
             switch ($action) {
                 case 'state':
                     $state = getState();
-                    echo json_encode(['success' => true, 'data' => $state]);
+                    $activeScene = getActiveScene($state);
+                    echo json_encode([
+                        'success' => true,
+                        'data' => [
+                            'activeSceneId' => $state['activeSceneId'],
+                            'scenes' => array_map(function($s) {
+                                return ['id' => $s['id'], 'name' => $s['name']];
+                            }, $state['scenes']),
+                            'scene' => $activeScene,
+                            'version' => $state['version']
+                        ]
+                    ]);
+                    break;
+
+                case 'ping':
+                    $state = getState();
+                    $ping = $state['ping'] ?? null;
+                    echo json_encode(['success' => true, 'ping' => $ping]);
                     break;
 
                 case 'check':
@@ -113,10 +190,18 @@ try {
                     $state = getState();
                     
                     if ($state['version'] > $clientVersion) {
+                        $activeScene = getActiveScene($state);
                         echo json_encode([
                             'success' => true,
                             'hasChanges' => true,
-                            'data' => $state
+                            'data' => [
+                                'activeSceneId' => $state['activeSceneId'],
+                                'scenes' => array_map(function($s) {
+                                    return ['id' => $s['id'], 'name' => $s['name']];
+                                }, $state['scenes']),
+                                'scene' => $activeScene,
+                                'version' => $state['version']
+                            ]
                         ]);
                     } else {
                         echo json_encode([
@@ -130,7 +215,7 @@ try {
                 case 'assets':
                     $mapAssets = [];
                     $tokenAssets = [];
-                    $backgroundAssets = []; 
+                    $backgroundAssets = [];
                     
                     $mapDir = __DIR__ . '/assets/map';
                     $tokenDir = __DIR__ . '/assets/tokens';
@@ -160,13 +245,10 @@ try {
                         }
                     }
                     
-                    
                     if (is_dir($bgDir)) {
                         foreach (glob($bgDir . '/*.{png,jpg,jpeg,gif,webp}', GLOB_BRACE) as $file) {
                             $filename = basename($file);
                             $name = pathinfo($filename, PATHINFO_FILENAME);
-                            
-                            
                             $imageInfo = getimagesize($file);
                             $width = $imageInfo[0] ?? 0;
                             $height = $imageInfo[1] ?? 0;
@@ -178,8 +260,8 @@ try {
                                 'src' => 'backend/assets/backgrounds/' . $filename,
                                 'width' => $width,
                                 'height' => $height,
-                                'gridWidth' => floor($width / 64),  
-                                'gridHeight' => floor($height / 64) 
+                                'gridWidth' => floor($width / 64),
+                                'gridHeight' => floor($height / 64)
                             ];
                         }
                     }
@@ -188,7 +270,7 @@ try {
                         'success' => true,
                         'mapAssets' => $mapAssets,
                         'tokenAssets' => $tokenAssets,
-                        'backgroundAssets' => $backgroundAssets  
+                        'backgroundAssets' => $backgroundAssets
                     ]);
                     break;
 
@@ -213,33 +295,186 @@ try {
             $input = json_decode(file_get_contents('php://input'), true);
             
             switch ($action) {
+                // ============================================
+                // SCENE MANAGEMENT
+                // ============================================
                 
+                case 'create-scene':
+                    $state = getState();
+                    $name = htmlspecialchars(substr($input['name'] ?? 'New Scene', 0, 50));
+                    $newScene = createEmptyScene($name);
+                    $state['scenes'][] = $newScene;
+                    $state = saveState($state);
+                    echo json_encode([
+                        'success' => true,
+                        'scene' => ['id' => $newScene['id'], 'name' => $newScene['name']],
+                        'version' => $state['version']
+                    ]);
+                    break;
+
+                case 'delete-scene':
+                    $state = getState();
+                    $sceneId = $input['id'] ?? '';
+                    
+                    // Nie można usunąć jedynej sceny
+                    if (count($state['scenes']) <= 1) {
+                        echo json_encode(['success' => false, 'error' => 'Cannot delete last scene']);
+                        break;
+                    }
+                    
+                    $state['scenes'] = array_values(array_filter(
+                        $state['scenes'],
+                        fn($s) => $s['id'] !== $sceneId
+                    ));
+                    
+                    // Jeśli usunięto aktywną scenę, przełącz na pierwszą
+                    if ($state['activeSceneId'] === $sceneId) {
+                        $state['activeSceneId'] = $state['scenes'][0]['id'];
+                    }
+                    
+                    $state = saveState($state);
+                    echo json_encode(['success' => true, 'version' => $state['version']]);
+                    break;
+
+                case 'rename-scene':
+                    $state = getState();
+                    $sceneId = $input['id'] ?? '';
+                    $name = htmlspecialchars(substr($input['name'] ?? 'Scene', 0, 50));
+                    
+                    foreach ($state['scenes'] as &$scene) {
+                        if ($scene['id'] === $sceneId) {
+                            $scene['name'] = $name;
+                            break;
+                        }
+                    }
+                    
+                    $state = saveState($state);
+                    echo json_encode(['success' => true, 'version' => $state['version']]);
+                    break;
+
+                case 'switch-scene':
+                    $state = getState();
+                    $sceneId = $input['id'] ?? '';
+                    
+                    // Sprawdź czy scena istnieje
+                    $found = false;
+                    foreach ($state['scenes'] as $scene) {
+                        if ($scene['id'] === $sceneId) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!$found) {
+                        echo json_encode(['success' => false, 'error' => 'Scene not found']);
+                        break;
+                    }
+                    
+                    $state['activeSceneId'] = $sceneId;
+                    $state = saveState($state);
+                    
+                    $activeScene = getActiveScene($state);
+                    echo json_encode([
+                        'success' => true,
+                        'scene' => $activeScene,
+                        'version' => $state['version']
+                    ]);
+                    break;
+
+                case 'duplicate-scene':
+                    $state = getState();
+                    $sceneId = $input['id'] ?? '';
+                    
+                    $sourceScene = getSceneById($state, $sceneId);
+                    if (!$sourceScene) {
+                        echo json_encode(['success' => false, 'error' => 'Scene not found']);
+                        break;
+                    }
+                    
+                    $newScene = $sourceScene;
+                    $newScene['id'] = 'scene_' . generateId();
+                    $newScene['name'] = $sourceScene['name'] . ' (copy)';
+                    
+                    $state['scenes'][] = $newScene;
+                    $state = saveState($state);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'scene' => ['id' => $newScene['id'], 'name' => $newScene['name']],
+                        'version' => $state['version']
+                    ]);
+                    break;
+
+                // ============================================
+                // SCENE CONTENT (operate on active scene)
+                // ============================================
+
                 case 'set-background':
                     $state = getState();
-                    $state['background'] = [
+                    $activeScene = getActiveScene($state);
+                    $activeScene['background'] = [
                         'src' => $input['src'],
                         'name' => $input['name'] ?? '',
                         'width' => intval($input['width'] ?? 0),
                         'height' => intval($input['height'] ?? 0)
                     ];
+                    updateActiveScene($state, $activeScene);
                     $state = saveState($state);
-                    echo json_encode(['success' => true, 'background' => $state['background'], 'version' => $state['version']]);
+                    echo json_encode(['success' => true, 'background' => $activeScene['background'], 'version' => $state['version']]);
                     break;
 
-                
                 case 'remove-background':
                     $state = getState();
-                    $state['background'] = null;
+                    $activeScene = getActiveScene($state);
+                    $activeScene['background'] = null;
+                    updateActiveScene($state, $activeScene);
                     $state = saveState($state);
                     echo json_encode(['success' => true, 'version' => $state['version']]);
                     break;
 
+                case 'set-fog':
+                    $state = getState();
+                    $activeScene = getActiveScene($state);
+                    $activeScene['fogOfWar'] = [
+                        'enabled' => (bool)($input['enabled'] ?? false),
+                        'data' => $input['data'] ?? null
+                    ];
+                    updateActiveScene($state, $activeScene);
+                    $state = saveState($state);
+                    echo json_encode(['success' => true, 'version' => $state['version']]);
+                    break;
+
+                case 'update-fog':
+                    $state = getState();
+                    $activeScene = getActiveScene($state);
+                    if (!isset($activeScene['fogOfWar'])) {
+                        $activeScene['fogOfWar'] = ['enabled' => true, 'data' => null];
+                    }
+                    $activeScene['fogOfWar']['data'] = $input['data'] ?? null;
+                    updateActiveScene($state, $activeScene);
+                    $state = saveState($state);
+                    echo json_encode(['success' => true, 'version' => $state['version']]);
+                    break;
+
+                case 'toggle-fog':
+                    $state = getState();
+                    $activeScene = getActiveScene($state);
+                    if (!isset($activeScene['fogOfWar'])) {
+                        $activeScene['fogOfWar'] = ['enabled' => false, 'data' => null];
+                    }
+                    $activeScene['fogOfWar']['enabled'] = (bool)($input['enabled'] ?? !$activeScene['fogOfWar']['enabled']);
+                    updateActiveScene($state, $activeScene);
+                    $state = saveState($state);
+                    echo json_encode(['success' => true, 'enabled' => $activeScene['fogOfWar']['enabled'], 'version' => $state['version']]);
+                    break;
+
                 case 'add-map-element':
                     $state = getState();
+                    $activeScene = getActiveScene($state);
                     
                     $x = intval($input['x']);
                     $y = intval($input['y']);
-                    foreach ($state['mapElements'] as $el) {
+                    foreach ($activeScene['mapElements'] as $el) {
                         if ($el['x'] === $x && $el['y'] === $y) {
                             echo json_encode(['success' => false, 'error' => 'Position occupied']);
                             exit;
@@ -253,17 +488,19 @@ try {
                         'x' => $x,
                         'y' => $y
                     ];
-                    $state['mapElements'][] = $element;
+                    $activeScene['mapElements'][] = $element;
+                    updateActiveScene($state, $activeScene);
                     $state = saveState($state);
                     echo json_encode(['success' => true, 'element' => $element, 'version' => $state['version']]);
                     break;
 
                 case 'add-token':
                     $state = getState();
+                    $activeScene = getActiveScene($state);
                     
                     $x = intval($input['x']);
                     $y = intval($input['y']);
-                    foreach ($state['tokens'] as $t) {
+                    foreach ($activeScene['tokens'] as $t) {
                         if ($t['x'] === $x && $t['y'] === $y) {
                             echo json_encode(['success' => false, 'error' => 'Position occupied by token']);
                             exit;
@@ -277,25 +514,27 @@ try {
                         'x' => $x,
                         'y' => $y
                     ];
-                    $state['tokens'][] = $token;
+                    $activeScene['tokens'][] = $token;
+                    updateActiveScene($state, $activeScene);
                     $state = saveState($state);
                     echo json_encode(['success' => true, 'token' => $token, 'version' => $state['version']]);
                     break;
 
                 case 'move-token':
                     $state = getState();
+                    $activeScene = getActiveScene($state);
                     $tokenId = $input['id'];
                     $newX = intval($input['x']);
                     $newY = intval($input['y']);
                     
-                    foreach ($state['tokens'] as $t) {
+                    foreach ($activeScene['tokens'] as $t) {
                         if ($t['id'] !== $tokenId && $t['x'] === $newX && $t['y'] === $newY) {
                             echo json_encode(['success' => false, 'error' => 'Position occupied']);
                             exit;
                         }
                     }
                     
-                    foreach ($state['tokens'] as &$token) {
+                    foreach ($activeScene['tokens'] as &$token) {
                         if ($token['id'] === $tokenId) {
                             $token['x'] = $newX;
                             $token['y'] = $newY;
@@ -303,77 +542,51 @@ try {
                         }
                     }
                     
+                    updateActiveScene($state, $activeScene);
                     $state = saveState($state);
                     echo json_encode(['success' => true, 'version' => $state['version']]);
                     break;
 
                 case 'remove-map-element':
                     $state = getState();
+                    $activeScene = getActiveScene($state);
                     $elementId = $input['id'];
-                    $state['mapElements'] = array_values(array_filter(
-                        $state['mapElements'],
+                    $activeScene['mapElements'] = array_values(array_filter(
+                        $activeScene['mapElements'],
                         fn($el) => $el['id'] !== $elementId
                     ));
+                    updateActiveScene($state, $activeScene);
                     $state = saveState($state);
                     echo json_encode(['success' => true, 'version' => $state['version']]);
                     break;
 
                 case 'remove-token':
                     $state = getState();
+                    $activeScene = getActiveScene($state);
                     $tokenId = $input['id'];
-                    $state['tokens'] = array_values(array_filter(
-                        $state['tokens'],
+                    $activeScene['tokens'] = array_values(array_filter(
+                        $activeScene['tokens'],
                         fn($t) => $t['id'] !== $tokenId
                     ));
+                    updateActiveScene($state, $activeScene);
                     $state = saveState($state);
                     echo json_encode(['success' => true, 'version' => $state['version']]);
                     break;
 
                 case 'clear':
-                    $state = [
-                        'background' => null,
-                        'fogOfWar' => ['enabled' => false, 'data' => null],  
-                        'mapElements' => [],
-                        'tokens' => [],
-                        'lastUpdate' => time(),
-                        'version' => 0
-                    ];
+                    // Czyści tylko aktywną scenę
+                    $state = getState();
+                    $activeScene = getActiveScene($state);
+                    $activeScene['background'] = null;
+                    $activeScene['fogOfWar'] = ['enabled' => false, 'data' => null];
+                    $activeScene['mapElements'] = [];
+                    $activeScene['tokens'] = [];
+                    updateActiveScene($state, $activeScene);
                     $state = saveState($state);
                     echo json_encode(['success' => true, 'version' => $state['version']]);
-                    break;
-
-                case 'set-fog':
-                    $state = getState();
-                    $state['fogOfWar'] = [
-                        'enabled' => (bool)($input['enabled'] ?? false),
-                        'data' => $input['data'] ?? null
-                    ];
-                    $state = saveState($state);
-                    echo json_encode(['success' => true, 'version' => $state['version']]);
-                    break;
-
-                case 'update-fog':
-                    $state = getState();
-                    if (!isset($state['fogOfWar'])) {
-                        $state['fogOfWar'] = ['enabled' => true, 'data' => null];
-                    }
-                    $state['fogOfWar']['data'] = $input['data'] ?? null;
-                    $state = saveState($state);
-                    echo json_encode(['success' => true, 'version' => $state['version']]);
-                    break;
-
-                case 'toggle-fog':
-                    $state = getState();
-                    if (!isset($state['fogOfWar'])) {
-                        $state['fogOfWar'] = ['enabled' => false, 'data' => null];
-                    }
-                    $state['fogOfWar']['enabled'] = (bool)($input['enabled'] ?? !$state['fogOfWar']['enabled']);
-                    $state = saveState($state);
-                    echo json_encode(['success' => true, 'enabled' => $state['fogOfWar']['enabled'], 'version' => $state['version']]);
                     break;
 
                 case 'roll':
-                    // Zapisz nowy rzut
                     $rollsFile = __DIR__ . '/data/rolls.json';
                     if (file_exists($rollsFile)) {
                         $rolls = json_decode(file_get_contents($rollsFile), true);
@@ -383,7 +596,7 @@ try {
                     
                     $newRoll = [
                         'id' => generateId(),
-                        'player' => htmlspecialchars(substr($input['player'] ?? 'Anonim', 0, 20)),
+                        'player' => htmlspecialchars(substr($input['player'] ?? 'Anonymous', 0, 20)),
                         'dice' => $input['dice'] ?? [],
                         'modifier' => intval($input['modifier'] ?? 0),
                         'total' => intval($input['total'] ?? 0),
@@ -392,14 +605,12 @@ try {
                     
                     $rolls[] = $newRoll;
                     
-                    // Zachowaj tylko ostatnie 100 rzutów
                     if (count($rolls) > 100) {
                         $rolls = array_slice($rolls, -100);
                     }
                     
                     file_put_contents($rollsFile, json_encode($rolls, JSON_PRETTY_PRINT));
                     
-                    // Zwiększ wersję stanu żeby inni gracze dostali update
                     $state = getState();
                     $state = saveState($state);
                     
@@ -407,10 +618,27 @@ try {
                     break;
 
                 case 'clear-rolls':
-                    // Wyczyść historię rzutów
                     $rollsFile = __DIR__ . '/data/rolls.json';
                     file_put_contents($rollsFile, json_encode([], JSON_PRETTY_PRINT));
                     echo json_encode(['success' => true]);
+                    break;
+
+                case 'send-ping':
+                    $state = getState();
+                    $state['ping'] = [
+                        'x' => intval($input['x']),
+                        'y' => intval($input['y']),
+                        'timestamp' => time() * 1000 + intval(microtime(true) * 1000) % 1000
+                    ];
+                    $state = saveState($state);
+                    echo json_encode(['success' => true, 'ping' => $state['ping'], 'version' => $state['version']]);
+                    break;
+
+                case 'clear-ping':
+                    $state = getState();
+                    $state['ping'] = null;
+                    $state = saveState($state);
+                    echo json_encode(['success' => true, 'version' => $state['version']]);
                     break;
 
                 default:

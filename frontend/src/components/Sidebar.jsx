@@ -1,4 +1,5 @@
 import CollapsibleSection from './CollapsibleSection'
+import SceneManager from './SceneManager'
 import { t } from '../lang';
 
 function Sidebar({ 
@@ -30,7 +31,16 @@ function Sidebar({
   onClear,
   basePath,
   zoomLevel,
-  onZoomChange
+  onZoomChange,
+  scenes,
+  activeSceneId,
+  onSwitchScene,
+  onCreateScene,
+  onDeleteScene,
+  onRenameScene,
+  onDuplicateScene,
+  pingMode,
+  onTogglePing,
 }) {
   const isSelected = (asset, type) => {
     return selectedAsset?.id === asset.id && selectedType === type
@@ -43,6 +53,7 @@ function Sidebar({
   }
 
   const getActiveTool = () => {
+    if (pingMode) return `📍 ${t('ping.active')}`  // NOWE
     if (fogEditMode) {
       const mode = fogRevealMode ? t('tools.fogReveal') : t('tools.fogHide')
       return t('tools.fogActive', { mode, size: fogBrushSize })
@@ -62,6 +73,22 @@ function Sidebar({
       </div>
 
       <div className="sidebar-sections">
+      <CollapsibleSection 
+        title={t('scenes.title')} 
+        icon="🎬" 
+        defaultOpen={true}
+        badge={scenes.length}
+      >
+        <SceneManager
+          scenes={scenes}
+          activeSceneId={activeSceneId}
+          onSwitchScene={onSwitchScene}
+          onCreateScene={onCreateScene}
+          onDeleteScene={onDeleteScene}
+          onRenameScene={onRenameScene}
+          onDuplicateScene={onDuplicateScene}
+        />
+      </CollapsibleSection>
         {/* Tła */}
         <CollapsibleSection title={t('sidebar.backgrounds')} icon="🖼️" defaultOpen={false}>
           {currentBackground && (
@@ -188,6 +215,15 @@ function Sidebar({
           defaultOpen={true}
           badge={mapAssets.length || null}
         >
+          <div 
+            className={`ping-tool ${pingMode ? 'active' : ''}`}
+            onClick={onTogglePing}
+            title={t('ping.toolHint')}
+          >
+            <span className="ping-icon">📍</span>
+            <span className="ping-label">{t('ping.tool')}</span>
+            {pingMode && <span className="ping-active">✓</span>}
+          </div>
           {hasMapElements && (
             <div 
               className={`eraser-tool ${isEraserActive ? 'active' : ''}`}

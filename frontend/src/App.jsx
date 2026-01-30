@@ -10,8 +10,11 @@ import {
 import DicePanel from './components/DicePanel'
 import { BASE_PATH, API_BASE } from '../config'
 import { t } from './lang';
+import SceneManager from './components/SceneManager'
 
 function App() {
+  const [scenes, setScenes] = useState([])
+  const [activeSceneId, setActiveSceneId] = useState(null)
   const [background, setBackground] = useState(null)
   const [mapElements, setMapElements] = useState([])
   const [tokens, setTokens] = useState([])
@@ -33,12 +36,82 @@ function App() {
   const [rollHistory, setRollHistory] = useState([])
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [zoomLevel, setZoomLevel] = useState(1)
+  const [pingMode, setPingMode] = useState(false)
+  const [pingAnimation, setPingAnimation] = useState(null)
+  const lastPingTimestampRef = useRef(0)
+  const gridContainerRef = useRef(null)
+  
   const fogUpdateTimeoutRef = useRef(null)
 
   const handleZoomChange = useCallback((newZoom) => {
     const clamped = Math.max(0.4, Math.min(1.4, newZoom))
     setZoomLevel(Math.round(clamped * 100) / 100)
   }, [])
+
+  const updateSceneState = useCallback((sceneData) => {
+    if (!sceneData) return
+    setBackground(sceneData.background || null)
+    setMapElements(sceneData.mapElements || [])
+    setTokens(sceneData.tokens || [])
+    setFogOfWar(sceneData.fogOfWar || { enabled: false, data: null })
+    setFogBitmap(decodeFromBase64(sceneData.fogOfWar?.data))
+  }, [])
+
+  const handleSendPing = useCallback((x, y) => {
+    fetch(`${API_BASE}?action=send-ping`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ x, y })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setVersion(data.version)
+          // Wyłącz tryb ping po wysłaniu
+          setPingMode(false)
+        }
+      })
+      .catch(console.error)
+  }, [])
+
+  const handleTogglePing = useCallback(() => {
+    const newPingMode = !pingMode
+    setPingMode(newPingMode)
+    
+    if (newPingMode) {
+      setSelectedAsset(null)
+      setSelectedType(null)
+      setIsEraserActive(false)
+      setFogEditMode(false)
+    }
+  }, [pingMode])
+
+  const scrollToPoint = useCallback((cellX, cellY) => {
+    if (!gridContainerRef.current) return
+    
+    const container = gridContainerRef.current
+    const cellSize = 64 * zoomLevel
+    
+    // Oblicz pozycję docelową (środek ekranu na danej komórce)
+    const targetX = cellX * cellSize + cellSize / 2 - container.clientWidth / 2
+    const targetY = cellY * cellSize + cellSize / 2 - container.clientHeight / 2
+    
+    // Smooth scroll
+    container.scrollTo({
+      left: Math.max(0, targetX),
+      top: Math.max(0, targetY),
+      behavior: 'smooth'
+    })
+    
+    // Pokaż animację pinga
+    setPingAnimation({ x: cellX, y: cellY, timestamp: Date.now() })
+    
+    // Ukryj animację po 2 sekundach
+    setTimeout(() => {
+      setPingAnimation(null)
+    }, 2000)
+  }, [zoomLevel])
   
   useEffect(() => {
     fetch(API_BASE + '?action=assets', { credentials: 'include' })
@@ -54,28 +127,23 @@ function App() {
   }, [])
 
   
-  useEffect(() => {
-    fetch(API_BASE + '?action=state', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setBackground(data.data.background || null)
-          setMapElements(data.data.mapElements || [])
-          setTokens(data.data.tokens || [])
-          setVersion(data.data.version || 0)
-          
-          if (data.data.fogOfWar) {
-            setFogOfWar(data.data.fogOfWar)
-            setFogBitmap(decodeFromBase64(data.data.fogOfWar.data))
-          }
-        }
-        setIsLoading(false)
-      })
-      .catch(err => {
-        console.error(err)
-        setIsLoading(false)
-      })
-  }, [])
+useEffect(() => {
+  fetch(API_BASE + '?action=state', { credentials: 'include' })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        setScenes(data.data.scenes || [])
+        setActiveSceneId(data.data.activeSceneId)
+        updateSceneState(data.data.scene)
+        setVersion(data.data.version || 0)
+      }
+      setIsLoading(false)
+    })
+    .catch(err => {
+      console.error(err)
+      setIsLoading(false)
+    })
+}, [updateSceneState])
 
   
   useEffect(() => {
@@ -84,33 +152,145 @@ function App() {
         .then(res => res.json())
         .then(data => {
           if (data.success && data.hasChanges) {
-            setBackground(data.data.background || null)
-            setMapElements(data.data.mapElements || [])
-            setTokens(data.data.tokens || [])
-            setVersion(data.data.version)
-            
-            if (data.data.fogOfWar) {
-              setFogOfWar(data.data.fogOfWar)
-              
-              if (!fogEditMode) {
-                setFogBitmap(decodeFromBase64(data.data.fogOfWar.data))
-              }
+            setScenes(data.data.scenes || [])
+            // Sprawdź czy zmieniono aktywną scenę
+            if (data.data.activeSceneId !== activeSceneId) {
+              setActiveSceneId(data.data.activeSceneId)
+              updateSceneState(data.data.scene)
+              // Reset narzędzi przy zmianie sceny
+              setSelectedAsset(null)
+              setSelectedType(null)
+              setIsEraserActive(false)
+              setFogEditMode(false)
+            } else if (!fogEditMode) {
+              // Aktualizuj tylko jeśli nie edytujemy mgły
+              updateSceneState(data.data.scene)
             }
+            setVersion(data.data.version)
           }
         })
         .catch(console.error)
-        fetch(`${API_BASE}?action=rolls`, { credentials: 'include' })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setRollHistory(data.rolls || [])
+
+      fetch(`${API_BASE}?action=ping`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.ping) {
+            const ping = data.ping
+            // Sprawdź czy to nowy ping
+            if (ping.timestamp > lastPingTimestampRef.current) {
+              lastPingTimestampRef.current = ping.timestamp
+              scrollToPoint(ping.x, ping.y)
             }
-          })
-          .catch(console.error)
+          }
+        })
+      .catch(console.error)
+      
+      // Pobierz rzuty
+      fetch(`${API_BASE}?action=rolls`, { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setRollHistory(data.rolls || [])
+          }
+        })
+        .catch(console.error)
     }, 2000)
 
     return () => clearInterval(interval)
-  }, [version, fogEditMode])
+  }, [version, activeSceneId, fogEditMode, updateSceneState, scrollToPoint])
+
+  const handleSwitchScene = useCallback((sceneId) => {
+    fetch(`${API_BASE}?action=switch-scene`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id: sceneId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setActiveSceneId(sceneId)
+          updateSceneState(data.scene)
+          setVersion(data.version)
+          // Reset narzędzi
+          setSelectedAsset(null)
+          setSelectedType(null)
+          setIsEraserActive(false)
+          setFogEditMode(false)
+        }
+      })
+      .catch(console.error)
+  }, [updateSceneState])
+
+  const handleCreateScene = useCallback((name) => {
+    fetch(`${API_BASE}?action=create-scene`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ name })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setScenes(prev => [...prev, data.scene])
+          setVersion(data.version)
+        }
+      })
+      .catch(console.error)
+  }, [])
+
+  const handleDeleteScene = useCallback((sceneId) => {
+    fetch(`${API_BASE}?action=delete-scene`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id: sceneId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setScenes(prev => prev.filter(s => s.id !== sceneId))
+          setVersion(data.version)
+        }
+      })
+      .catch(console.error)
+  }, [])
+
+  const handleRenameScene = useCallback((sceneId, name) => {
+    fetch(`${API_BASE}?action=rename-scene`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id: sceneId, name })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setScenes(prev => prev.map(s => 
+            s.id === sceneId ? { ...s, name } : s
+          ))
+          setVersion(data.version)
+        }
+      })
+      .catch(console.error)
+  }, [])
+
+  const handleDuplicateScene = useCallback((sceneId) => {
+    fetch(`${API_BASE}?action=duplicate-scene`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id: sceneId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setScenes(prev => [...prev, data.scene])
+          setVersion(data.version)
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   const handleDiceRoll = useCallback((rollData) => {
     setRollHistory(prev => [...prev, { ...rollData, id: Date.now().toString() }])
@@ -133,6 +313,7 @@ function App() {
   const handleSelectAsset = useCallback((asset, type) => {
     setIsEraserActive(false)
     setFogEditMode(false)
+    setPingMode(false) 
     
     if (selectedAsset?.id === asset.id && selectedType === type) {
       setSelectedAsset(null)
@@ -145,6 +326,7 @@ function App() {
 
   const handleToggleEraser = useCallback(() => {
     setFogEditMode(false)  
+    setPingMode(false) 
     
     if (isEraserActive) {
       setIsEraserActive(false)
@@ -389,6 +571,7 @@ function App() {
   const handleToggleFogEdit = useCallback(() => {
     const newEditMode = !fogEditMode
     setFogEditMode(newEditMode)
+    setPingMode(false) 
     
     
     if (newEditMode) {
@@ -474,10 +657,20 @@ function App() {
         basePath={BASE_PATH}
         zoomLevel={zoomLevel}
         onZoomChange={handleZoomChange}
+        scenes={scenes}
+        activeSceneId={activeSceneId}
+        onSwitchScene={handleSwitchScene}
+        onCreateScene={handleCreateScene}
+        onDeleteScene={handleDeleteScene}
+        onRenameScene={handleRenameScene}
+        onDuplicateScene={handleDuplicateScene}
+        pingMode={pingMode}
+        onTogglePing={handleTogglePing}
       />
       
       <main className="main-content">
         <Grid
+          ref={gridContainerRef}
           background={background}
           mapElements={mapElements}
           tokens={tokens}
@@ -497,6 +690,9 @@ function App() {
           onRemoveToken={handleRemoveToken}
           basePath={BASE_PATH}
           zoomLevel={zoomLevel}
+          pingMode={pingMode}
+          pingAnimation={pingAnimation}
+          onSendPing={handleSendPing}
         />
       </main>
 

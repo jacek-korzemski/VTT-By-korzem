@@ -1,40 +1,46 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react'
+import React, { useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
 import Token from './Token'
 import MapElement from './MapElement'
 import FogOfWar from './FogOfWar'
 import { GRID_SIZE, CELL_SIZE } from '../../config'
 
-function Grid({
-  background,
-  mapElements,
-  tokens,
-  selectedAsset,
-  selectedType,
-  isEraserActive,
-  fogBitmap,
-  fogEnabled,
-  fogEditMode,
-  fogRevealMode,
-  fogBrushSize,
-  fogGmOpacity,
-  onFogBitmapChange,
-  onCellClick,
-  onTokenMove,
-  onRemoveMapElement,
-  onRemoveToken,
-  basePath,
-  zoomLevel  // NOWE
-}) {
+const Grid = forwardRef(function Grid(props, ref) {
+  // Destrukturyzacja props
+  const {
+    background,
+    mapElements,
+    tokens,
+    selectedAsset,
+    selectedType,
+    isEraserActive,
+    fogBitmap,
+    fogEnabled,
+    fogEditMode,
+    fogRevealMode,
+    fogBrushSize,
+    fogGmOpacity,
+    onFogBitmapChange,
+    onCellClick,
+    onTokenMove,
+    onRemoveMapElement,
+    onRemoveToken,
+    basePath,
+    zoomLevel,
+    pingMode,
+    pingAnimation,
+    onSendPing
+  } = props
+
   const gridRef = useRef(null)
   const [draggedToken, setDraggedToken] = useState(null)
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
-  
-  // NOWE: Stan dla panningu
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
   const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 })
 
-  // Uwzględnij zoom w obliczeniach pozycji
+  // Expose gridRef via forwarded ref
+  useImperativeHandle(ref, () => gridRef.current, [])
+
   const getCellFromMousePosition = useCallback((clientX, clientY) => {
     if (!gridRef.current) return null
     
@@ -42,7 +48,6 @@ function Grid({
     const scrollLeft = gridRef.current.scrollLeft
     const scrollTop = gridRef.current.scrollTop
     
-    // Uwzględnij zoom
     const x = Math.floor(((clientX - rect.left) / zoomLevel + scrollLeft / zoomLevel) / CELL_SIZE)
     const y = Math.floor(((clientY - rect.top) / zoomLevel + scrollTop / zoomLevel) / CELL_SIZE)
     
@@ -58,35 +63,30 @@ function Grid({
     const scrollLeft = gridRef.current.scrollLeft
     const scrollTop = gridRef.current.scrollTop
     
-    // Uwzględnij zoom
     return {
       x: (clientX - rect.left) / zoomLevel + scrollLeft / zoomLevel,
       y: (clientY - rect.top) / zoomLevel + scrollTop / zoomLevel
     }
   }, [zoomLevel])
 
-  // NOWE: Sprawdź czy można rozpocząć panning
   const canStartPanning = useCallback((e) => {
-    // Nie pannuj gdy klikamy na interaktywne elementy
     if (e.target.closest('.token')) return false
     if (e.target.closest('.map-element.erasable')) return false
     if (e.target.closest('.fog-canvas.editing')) return false
-    // Nie pannuj gdy mamy wybrane narzędzie lub tryb edycji
     if (selectedAsset) return false
     if (isEraserActive) return false
     if (fogEditMode) return false
+    if (pingMode) return false
     return true
-  }, [selectedAsset, isEraserActive, fogEditMode])
+  }, [selectedAsset, isEraserActive, fogEditMode, pingMode])
 
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return
     
-    // Sprawdź czy to token - obsługuj przeciąganie tokenu
     if (e.target.closest('.token') && !isEraserActive && !fogEditMode) {
-      return // Token sam obsłuży swój mousedown
+      return
     }
     
-    // Sprawdź czy można pannować
     if (canStartPanning(e)) {
       e.preventDefault()
       setIsPanning(true)
@@ -98,9 +98,7 @@ function Grid({
     }
   }, [canStartPanning, isEraserActive, fogEditMode])
 
-  // Zaktualizowany handleMouseMove
   const handleMouseMove = useCallback((e) => {
-    // Panning
     if (isPanning && gridRef.current) {
       const dx = e.clientX - panStart.x
       const dy = e.clientY - panStart.y
@@ -109,7 +107,6 @@ function Grid({
       return
     }
     
-    // Przeciąganie tokenu
     if (draggedToken) {
       e.preventDefault()
       const pos = getPixelPosition(e.clientX, e.clientY)
@@ -119,15 +116,12 @@ function Grid({
     }
   }, [isPanning, panStart, scrollStart, draggedToken, getPixelPosition])
 
-  // Zaktualizowany handleMouseUp
   const handleMouseUp = useCallback((e) => {
-    // Zakończ panning
     if (isPanning) {
       setIsPanning(false)
       return
     }
     
-    // Zakończ przeciąganie tokenu
     if (draggedToken) {
       e.preventDefault()
       const cell = getCellFromMousePosition(e.clientX, e.clientY)
@@ -138,7 +132,6 @@ function Grid({
     }
   }, [isPanning, draggedToken, getCellFromMousePosition, onTokenMove])
 
-  // Kliknięcie na grid (tylko jeśli nie było panningu)
   const handleGridClick = useCallback((e) => {
     if (e.button !== 0) return
     if (e.target.closest('.token')) return
@@ -149,14 +142,23 @@ function Grid({
     if (isPanning) return
     
     const cell = getCellFromMousePosition(e.clientX, e.clientY)
-    if (cell && selectedAsset) {
+    if (!cell) return
+    
+    // Obsługa pinga
+    if (pingMode && onSendPing) {
+      onSendPing(cell.x, cell.y)
+      return
+    }
+    
+    if (selectedAsset) {
       onCellClick(cell.x, cell.y)
     }
-  }, [getCellFromMousePosition, selectedAsset, onCellClick, draggedToken, fogEditMode, isPanning])
+  }, [getCellFromMousePosition, selectedAsset, onCellClick, draggedToken, fogEditMode, isPanning, pingMode, onSendPing])
 
   const handleTokenDragStart = useCallback((token, e) => {
     if (isEraserActive) return
     if (fogEditMode) return
+    if (pingMode) return
     
     e.preventDefault()
     e.stopPropagation()
@@ -166,13 +168,14 @@ function Grid({
       setDraggedToken(token)
       setDragPosition(pos)
     }
-  }, [getPixelPosition, isEraserActive, fogEditMode])
+  }, [getPixelPosition, isEraserActive, fogEditMode, pingMode])
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
     
     if (isEraserActive) return
     if (fogEditMode) return
+    if (pingMode) return
     
     const cell = getCellFromMousePosition(e.clientX, e.clientY)
     if (!cell) return
@@ -187,7 +190,7 @@ function Grid({
     if (element) {
       onRemoveMapElement(element.id)
     }
-  }, [getCellFromMousePosition, tokens, mapElements, onRemoveToken, onRemoveMapElement, isEraserActive, fogEditMode])
+  }, [getCellFromMousePosition, tokens, mapElements, onRemoveToken, onRemoveMapElement, isEraserActive, fogEditMode, pingMode])
 
   const handleDragStart = useCallback((e) => {
     e.preventDefault()
@@ -199,7 +202,6 @@ function Grid({
     }
   }, [isEraserActive, onRemoveMapElement])
 
-  // Cleanup przy wyjściu kursora
   const handleMouseLeave = useCallback(() => {
     setDraggedToken(null)
     setIsPanning(false)
@@ -212,13 +214,13 @@ function Grid({
     backgroundSize: 'auto'
   } : {}
 
-  // Klasy dla kursora
   const containerClasses = [
     'grid-container',
     isEraserActive && 'eraser-mode',
     fogEditMode && 'fog-edit-mode',
+    pingMode && 'ping-mode',
     isPanning && 'panning',
-    (!selectedAsset && !isEraserActive && !fogEditMode) && 'can-pan'
+    (!selectedAsset && !isEraserActive && !fogEditMode && !pingMode) && 'can-pan'
   ].filter(Boolean).join(' ')
 
   return (
@@ -233,7 +235,6 @@ function Grid({
       onContextMenu={handleContextMenu}
       onDragStart={handleDragStart}
     >
-      {/* Wrapper dla zoom */}
       <div 
         className="grid-zoom-wrapper"
         style={{
@@ -274,6 +275,22 @@ function Grid({
             />
           ))}
           
+          {/* Animacja Ping */}
+          {pingAnimation && (
+            <div 
+              className="ping-animation"
+              style={{
+                left: pingAnimation.x * CELL_SIZE + CELL_SIZE / 2,
+                top: pingAnimation.y * CELL_SIZE + CELL_SIZE / 2,
+              }}
+            >
+              <span className="ping-dot" />
+              <span className="ping-ring ping-ring-1" />
+              <span className="ping-ring ping-ring-2" />
+              <span className="ping-ring ping-ring-3" />
+            </div>
+          )}
+          
           <FogOfWar
             bitmap={fogBitmap}
             enabled={fogEnabled}
@@ -288,6 +305,6 @@ function Grid({
       </div>
     </div>
   )
-}
+})
 
 export default Grid
