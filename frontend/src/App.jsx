@@ -38,6 +38,7 @@ function App() {
   const [zoomLevel, setZoomLevel] = useState(1)
   const [pingMode, setPingMode] = useState(false)
   const [pingAnimation, setPingAnimation] = useState(null)
+  const [activePing, setActivePing] = useState(null)
   const lastPingTimestampRef = useRef(0)
   const gridContainerRef = useRef(null)
   
@@ -67,8 +68,8 @@ function App() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
+          setActivePing(data.ping)
           setVersion(data.version)
-          // Wyłącz tryb ping po wysłaniu
           setPingMode(false)
         }
       })
@@ -86,6 +87,22 @@ function App() {
       setFogEditMode(false)
     }
   }, [pingMode])
+
+  const handleClearPing = useCallback(() => {
+    fetch(`${API_BASE}?action=clear-ping`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setActivePing(null)
+          setVersion(data.version)
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   const scrollToPoint = useCallback((cellX, cellY) => {
     if (!gridContainerRef.current) return
@@ -174,16 +191,19 @@ useEffect(() => {
       fetch(`${API_BASE}?action=ping`, { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
-          if (data.success && data.ping) {
-            const ping = data.ping
-            // Sprawdź czy to nowy ping
-            if (ping.timestamp > lastPingTimestampRef.current) {
-              lastPingTimestampRef.current = ping.timestamp
-              scrollToPoint(ping.x, ping.y)
+          if (data.success) {
+            if (data.ping) {
+              setActivePing(data.ping)
+              if (data.ping.timestamp > lastPingTimestampRef.current) {
+                lastPingTimestampRef.current = data.ping.timestamp
+                scrollToPoint(data.ping.x, data.ping.y)
+              }
+            } else {
+              setActivePing(null)
             }
           }
         })
-      .catch(console.error)
+        .catch(console.error)
       
       // Pobierz rzuty
       fetch(`${API_BASE}?action=rolls`, { credentials: 'include' })
@@ -666,6 +686,8 @@ useEffect(() => {
         onDuplicateScene={handleDuplicateScene}
         pingMode={pingMode}
         onTogglePing={handleTogglePing}
+        activePing={activePing}
+        onClearPing={handleClearPing}
       />
       
       <main className="main-content">

@@ -40,7 +40,9 @@ function Sidebar({
   onRenameScene,
   onDuplicateScene,
   pingMode,
+  activePing,
   onTogglePing,
+  onClearPing,
 }) {
   const isSelected = (asset, type) => {
     return selectedAsset?.id === asset.id && selectedType === type
@@ -224,6 +226,16 @@ function Sidebar({
             <span className="ping-label">{t('ping.tool')}</span>
             {pingMode && <span className="ping-active">✓</span>}
           </div>
+
+          {activePing && (
+            <button 
+              className="ping-clear-btn"
+              onClick={onClearPing}
+              title={t('ping.clearHint')}
+            >
+              ✕ {t('ping.clear')}
+            </button>
+          )}
           {hasMapElements && (
             <div 
               className={`eraser-tool ${isEraserActive ? 'active' : ''}`}

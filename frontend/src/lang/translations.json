@@ -75,7 +75,9 @@
     "ping": {
       "tool": "Attention Ping",
       "toolHint": "Click on map to focus all players there",
-      "active": "Click on map to ping"
+      "active": "Click on map to ping",
+      "clear": "Clear ping",
+      "clearHint": "Remove active ping so new players won't be redirected"
     }
   },
   "pl": {
@@ -154,7 +156,9 @@
     "ping": {
       "tool": "Przyciągnij uwagę",
       "toolHint": "Kliknij na mapę aby przenieść widok graczy",
-      "active": "Kliknij na mapę aby wysłać ping"
+      "active": "Kliknij na mapę aby wysłać ping",
+      "clear": "Usuń ping",
+      "clearHint": "Usuń aktywny ping, żeby nowi gracze nie byli przekierowywani"
     }
   }
 }
