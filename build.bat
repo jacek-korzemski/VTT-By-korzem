@@ -1,9 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-
-:: ============================================
-:: Simple VTT - Build Script
-:: ============================================
+chcp 65001 >nul 2>nul
 
 echo.
 echo  ========================================
@@ -20,25 +17,73 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-:: Parametry
-set "PASSWORD=%~1"
-set "BASE_PATH=%~2"
-set "LANGUAGE=%~3"
-set "ALLOWED_ORIGINS=%~4"
+echo  This script will guide you through the build process.
+echo  Press ENTER to use default values shown in [brackets].
+echo.
+echo  ----------------------------------------
+echo.
 
-:: Domyślne wartości
+:: Hasło
+set "PASSWORD="
+set /p "PASSWORD=Password [2137]: "
 if "%PASSWORD%"=="" set "PASSWORD=2137"
+
+:: Ścieżka bazowa
+set "BASE_PATH="
+set /p "BASE_PATH=Base path [/vtt/room1/]: "
 if "%BASE_PATH%"=="" set "BASE_PATH=/vtt/room1/"
+
+:: Język
+:ask_language
+set "LANGUAGE="
+set /p "LANGUAGE=Language (en/pl) [en]: "
 if "%LANGUAGE%"=="" set "LANGUAGE=en"
+if /i not "%LANGUAGE%"=="en" if /i not "%LANGUAGE%"=="pl" (
+    echo   Invalid option. Please enter 'en' or 'pl'.
+    goto ask_language
+)
+
+:: L5R
+:ask_l5r
+set "ENABLE_L5R="
+set /p "ENABLE_L5R=Enable L5R dice? (true/false) [false]: "
+if "%ENABLE_L5R%"=="" set "ENABLE_L5R=false"
+if /i not "%ENABLE_L5R%"=="true" if /i not "%ENABLE_L5R%"=="false" (
+    echo   Invalid option. Please enter 'true' or 'false'.
+    goto ask_l5r
+)
+
+:: Allowed origins
+set "ALLOWED_ORIGINS="
+set /p "ALLOWED_ORIGINS=Allowed origins [*]: "
 if "%ALLOWED_ORIGINS%"=="" set "ALLOWED_ORIGINS=*"
 
-echo [INFO] Password: %PASSWORD%
-echo [INFO] Base path: %BASE_PATH%
-echo [INFO] Language: %LANGUAGE%
-echo [INFO] Allowed origins: %ALLOWED_ORIGINS%
+echo.
+echo  ----------------------------------------
+echo.
+echo  Configuration summary:
+echo    Password:        %PASSWORD%
+echo    Base path:       %BASE_PATH%
+echo    Language:        %LANGUAGE%
+echo    Enable L5R:      %ENABLE_L5R%
+echo    Allowed origins: %ALLOWED_ORIGINS%
+echo.
+echo  ----------------------------------------
+echo.
+
+set "CONFIRM="
+set /p "CONFIRM=Proceed with build? (Y/n): "
+if /i "%CONFIRM%"=="n" (
+    echo.
+    echo  Build cancelled.
+    pause
+    exit /b 0
+)
+
+echo.
 
 :: Ustaw teksty na podstawie języka
-if "%LANGUAGE%"=="pl" (
+if /i "%LANGUAGE%"=="pl" (
     set "LOGIN_TITLE=Simple VTT"
     set "LOGIN_SUBTITLE=Wprowadz haslo aby kontynuowac"
     set "LOGIN_PLACEHOLDER=Haslo..."
@@ -56,7 +101,6 @@ if "%LANGUAGE%"=="pl" (
     set "APP_TITLE=Simple VTT"
 )
 
-echo.
 echo [1/5] Creating build folder...
 if exist "build" rmdir /s /q "build"
 mkdir "build"
@@ -73,6 +117,7 @@ echo [2/5] Configuring frontend...
     echo VITE_BASE_PATH=%BASE_PATH%
     echo VITE_API_PATH=backend/api.php
     echo VITE_LANGUAGE=%LANGUAGE%
+    echo VITE_ENABLE_L5R=%ENABLE_L5R%
 ) > "frontend\.env"
 
 echo [3/5] Building frontend (this may take a while)...
@@ -101,6 +146,7 @@ cd ..
 
 echo [4/5] Copying files...
 
+:: Kopiuj zbudowane assety (zawierają już L5R jeśli włączone)
 xcopy /s /y "frontend\dist\assets\*" "build\assets\" >nul 2>nul
 
 copy /y "backend\api.php" "build\backend\" >nul
@@ -128,14 +174,13 @@ copy /y "backend\api.php" "build\backend\" >nul
     echo ALLOWED_ORIGINS=%ALLOWED_ORIGINS%
 ) > "build\backend\.env"
 
-echo. > "build\backend\assets\map\.gitkeep"
-echo. > "build\backend\assets\tokens\.gitkeep"
-echo. > "build\backend\assets\backgrounds\.gitkeep"
-echo. > "build\backend\data\.gitkeep"
+powershell -Command "'' | Out-File -FilePath 'build\backend\assets\map\.gitkeep' -Encoding ASCII"
+powershell -Command "'' | Out-File -FilePath 'build\backend\assets\tokens\.gitkeep' -Encoding ASCII"
+powershell -Command "'' | Out-File -FilePath 'build\backend\assets\backgrounds\.gitkeep' -Encoding ASCII"
+powershell -Command "'' | Out-File -FilePath 'build\backend\data\.gitkeep' -Encoding ASCII"
 
 echo [5/5] Generating index.php...
 
-:: Wywołaj skrypt PowerShell z parametrami
 powershell -ExecutionPolicy Bypass -File "build-helper.ps1" -TemplatePath "index.php.template" -OutputPath "build\index.php" -Password "%PASSWORD%" -BasePath "%BASE_PATH%" -Lang "%LANGUAGE%" -LoginTitle "%LOGIN_TITLE%" -LoginSubtitle "%LOGIN_SUBTITLE%" -LoginPlaceholder "%LOGIN_PLACEHOLDER%" -LoginSubmit "%LOGIN_SUBMIT%" -LoginError "%LOGIN_ERROR%" -Logout "%LOGOUT%" -AppTitle "%APP_TITLE%"
 
 if %errorlevel% neq 0 (
@@ -155,15 +200,21 @@ echo  ========================================
 echo.
 echo   The 'build' folder contains the package.
 echo.
-echo   Usage:
+echo   Configuration used:
+echo     Password:        %PASSWORD%
+echo     Base path:       %BASE_PATH%
+echo     Language:        %LANGUAGE%
+echo     L5R enabled:     %ENABLE_L5R%
+echo.
+echo   Next steps:
 echo   1. Upload contents of 'build' folder to server
 echo      at location: %BASE_PATH%
 echo   2. Add images to:
-echo      - backend/assets/map/ (map elements)
-echo      - backend/assets/tokens/ (tokens)
-echo      - backend/assets/backgrounds/ (map backgrounds)
-echo   3. Make sure backend/data/ folder is writable
-echo   4. Open the page and login with: %PASSWORD%
+echo      - backend/assets/map/
+echo      - backend/assets/tokens/
+echo      - backend/assets/backgrounds/
+echo   3. Ensure backend/data/ folder is writable
+echo   4. Open the page and login with your password
 echo.
 echo  ========================================
 echo.

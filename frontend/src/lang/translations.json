@@ -45,7 +45,32 @@
       "historyEmpty": "No rolls yet",
       "now": "now",
       "minutesAgo": "m ago",
-      "hoursAgo": "h ago"
+      "hoursAgo": "h ago",
+      "standardMode": "Standard"
+    },
+    "l5r": {
+      "ringDice": "Ring Dice",
+      "skillDice": "Skill Dice",
+      "roll": "Roll Dice",
+      "selectToKeep": "Select dice to keep:",
+      "kept": "Kept",
+      "available": "Available",
+      "keepSelected": "Keep selected",
+      "selectToExplode": "Select explosive dice to reroll:",
+      "explode": "Explode",
+      "skipExplode": "Skip",
+      "result": "Result",
+      "success": "Success",
+      "opportunity": "Opportunity",
+      "strife": "Strife",
+      "explosive": "Explosive",
+      "exploded": "Exploded",
+      "blank": "Blank",
+      "saveResult": "Save result",
+      "rollAgain": "Roll again",
+      "reset": "Reset",
+      "diceKept": "dice kept",
+      "finishKeeping": "Finish"
     },
     "login": {
       "title": "Simple VTT",
@@ -115,7 +140,7 @@
       "zoomIn": "Przybliż",
       "reset": "Reset (100%)"
     },
-    "dice": {
+     "dice": {
       "title": "Rzut Kośćmi",
       "playerPlaceholder": "Twoje imię...",
       "addDie": "Kliknij kość aby dodać",
@@ -126,7 +151,32 @@
       "historyEmpty": "Brak rzutów",
       "now": "teraz",
       "minutesAgo": "m temu",
-      "hoursAgo": "h temu"
+      "hoursAgo": "h temu",
+      "standardMode": "Standardowe"
+    },
+    "l5r": {
+      "ringDice": "Kości Pierścienia",
+      "skillDice": "Kości Umiejętności",
+      "roll": "Rzuć kośćmi",
+      "selectToKeep": "Wybierz kości do zatrzymania:",
+      "kept": "Zatrzymane",
+      "available": "Dostępne",
+      "keepSelected": "Zatrzymaj wybrane",
+      "selectToExplode": "Wybierz eksplodujące kości do przerzutu:",
+      "explode": "Eksploduj",
+      "skipExplode": "Pomiń",
+      "result": "Wynik",
+      "success": "Sukces",
+      "opportunity": "Okazja",
+      "strife": "Stres",
+      "explosive": "Eksplodujący",
+      "exploded": "Wyeksplodowany",
+      "blank": "Puste",
+      "saveResult": "Zapisz wynik",
+      "rollAgain": "Rzuć ponownie",
+      "reset": "Reset",
+      "diceKept": "kości zatrzymanych",
+      "finishKeeping": "Zakończ"
     },
     "login": {
       "title": "Simple VTT",

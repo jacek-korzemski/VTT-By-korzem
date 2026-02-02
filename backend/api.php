@@ -594,23 +594,61 @@ try {
                         $rolls = [];
                     }
                     
-                    $newRoll = [
-                        'id' => generateId(),
-                        'player' => htmlspecialchars(substr($input['player'] ?? 'Anonymous', 0, 20)),
-                        'dice' => $input['dice'] ?? [],
-                        'modifier' => intval($input['modifier'] ?? 0),
-                        'total' => intval($input['total'] ?? 0),
-                        'timestamp' => $input['timestamp'] ?? (time() * 1000)
-                    ];
+                    // Sprawdź typ rzutu
+                    $rollType = $input['type'] ?? 'standard';
+                    
+                    if ($rollType === 'l5r') {
+                        // Rzut L5R
+                        $newRoll = [
+                            'id' => generateId(),
+                            'player' => htmlspecialchars(substr($input['player'] ?? 'Anonymous', 0, 20)),
+                            'type' => 'l5r',
+                            'dice' => array_map(function($die) {
+                                return [
+                                    'type' => $die['type'] ?? 'ring',
+                                    'symbol' => htmlspecialchars($die['symbol'] ?? ''),
+                                    'success' => intval($die['success'] ?? 0),
+                                    'opportunity' => intval($die['opportunity'] ?? 0),
+                                    'strife' => (bool)($die['strife'] ?? false),
+                                    'exploded' => (bool)($die['exploded'] ?? false)
+                                ];
+                            }, $input['dice'] ?? []),
+                            'totals' => [
+                                'success' => intval($input['totals']['success'] ?? 0),
+                                'opportunity' => intval($input['totals']['opportunity'] ?? 0),
+                                'strife' => intval($input['totals']['strife'] ?? 0)
+                            ],
+                            'timestamp' => $input['timestamp'] ?? (time() * 1000)
+                        ];
+                    } else {
+                        // Rzut standardowy
+                        $newRoll = [
+                            'id' => generateId(),
+                            'player' => htmlspecialchars(substr($input['player'] ?? 'Anonymous', 0, 20)),
+                            'type' => 'standard',
+                            'dice' => array_map(function($die) {
+                                return [
+                                    'type' => $die['type'] ?? 'd6',
+                                    'sides' => intval($die['sides'] ?? 6),
+                                    'result' => intval($die['result'] ?? 1)
+                                ];
+                            }, $input['dice'] ?? []),
+                            'modifier' => intval($input['modifier'] ?? 0),
+                            'total' => intval($input['total'] ?? 0),
+                            'timestamp' => $input['timestamp'] ?? (time() * 1000)
+                        ];
+                    }
                     
                     $rolls[] = $newRoll;
                     
+                    // Zachowaj tylko ostatnie 100 rzutów
                     if (count($rolls) > 100) {
                         $rolls = array_slice($rolls, -100);
                     }
                     
                     file_put_contents($rollsFile, json_encode($rolls, JSON_PRETTY_PRINT));
                     
+                    // Zwiększ wersję stanu
                     $state = getState();
                     $state = saveState($state);
                     
