@@ -1,0 +1,426 @@
+import React, { useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useState } from 'react'
+
+// Fantasy/RPG Emoji pogrupowane tematycznie
+const EMOJI_GROUPS = [
+  {
+    name: '⚔️',
+    title: 'Weapons & Armor',
+    emojis: ['⚔️', '🗡️', '🏹', '🛡️', '🪓', '🔱', '💣', '🧨']
+  },
+  {
+    name: '🔮',
+    title: 'Magic & Items',
+    emojis: ['🔮', '🪄', '✨', '⚗️', '🧪', '📜', '📖', '🗝️', '🔑', '🕯️', '🪔', '💎', '💍', '📿', '⚱️']
+  },
+  {
+    name: '🧙',
+    title: 'Characters',
+    emojis: ['🧙', '🧙‍♂️', '🧙‍♀️', '🧝', '🧝‍♂️', '🧝‍♀️', '🧛', '🧟', '👻', '💀', '☠️', '👹', '👺', '🤴', '👸', '👑']
+  },
+  {
+    name: '🐉',
+    title: 'Creatures',
+    emojis: ['🐉', '🐲', '🦇', '🕷️', '🦂', '🐺', '🦅', '🦉', '🐍', '🐗', '🦌', '🐻', '🦁', '🐊', '🦈']
+  },
+  {
+    name: '🏰',
+    title: 'Places',
+    emojis: ['🏰', '🏛️', '⛪', '🗻', '🌋', '🏔️', '🌲', '🌳', '🏕️', '⛺', '🪨', '🌙', '⭐', '🌟', '☀️']
+  },
+  {
+    name: '🔥',
+    title: 'Elements',
+    emojis: ['🔥', '❄️', '⚡', '💧', '🌊', '💨', '🌪️', '☁️', '🌈', '☄️', '💥', '💫']
+  },
+  {
+    name: '💰',
+    title: 'Treasure',
+    emojis: ['💰', '💎', '🏆', '🎁', '📦', '🗃️', '⚜️', '🔶', '🔷', '💵', '🪙']
+  },
+  {
+    name: '❤️',
+    title: 'Status',
+    emojis: ['❤️', '💔', '🖤', '💜', '💙', '💚', '💛', '🧡', '❤️‍🔥', '✅', '❌', '⚠️', '💤', '💢', '💯', '🎲']
+  }
+]
+
+const SimpleWYSIWYG = forwardRef(function SimpleWYSIWYG(props, ref) {
+  const {
+    height = '100%',
+    placeholder = 'Start typing...',
+    initialContent = '',
+    onChange,
+    className = ''
+  } = props
+
+  const editorRef = useRef(null)
+  const savedSelectionRef = useRef(null)
+  const [showTableModal, setShowTableModal] = useState(false)
+  const [showEmojiPanel, setShowEmojiPanel] = useState(false)
+  const [activeEmojiGroup, setActiveEmojiGroup] = useState(0)
+  const [tableRows, setTableRows] = useState(3)
+  const [tableCols, setTableCols] = useState(3)
+  const [toolbarState, setToolbarState] = useState({
+    bold: false,
+    italic: false,
+    underline: false
+  })
+
+  useEffect(() => {
+    if (editorRef.current && initialContent) {
+      editorRef.current.innerHTML = initialContent
+    }
+  }, [])
+
+  const handleChange = useCallback(() => {
+    if (onChange && editorRef.current) {
+      onChange(editorRef.current.innerHTML)
+    }
+  }, [onChange])
+
+  const updateToolbarState = useCallback(() => {
+    setToolbarState({
+      bold: document.queryCommandState('bold'),
+      italic: document.queryCommandState('italic'),
+      underline: document.queryCommandState('underline')
+    })
+  }, [])
+
+  const executeCommand = useCallback((command, value) => {
+    editorRef.current?.focus()
+    document.execCommand(command, false, value || '')
+    handleChange()
+    updateToolbarState()
+  }, [handleChange, updateToolbarState])
+
+  const saveSelection = useCallback(() => {
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      savedSelectionRef.current = selection.getRangeAt(0).cloneRange()
+    }
+  }, [])
+
+  const restoreSelection = useCallback(() => {
+    if (savedSelectionRef.current) {
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(savedSelectionRef.current)
+    }
+  }, [])
+
+  // Wstaw emoji
+  const insertEmoji = useCallback((emoji) => {
+    restoreSelection()
+    
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0)
+      range.deleteContents()
+      const textNode = document.createTextNode(emoji)
+      range.insertNode(textNode)
+      range.setStartAfter(textNode)
+      range.collapse(true)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    } else {
+      // Fallback - wstaw na końcu
+      if (editorRef.current) {
+        editorRef.current.innerHTML += emoji
+      }
+    }
+    
+    handleChange()
+    editorRef.current?.focus()
+  }, [restoreSelection, handleChange])
+
+  const insertTable = useCallback(() => {
+    restoreSelection()
+    
+    const table = document.createElement('table')
+    table.className = 'swysiwyg-table'
+    
+    for (let i = 0; i < tableRows; i++) {
+      const tr = document.createElement('tr')
+      for (let j = 0; j < tableCols; j++) {
+        const td = document.createElement('td')
+        td.innerHTML = '&nbsp;'
+        tr.appendChild(td)
+      }
+      table.appendChild(tr)
+    }
+
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0)
+      range.deleteContents()
+      range.insertNode(table)
+      range.setStartAfter(table)
+      range.collapse(true)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+
+    setShowTableModal(false)
+    handleChange()
+  }, [tableRows, tableCols, restoreSelection, handleChange])
+
+  const handleKeyDown = useCallback((e) => {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault()
+          executeCommand('bold')
+          break
+        case 'i':
+          e.preventDefault()
+          executeCommand('italic')
+          break
+        case 'u':
+          e.preventDefault()
+          executeCommand('underline')
+          break
+      }
+    }
+  }, [executeCommand])
+
+  // Zamknij emoji panel gdy klikniemy poza
+  useEffect(() => {
+    if (!showEmojiPanel) return
+
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.swysiwyg-emoji-container')) {
+        setShowEmojiPanel(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showEmojiPanel])
+
+  useImperativeHandle(ref, () => ({
+    getContent: () => editorRef.current?.innerHTML || '',
+    setContent: (html) => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = html
+        handleChange()
+      }
+    },
+    getPlainText: () => editorRef.current?.innerText || '',
+    clear: () => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = ''
+        handleChange()
+      }
+    },
+    focus: () => editorRef.current?.focus()
+  }), [handleChange])
+
+  return (
+    <div className={`swysiwyg-wrapper ${className}`}>
+      {/* Toolbar */}
+      <div className="swysiwyg-toolbar">
+        <div className="swysiwyg-toolbar-group">
+          <button
+            type="button"
+            className={toolbarState.bold ? 'active' : ''}
+            onClick={() => executeCommand('bold')}
+            title="Bold (Ctrl+B)"
+          >
+            <strong>B</strong>
+          </button>
+          <button
+            type="button"
+            className={toolbarState.italic ? 'active' : ''}
+            onClick={() => executeCommand('italic')}
+            title="Italic (Ctrl+I)"
+          >
+            <em>I</em>
+          </button>
+          <button
+            type="button"
+            className={toolbarState.underline ? 'active' : ''}
+            onClick={() => executeCommand('underline')}
+            title="Underline (Ctrl+U)"
+          >
+            <u>U</u>
+          </button>
+        </div>
+
+        <div className="swysiwyg-toolbar-group">
+          <select
+            onChange={(e) => {
+              if (e.target.value) {
+                executeCommand('fontSize', e.target.value)
+                e.target.value = ''
+              }
+            }}
+            title="Font size"
+          >
+            <option value="">Size</option>
+            <option value="1">XS</option>
+            <option value="2">S</option>
+            <option value="3">M</option>
+            <option value="4">L</option>
+            <option value="5">XL</option>
+            <option value="6">XXL</option>
+          </select>
+        </div>
+
+        <div className="swysiwyg-toolbar-group">
+          <label className="swysiwyg-color-picker" title="Text color">
+            <span className="swysiwyg-color-icon">A</span>
+            <input
+              type="color"
+              defaultValue="#ffffff"
+              onInput={(e) => executeCommand('foreColor', e.target.value)}
+            />
+          </label>
+        </div>
+
+        <div className="swysiwyg-toolbar-group">
+          <button
+            type="button"
+            onClick={() => executeCommand('insertUnorderedList')}
+            title="Bullet list"
+          >
+            •
+          </button>
+          <button
+            type="button"
+            onClick={() => executeCommand('insertOrderedList')}
+            title="Numbered list"
+          >
+            1.
+          </button>
+        </div>
+
+        <div className="swysiwyg-toolbar-group">
+          <button
+            type="button"
+            onClick={() => {
+              saveSelection()
+              setShowTableModal(true)
+            }}
+            title="Insert table"
+          >
+            ▦
+          </button>
+        </div>
+
+        {/* Emoji button */}
+        <div className="swysiwyg-toolbar-group swysiwyg-emoji-container">
+          <button
+            type="button"
+            className={showEmojiPanel ? 'active' : ''}
+            onClick={() => {
+              saveSelection()
+              setShowEmojiPanel(!showEmojiPanel)
+            }}
+            title="Insert emoji"
+          >
+            😀
+          </button>
+
+          {/* Emoji Panel */}
+          {showEmojiPanel && (
+            <div className="swysiwyg-emoji-panel">
+              <div className="swysiwyg-emoji-tabs">
+                {EMOJI_GROUPS.map((group, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={activeEmojiGroup === idx ? 'active' : ''}
+                    onClick={() => setActiveEmojiGroup(idx)}
+                    title={group.title}
+                  >
+                    {group.name}
+                  </button>
+                ))}
+              </div>
+              <div className="swysiwyg-emoji-grid">
+                {EMOJI_GROUPS[activeEmojiGroup].emojis.map((emoji, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => insertEmoji(emoji)}
+                    title={emoji}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Editor */}
+      <div className="swysiwyg-editor-container" style={{ height }}>
+        <div
+          ref={editorRef}
+          className="swysiwyg-editor"
+          contentEditable
+          suppressContentEditableWarning={true}
+          data-placeholder={placeholder}
+          onInput={handleChange}
+          onBlur={handleChange}
+          onKeyDown={handleKeyDown}
+          onMouseUp={updateToolbarState}
+          onKeyUp={updateToolbarState}
+        />
+      </div>
+
+      {/* Table Modal */}
+      {showTableModal && (
+        <div 
+          className="swysiwyg-modal active"
+          onClick={(e) => e.target === e.currentTarget && setShowTableModal(false)}
+        >
+          <div className="swysiwyg-modal-content">
+            <h3>Insert Table</h3>
+            <div className="swysiwyg-modal-form">
+              <label>
+                Rows:
+                <input
+                  type="number"
+                  value={tableRows}
+                  onChange={(e) => setTableRows(parseInt(e.target.value) || 1)}
+                  min={1}
+                  max={20}
+                />
+              </label>
+              <label>
+                Columns:
+                <input
+                  type="number"
+                  value={tableCols}
+                  onChange={(e) => setTableCols(parseInt(e.target.value) || 1)}
+                  min={1}
+                  max={10}
+                />
+              </label>
+            </div>
+            <div className="swysiwyg-modal-buttons">
+              <button
+                type="button"
+                className="swysiwyg-btn-cancel"
+                onClick={() => setShowTableModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="swysiwyg-btn-insert"
+                onClick={insertTable}
+              >
+                Insert
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+})
+
+export default SimpleWYSIWYG

@@ -29,6 +29,19 @@
       "clickToDeselect": "Click again to deselect",
       "hintLeftRight": "LMB = action | RMB = remove"
     },
+    "notes": {
+      "title": "Notepads",
+      "titlePlaceholder": "Notepad title...",
+      "placeholder": "Write your notes here...",
+      "import": "Load",
+      "export": "Save",
+      "clear": "Clear",
+      "close": "Close",
+      "remove": "Remove notepad",
+      "addEditor": "Add notepad",
+      "clearConfirm": "Are you sure you want to clear this notepad?",
+      "removeConfirm": "Are you sure you want to remove this notepad? Content will be lost."
+    },
     "zoom": {
       "zoomOut": "Zoom out",
       "zoomIn": "Zoom in",
@@ -134,6 +147,19 @@
       "selectTool": "Kliknij element aby wybrać",
       "clickToDeselect": "Kliknij ponownie aby odznaczyć",
       "hintLeftRight": "LPM = akcja | PPM = usuń"
+    },
+    "notes": {
+      "title": "Notatniki",
+      "titlePlaceholder": "Tytuł notatnika...",
+      "placeholder": "Pisz swoje notatki tutaj...",
+      "import": "Wczytaj",
+      "export": "Zapisz",
+      "clear": "Wyczyść",
+      "close": "Zamknij",
+      "remove": "Usuń notatnik",
+      "addEditor": "Dodaj notatnik",
+      "clearConfirm": "Czy na pewno chcesz wyczyścić ten notatnik?",
+      "removeConfirm": "Czy na pewno chcesz usunąć ten notatnik? Zawartość zostanie utracona."
     },
     "zoom": {
       "zoomOut": "Oddal",

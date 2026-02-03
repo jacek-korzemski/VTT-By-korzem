@@ -10,10 +10,11 @@ import {
 import DicePanel from './components/DicePanel'
 import { BASE_PATH, API_BASE } from '../config'
 import { t } from './lang';
-import SceneManager from './components/SceneManager'
+import NotesPanel from './components/NotesPanel'
 
 function App() {
   const [scenes, setScenes] = useState([])
+  const [notesPanelOpen, setNotesPanelOpen] = useState(false)
   const [activeSceneId, setActiveSceneId] = useState(null)
   const [background, setBackground] = useState(null)
   const [mapElements, setMapElements] = useState([])
@@ -723,6 +724,11 @@ useEffect(() => {
         onToggle={() => setDicePanelOpen(prev => !prev)}
         rollHistory={rollHistory}
         onRoll={handleDiceRoll}
+      />
+
+      <NotesPanel
+        isOpen={notesPanelOpen}
+        onToggle={() => setNotesPanelOpen(prev => !prev)}
       />
     </div>
   )
