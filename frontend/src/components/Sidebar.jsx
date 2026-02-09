@@ -5,7 +5,10 @@ import { t } from '../lang';
 function Sidebar({ 
   isOpen,
   mapAssets, 
-  tokenAssets,
+  tokenPath,
+  tokenFolders,
+  tokenFiles,
+  onTokenPathChange,
   backgroundAssets,
   currentBackground,
   selectedAsset, 
@@ -270,13 +273,55 @@ function Sidebar({
           title={t('sidebar.tokens')} 
           icon="🎭" 
           defaultOpen={true}
-          badge={tokenAssets.length || null}
+          badge={tokenFolders.length + tokenFiles.length || null}
         >
+          {(tokenPath || tokenFolders.length > 0) && (
+            <div className="token-breadcrumbs">
+              <button
+                type="button"
+                className="breadcrumb-btn"
+                onClick={() => onTokenPathChange('')}
+                title={t('sidebar.tokensRoot')}
+              >
+                🎭
+              </button>
+              {tokenPath.split('/').filter(Boolean).map((segment, i, arr) => {
+                const pathUpToHere = arr.slice(0, i + 1).join('/')
+                return (
+                  <span key={pathUpToHere} className="breadcrumb-segment">
+                    <span className="breadcrumb-sep">/</span>
+                    <button
+                      type="button"
+                      className="breadcrumb-btn"
+                      onClick={() => onTokenPathChange(pathUpToHere)}
+                    >
+                      {segment}
+                    </button>
+                  </span>
+                )
+              })}
+            </div>
+          )}
+          {tokenFolders.length > 0 && (
+            <div className="token-folders">
+              {tokenFolders.map(folder => (
+                <div
+                  key={folder.path}
+                  className="asset-item token-folder"
+                  onClick={() => onTokenPathChange(folder.path)}
+                  title={folder.name}
+                >
+                  <span className="folder-icon">📁</span>
+                  <span>{folder.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="asset-grid">
-            {tokenAssets.length === 0 && (
+            {tokenFiles.length === 0 && tokenFolders.length === 0 && (
               <p className="no-assets">{t('sidebar.noAssets')}</p>
             )}
-            {tokenAssets.map(asset => (
+            {tokenFiles.map(asset => (
               <div
                 key={asset.id}
                 className={`asset-item ${isSelected(asset, 'token') ? 'selected' : ''}`}

@@ -212,9 +212,55 @@ try {
                     }
                     break;
 
+                case 'list-tokens':
+                    // Lista tokenów z nawigacją po folderach (assets/tokens + podfoldery)
+                    $tokenBaseDir = __DIR__ . '/assets/tokens';
+                    $path = isset($_GET['path']) ? trim($_GET['path']) : '';
+                    $path = str_replace('\\', '/', $path);
+                    $path = trim($path, '/');
+                    if (strpos($path, '..') !== false) {
+                        echo json_encode(['success' => false, 'error' => 'Invalid path']);
+                        break;
+                    }
+                    $fullPath = $path === '' ? $tokenBaseDir : $tokenBaseDir . '/' . $path;
+                    if (!is_dir($fullPath)) {
+                        echo json_encode(['success' => true, 'currentPath' => $path, 'folders' => [], 'files' => []]);
+                        break;
+                    }
+                    $folders = [];
+                    $files = [];
+                    $extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
+                    foreach (scandir($fullPath) as $entry) {
+                        if ($entry === '.' || $entry === '..') continue;
+                        $entryPath = $fullPath . '/' . $entry;
+                        $relativePath = $path === '' ? $entry : $path . '/' . $entry;
+                        if (is_dir($entryPath)) {
+                            $folders[] = ['name' => $entry, 'path' => $relativePath];
+                        } else {
+                            $ext = strtolower(pathinfo($entry, PATHINFO_EXTENSION));
+                            if (in_array($ext, $extensions)) {
+                                $name = pathinfo($entry, PATHINFO_FILENAME);
+                                $src = 'backend/assets/tokens/' . $relativePath;
+                                $files[] = [
+                                    'id' => $relativePath,
+                                    'name' => ucfirst(str_replace(['_', '-'], ' ', $name)),
+                                    'src' => $src
+                                ];
+                            }
+                        }
+                    }
+                    usort($folders, fn($a, $b) => strcasecmp($a['name'], $b['name']));
+                    usort($files, fn($a, $b) => strcasecmp($a['name'], $b['name']));
+                    echo json_encode([
+                        'success' => true,
+                        'currentPath' => $path,
+                        'folders' => $folders,
+                        'files' => $files
+                    ]);
+                    break;
+
                 case 'assets':
                     $mapAssets = [];
-                    $tokenAssets = [];
                     $backgroundAssets = [];
                     
                     $mapDir = __DIR__ . '/assets/map';
@@ -233,17 +279,7 @@ try {
                         }
                     }
                     
-                    if (is_dir($tokenDir)) {
-                        foreach (glob($tokenDir . '/*.{png,jpg,jpeg,gif,webp}', GLOB_BRACE) as $file) {
-                            $filename = basename($file);
-                            $name = pathinfo($filename, PATHINFO_FILENAME);
-                            $tokenAssets[] = [
-                                'id' => $name,
-                                'name' => ucfirst(str_replace(['_', '-'], ' ', $name)),
-                                'src' => 'backend/assets/tokens/' . $filename
-                            ];
-                        }
-                    }
+                    // Tokeny są ładowane przez list-tokens z nawigacją po folderach – nie zwracamy ich w assets
                     
                     if (is_dir($bgDir)) {
                         foreach (glob($bgDir . '/*.{png,jpg,jpeg,gif,webp}', GLOB_BRACE) as $file) {
@@ -269,7 +305,6 @@ try {
                     echo json_encode([
                         'success' => true,
                         'mapAssets' => $mapAssets,
-                        'tokenAssets' => $tokenAssets,
                         'backgroundAssets' => $backgroundAssets
                     ]);
                     break;

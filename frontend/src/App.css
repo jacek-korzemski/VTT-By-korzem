@@ -395,6 +395,54 @@ body {
   margin-top: 0.25rem;
 }
 
+.token-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.breadcrumb-btn {
+  background: none;
+  border: none;
+  color: #8ab4f8;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: 3px;
+}
+
+.breadcrumb-btn:hover {
+  background: #0f3460;
+  color: #fff;
+}
+
+.breadcrumb-segment {
+  display: inline-flex;
+  align-items: center;
+}
+
+.breadcrumb-sep {
+  color: #666;
+  margin: 0 0.1rem;
+}
+
+.token-folders {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.token-folders .token-folder {
+  min-height: 2.5rem;
+}
+
+.token-folders .folder-icon {
+  font-size: 1.25rem;
+}
+
 /* ============================================
    SCENE MANAGER
    ============================================ */
