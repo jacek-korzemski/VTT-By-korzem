@@ -141,6 +141,7 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           <h2>🎲 {t('dice.title')}</h2>
         </div>
 
+        <div className="dice-panel-content">
         {/* Nazwa gracza */}
         <div className="dice-player-name">
           <input
@@ -269,6 +270,7 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
               ))
             )}
           </div>
+        </div>
         </div>
       </div>
     </>

@@ -95,8 +95,23 @@ body {
 
 .sidebar-sections {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Wrapper wewnątrz scrolla: min-height 100% zapewnia przyklejenie zoom/footer do dołu przy małej ilości treści */
+.sidebar-sections-inner {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-sections-content {
+  flex: 1 1 auto;
+  min-height: min-content;
 }
 
 .sidebar-footer {
@@ -105,7 +120,6 @@ body {
   color: #666;
   background: #0f3460;
   flex-shrink: 0;
-  margin-top: auto;
   border-top: 1px solid #1a3a5c;
 }
 
@@ -1167,6 +1181,13 @@ body {
 }
 .dice-panel-header h2 { margin: 0; font-size: 1.1rem; color: #e94560; }
 
+.dice-panel-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .dice-mode-switch {
   display: flex;
   gap: 0;
@@ -1346,10 +1367,7 @@ body {
 
 /* Historia rzutów */
 .dice-history {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  padding-bottom: 1rem;
 }
 .dice-history h3 {
   padding: 0.75rem 1rem;
@@ -1360,7 +1378,7 @@ body {
   letter-spacing: 0.05em;
   border-bottom: 1px solid #0f3460;
 }
-.history-list { flex: 1; overflow-y: auto; padding: 0.5rem; }
+.history-list { padding: 0.5rem; }
 .history-empty {
   color: #666;
   font-size: 0.85rem;
@@ -1401,9 +1419,9 @@ body {
 }
 .history-item.l5r-roll .history-total { color: #ccc; font-size: 0.9rem; }
 
-.history-list::-webkit-scrollbar { width: 6px; }
-.history-list::-webkit-scrollbar-track { background: transparent; }
-.history-list::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
+.dice-panel-content::-webkit-scrollbar { width: 6px; }
+.dice-panel-content::-webkit-scrollbar-track { background: transparent; }
+.dice-panel-content::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
 
 /* ============================================
    PANEL KOŚCI (L5R)
