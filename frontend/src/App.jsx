@@ -19,7 +19,9 @@ function App() {
   const [background, setBackground] = useState(null)
   const [mapElements, setMapElements] = useState([])
   const [tokens, setTokens] = useState([])
-  const [mapAssets, setMapAssets] = useState([])
+  const [mapPath, setMapPath] = useState('')
+  const [mapFolders, setMapFolders] = useState([])
+  const [mapFiles, setMapFiles] = useState([])
   const [tokenPath, setTokenPath] = useState('')
   const [tokenFolders, setTokenFolders] = useState([])
   const [tokenFiles, setTokenFiles] = useState([])
@@ -138,12 +140,24 @@ function App() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setMapAssets(data.mapAssets)
           setBackgroundAssets(data.backgroundAssets || [])
         }
       })
       .catch(console.error)
   }, [])
+
+  useEffect(() => {
+    const q = mapPath ? `&path=${encodeURIComponent(mapPath)}` : ''
+    fetch(`${API_BASE}?action=list-map${q}`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setMapFolders(data.folders || [])
+          setMapFiles(data.files || [])
+        }
+      })
+      .catch(console.error)
+  }, [mapPath])
 
   useEffect(() => {
     const q = tokenPath ? `&path=${encodeURIComponent(tokenPath)}` : ''
@@ -664,7 +678,10 @@ useEffect(() => {
 
       <Sidebar
         isOpen={sidebarOpen}
-        mapAssets={mapAssets}
+        mapPath={mapPath}
+        mapFolders={mapFolders}
+        mapFiles={mapFiles}
+        onMapPathChange={setMapPath}
         tokenPath={tokenPath}
         tokenFolders={tokenFolders}
         tokenFiles={tokenFiles}

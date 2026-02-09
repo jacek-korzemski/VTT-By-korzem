@@ -4,7 +4,10 @@ import { t } from '../lang';
 
 function Sidebar({ 
   isOpen,
-  mapAssets, 
+  mapPath,
+  mapFolders,
+  mapFiles,
+  onMapPathChange,
   tokenPath,
   tokenFolders,
   tokenFiles,
@@ -218,7 +221,7 @@ function Sidebar({
           title={t('sidebar.mapElements')} 
           icon="🏠" 
           defaultOpen={true}
-          badge={mapAssets.length || null}
+          badge={mapFolders.length + mapFiles.length || null}
         >
           <div 
             className={`ping-tool ${pingMode ? 'active' : ''}`}
@@ -249,12 +252,55 @@ function Sidebar({
               {isEraserActive && <span className="eraser-active">✓</span>}
             </div>
           )}
+
+          {(mapPath || mapFolders.length > 0) && (
+            <div className="token-breadcrumbs">
+              <button
+                type="button"
+                className="breadcrumb-btn"
+                onClick={() => onMapPathChange('')}
+                title={t('sidebar.mapElementsRoot')}
+              >
+                🏠
+              </button>
+              {mapPath.split('/').filter(Boolean).map((segment, i, arr) => {
+                const pathUpToHere = arr.slice(0, i + 1).join('/')
+                return (
+                  <span key={pathUpToHere} className="breadcrumb-segment">
+                    <span className="breadcrumb-sep">/</span>
+                    <button
+                      type="button"
+                      className="breadcrumb-btn"
+                      onClick={() => onMapPathChange(pathUpToHere)}
+                    >
+                      {segment}
+                    </button>
+                  </span>
+                )
+              })}
+            </div>
+          )}
+          {mapFolders.length > 0 && (
+            <div className="token-folders">
+              {mapFolders.map(folder => (
+                <div
+                  key={folder.path}
+                  className="asset-item token-folder"
+                  onClick={() => onMapPathChange(folder.path)}
+                  title={folder.name}
+                >
+                  <span className="folder-icon">📁</span>
+                  <span>{folder.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
           
           <div className="asset-grid">
-            {mapAssets.length === 0 && (
+            {mapFiles.length === 0 && mapFolders.length === 0 && (
               <p className="no-assets">{t('sidebar.noAssets')}</p>
             )}
-            {mapAssets.map(asset => (
+            {mapFiles.map(asset => (
               <div
                 key={asset.id}
                 className={`asset-item ${isSelected(asset, 'map') ? 'selected' : ''}`}
