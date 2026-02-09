@@ -4,10 +4,11 @@ Simple Virtual Table Top, that you can build and host on apache server. Simplies
 
 ## Features:
 - maps as backgrounds, just prepare it to fit the grid 64x64px
-- droping map elements on grid - building, furniture, details, what you want
+- droping map elements on grid - buildings, furniture, details, what you want
 - tokens, drop tokens, move tokens, remove tokens
 - zoom in/zoom out
 - roll a dice, or a few die, add modifier
+- Legend of 5 Rings dice roller module
 - Fog of war - simple, but sometimes usefull fog of war, with 50% opacity for GM
 
 ## Requirements
@@ -69,3 +70,15 @@ cd frontend
 npm install
 npm run dev
 ```
+
+# ROADMAP 🛻
+
+So, I'm after first playtests - cheap Apache hosting could handle 8 devices connected to game at the same time for over 2 hours.
+This means that concept is fine, polling as backend communication works fine, and I will improve this app in future. So here is roadmap,
+so I won't forget:
+
+1. Make it mobile friendly. Right now - almost everything works on mobile, scrolling map, using panels, rolling dice, using notepads etc. but
+  I have to fix token movement, map elements and tokens deletion, sidebar scrolls to fit in small screens
+2. GM and player Separation. I need to keep it simple, but somehow separate UI for GM and playes. Like - separate password for players and GM, that 
+  can be setup during build. 
+3. Some minor fixes, like - change size on bottom bar on mobile, make tables in notepad deletable on mobile

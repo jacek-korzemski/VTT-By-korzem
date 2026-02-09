@@ -659,11 +659,11 @@ body {
   object-fit: contain;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
   border-radius: 50%;
-  border: 2px solid #e94560;
   background: rgba(0, 0, 0, 0.3);
   -webkit-user-drag: none;
   user-drag: none;
   pointer-events: none;
+  width: 64px;
 }
 
 /* ============================================
