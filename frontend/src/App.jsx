@@ -545,12 +545,19 @@ useEffect(() => {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setMapElements(prev => prev.filter(e => e.id !== elementId))
+          setMapElements(prev => {
+            const filtered = prev.filter(e => e.id !== elementId)
+            // Automatycznie wyłącz gumkę jeśli usunęliśmy ostatni element
+            if (filtered.length === 0 && isEraserActive) {
+              setIsEraserActive(false)
+            }
+            return filtered
+          })
           setVersion(data.version)
         }
       })
       .catch(console.error)
-  }, [])
+  }, [isEraserActive])
 
   
   const handleRemoveToken = useCallback((tokenId) => {

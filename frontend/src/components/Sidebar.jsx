@@ -90,6 +90,11 @@ function Sidebar({
     return null
   }
 
+  const mapPathSegments = (mapPath || '').split('/').filter(Boolean)
+  const mapParentPath = mapPathSegments.slice(0, -1).join('/')
+  const tokenPathSegments = (tokenPath || '').split('/').filter(Boolean)
+  const tokenParentPath = tokenPathSegments.slice(0, -1).join('/')
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
@@ -165,7 +170,7 @@ function Sidebar({
         )}
 
         {/* Mgła Wojny */}
-        <CollapsibleSection 
+        {isGameMaster && <CollapsibleSection 
           title={t('sidebar.fog')} 
           icon="🌫️" 
           defaultOpen={false}
@@ -243,7 +248,7 @@ function Sidebar({
               </>
             )}
           </div>
-        </CollapsibleSection>
+        </CollapsibleSection>}
 
         {/* Elementy mapy */}
         <CollapsibleSection 
@@ -310,8 +315,18 @@ function Sidebar({
               })}
             </div>
           )}
-          {mapFolders.length > 0 && (
+          {(mapPathSegments.length > 0 || mapFolders.length > 0) && (
             <div className="token-folders">
+              {mapPathSegments.length > 0 && (
+                <div
+                  className="asset-item token-folder"
+                  onClick={() => onMapPathChange(mapParentPath)}
+                  title={t('sidebar.folderBack')}
+                >
+                  <span className="folder-icon">📁</span>
+                  <span>{t('sidebar.folderBack')}</span>
+                </div>
+              )}
               {mapFolders.map(folder => (
                 <div
                   key={folder.path}
@@ -381,8 +396,18 @@ function Sidebar({
               })}
             </div>
           )}
-          {tokenFolders.length > 0 && (
+          {(tokenPathSegments.length > 0 || tokenFolders.length > 0) && (
             <div className="token-folders">
+              {tokenPathSegments.length > 0 && (
+                <div
+                  className="asset-item token-folder"
+                  onClick={() => onTokenPathChange(tokenParentPath)}
+                  title={t('sidebar.folderBack')}
+                >
+                  <span className="folder-icon">📁</span>
+                  <span>{t('sidebar.folderBack')}</span>
+                </div>
+              )}
               {tokenFolders.map(folder => (
                 <div
                   key={folder.path}
