@@ -16,7 +16,6 @@ function FogOfWar({
   const [isPainting, setIsPainting] = useState(false)
   const lastCellRef = useRef(null)
 
-  // Renderuj mgłę
   useEffect(() => {
     if (!enabled || !canvasRef.current) return
     
