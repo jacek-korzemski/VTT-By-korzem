@@ -24,6 +24,8 @@ const Grid = forwardRef(function Grid(props, ref) {
     onTokenMove,
     onRemoveMapElement,
     onRemoveToken,
+    onDropPlace,
+    onDeselectPlacement,
     basePath,
     zoomLevel,
     pingMode,
@@ -210,11 +212,10 @@ const Grid = forwardRef(function Grid(props, ref) {
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
-    
+    onDeselectPlacement?.()
     if (isEraserActive) return
     if (fogEditMode) return
     if (pingMode) return
-    
     const cell = getCellFromMousePosition(e.clientX, e.clientY)
     if (!cell) return
 
@@ -228,7 +229,28 @@ const Grid = forwardRef(function Grid(props, ref) {
     if (element) {
       onRemoveMapElement(element.id)
     }
-  }, [getCellFromMousePosition, tokens, mapElements, onRemoveToken, onRemoveMapElement, isEraserActive, fogEditMode, pingMode])
+  }, [getCellFromMousePosition, tokens, mapElements, onRemoveToken, onRemoveMapElement, isEraserActive, fogEditMode, pingMode, onDeselectPlacement])
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }, [])
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault()
+    if (!onDropPlace) return
+    const cell = getCellFromMousePosition(e.clientX, e.clientY)
+    if (!cell) return
+    try {
+      const raw = e.dataTransfer.getData('application/json')
+      if (!raw) return
+      const { id, src, name, type } = JSON.parse(raw)
+      if (!id || !type || (type !== 'token' && type !== 'map')) return
+      onDropPlace({ id, src, name }, type, cell.x, cell.y)
+    } catch (_) {
+      // ignore invalid drop data
+    }
+  }, [getCellFromMousePosition, onDropPlace])
 
   const handleDragStart = useCallback((e) => {
     e.preventDefault()
@@ -275,6 +297,8 @@ const Grid = forwardRef(function Grid(props, ref) {
       onClick={handleGridClick}
       onContextMenu={handleContextMenu}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       <div 
         className="grid-zoom-wrapper"

@@ -49,12 +49,30 @@ function Sidebar({
   activePing,
   onTogglePing,
   onClearPing,
+  onDeselectAsset,
 }) {
   const isSelected = (asset, type) => {
     return selectedAsset?.id === asset.id && selectedType === type
   }
 
   const getImageSrc = (src) => `${basePath}${src}`
+
+  const handleAssetDragStart = (asset, type, e) => {
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      id: asset.id,
+      src: asset.src,
+      name: asset.name,
+      type,
+    }))
+    e.dataTransfer.effectAllowed = 'copy'
+    const item = e.target.closest?.('.asset-item')
+    if (e.dataTransfer.setDragImage && item) {
+      const img = item.querySelector('img')
+      const el = img || item
+      const rect = el.getBoundingClientRect()
+      e.dataTransfer.setDragImage(el, rect.width / 2, rect.height / 2)
+    }
+  }
 
   const isCurrentBackground = (bg) => {
     return currentBackground?.src === bg.src
@@ -88,6 +106,7 @@ function Sidebar({
         icon="🎬" 
         defaultOpen={true}
         badge={scenes.length}
+        onToggle={onDeselectAsset}
       >
         <SceneManager
           scenes={scenes}
@@ -100,7 +119,7 @@ function Sidebar({
         />
       </CollapsibleSection>
         {/* Tła */}
-        <CollapsibleSection title={t('sidebar.backgrounds')} icon="🖼️" defaultOpen={false}>
+        <CollapsibleSection title={t('sidebar.backgrounds')} icon="🖼️" defaultOpen={false} onToggle={onDeselectAsset}>
           {currentBackground && (
             <div className="current-background">
               <span className="current-bg-label">{t('sidebar.backgroundActive')}</span>
@@ -144,6 +163,7 @@ function Sidebar({
           icon="🌫️" 
           defaultOpen={false}
           badge={fogOfWar.enabled ? 'ON' : null}
+          onToggle={onDeselectAsset}
         >
           <div className="fog-controls">
             <label className="fog-toggle">
@@ -224,6 +244,7 @@ function Sidebar({
           icon="🏠" 
           defaultOpen={true}
           badge={mapFolders.length + mapFiles.length || null}
+          onToggle={onDeselectAsset}
         >
           <div 
             className={`ping-tool ${pingMode ? 'active' : ''}`}
@@ -306,10 +327,12 @@ function Sidebar({
               <div
                 key={asset.id}
                 className={`asset-item ${isSelected(asset, 'map') ? 'selected' : ''}`}
+                draggable
+                onDragStart={(e) => handleAssetDragStart(asset, 'map', e)}
                 onClick={() => onSelectAsset(asset, 'map')}
                 title={asset.name}
               >
-                <img src={getImageSrc(asset.src)} alt={asset.name} />
+                <img src={getImageSrc(asset.src)} alt={asset.name} draggable={false} />
                 <span>{asset.name}</span>
               </div>
             ))}
@@ -322,6 +345,7 @@ function Sidebar({
           icon="🎭" 
           defaultOpen={true}
           badge={tokenFolders.length + tokenFiles.length || null}
+          onToggle={onDeselectAsset}
         >
           {(tokenPath || tokenFolders.length > 0) && (
             <div className="token-breadcrumbs">
@@ -373,10 +397,12 @@ function Sidebar({
               <div
                 key={asset.id}
                 className={`asset-item ${isSelected(asset, 'token') ? 'selected' : ''}`}
+                draggable
+                onDragStart={(e) => handleAssetDragStart(asset, 'token', e)}
                 onClick={() => onSelectAsset(asset, 'token')}
                 title={asset.name}
               >
-                <img src={getImageSrc(asset.src)} alt={asset.name} />
+                <img src={getImageSrc(asset.src)} alt={asset.name} draggable={false} />
                 <span>{asset.name}</span>
               </div>
             ))}

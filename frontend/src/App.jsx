@@ -450,46 +450,48 @@ useEffect(() => {
   }, [mapElements])
 
   
-  const handleCellClick = useCallback((x, y) => {
-    
-    if (isEraserActive) return
-    
-    if (!selectedAsset || !selectedType) return
+  const handleDeselectAsset = useCallback(() => {
+    setSelectedAsset(null)
+    setSelectedType(null)
+  }, [])
 
-    if (selectedType === 'token' && isOccupiedByToken(x, y)) {
-      return
-    }
-
-    if (selectedType === 'map' && isOccupiedByMapElement(x, y)) {
-      return
-    }
-
-    const action = selectedType === 'map' ? 'add-map-element' : 'add-token'
-    
-    fetch(`${API_BASE}?action=${action}`, {
+  const placeAssetAt = useCallback((asset, type, x, y, deselectAfterPlace = false) => {
+    if (type === 'token' && isOccupiedByToken(x, y)) return
+    if (type === 'map' && isOccupiedByMapElement(x, y)) return
+    const action = type === 'map' ? 'add-map-element' : 'add-token'
+    return fetch(`${API_BASE}?action=${action}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({
-        assetId: selectedAsset.id,
-        src: selectedAsset.src,
-        x,
-        y
-      })
+      body: JSON.stringify({ assetId: asset.id, src: asset.src, x, y })
     })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          if (selectedType === 'map') {
+          if (type === 'map') {
             setMapElements(prev => [...prev, data.element])
           } else {
             setTokens(prev => [...prev, data.token])
           }
           setVersion(data.version)
+          if (deselectAfterPlace) {
+            setSelectedAsset(null)
+            setSelectedType(null)
+          }
         }
       })
       .catch(console.error)
-  }, [selectedAsset, selectedType, isOccupiedByToken, isOccupiedByMapElement, isEraserActive])
+  }, [isOccupiedByToken, isOccupiedByMapElement])
+
+  const handleCellClick = useCallback((x, y) => {
+    if (isEraserActive) return
+    if (!selectedAsset || !selectedType) return
+    placeAssetAt(selectedAsset, selectedType, x, y, false)
+  }, [selectedAsset, selectedType, isEraserActive, placeAssetAt])
+
+  const handleDropOnGrid = useCallback((asset, type, x, y) => {
+    placeAssetAt(asset, type, x, y, true)
+  }, [placeAssetAt])
 
   
   const handleTokenMove = useCallback((tokenId, newX, newY) => {
@@ -646,6 +648,16 @@ useEffect(() => {
 
   
   useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        handleDeselectAsset()
+      }
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [handleDeselectAsset])
+
+  useEffect(() => {
     const preventSelection = (e) => {
       if (e.target.closest('.grid-container')) {
         e.preventDefault()
@@ -737,6 +749,7 @@ useEffect(() => {
         onTogglePing={handleTogglePing}
         activePing={activePing}
         onClearPing={handleClearPing}
+        onDeselectAsset={handleDeselectAsset}
       />
       
       <main className="main-content">
@@ -759,6 +772,8 @@ useEffect(() => {
           onTokenMove={handleTokenMove}
           onRemoveMapElement={handleRemoveMapElement}
           onRemoveToken={handleRemoveToken}
+          onDropPlace={handleDropOnGrid}
+          onDeselectPlacement={handleDeselectAsset}
           basePath={BASE_PATH}
           zoomLevel={zoomLevel}
           pingMode={pingMode}
