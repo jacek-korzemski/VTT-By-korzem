@@ -2249,6 +2249,29 @@ body {
   overflow: hidden;
 }
 
+/* Wersja w portalu – fixed, zawsze na wierzchu; zawartość wrap i przewijanie */
+.swysiwyg-emoji-panel-portal {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 280px;
+  max-width: min(280px, calc(100vw - 16px));
+  z-index: 999999;
+}
+.swysiwyg-emoji-panel-portal .swysiwyg-emoji-grid {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  grid-template-columns: unset;
+  align-content: flex-start;
+}
+.swysiwyg-emoji-panel-portal .swysiwyg-emoji-tabs {
+  flex-wrap: wrap;
+}
+
 .swysiwyg-emoji-tabs {
   display: flex;
   gap: 2px;

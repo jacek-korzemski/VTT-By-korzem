@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 // Fantasy/RPG Emoji pogrupowane tematycznie
 const EMOJI_GROUPS = [
@@ -55,8 +56,13 @@ const SimpleWYSIWYG = forwardRef(function SimpleWYSIWYG(props, ref) {
 
   const editorRef = useRef(null)
   const savedSelectionRef = useRef(null)
+  const emojiContainerRef = useRef(null)
+  const emojiButtonRef = useRef(null)
+  const emojiPanelRef = useRef(null)
+  const emojiOpenedWithCursorInEditorRef = useRef(false)
   const [showTableModal, setShowTableModal] = useState(false)
   const [showEmojiPanel, setShowEmojiPanel] = useState(false)
+  const [emojiPanelPosition, setEmojiPanelPosition] = useState(null)
   const [activeEmojiGroup, setActiveEmojiGroup] = useState(0)
   const [tableRows, setTableRows] = useState(3)
   const [tableCols, setTableCols] = useState(3)
@@ -94,9 +100,22 @@ const SimpleWYSIWYG = forwardRef(function SimpleWYSIWYG(props, ref) {
   }, [handleChange, updateToolbarState])
 
   const saveSelection = useCallback(() => {
+    const editor = editorRef.current
     const selection = window.getSelection()
-    if (selection && selection.rangeCount > 0) {
-      savedSelectionRef.current = selection.getRangeAt(0).cloneRange()
+    if (!selection || selection.rangeCount === 0 || !editor) {
+      savedSelectionRef.current = null
+      return
+    }
+    try {
+      const range = selection.getRangeAt(0)
+      const node = range.commonAncestorContainer
+      if (node && (editor === node || editor.contains(node))) {
+        savedSelectionRef.current = range.cloneRange()
+      } else {
+        savedSelectionRef.current = null
+      }
+    } catch {
+      savedSelectionRef.current = null
     }
   }, [])
 
@@ -108,13 +127,35 @@ const SimpleWYSIWYG = forwardRef(function SimpleWYSIWYG(props, ref) {
     }
   }, [])
 
-  // Wstaw emoji
+  // Wstaw emoji – w pozycji kursora (jeśli był w edytorze przy otwarciu panelu), inaczej na końcu
   const insertEmoji = useCallback((emoji) => {
+    const editor = editorRef.current
+    if (!editor) return
+
+    editor.focus()
+
+    if (!emojiOpenedWithCursorInEditorRef.current) {
+      editor.innerHTML += emoji
+      handleChange()
+      editor.focus()
+      return
+    }
+
     restoreSelection()
-    
     const selection = window.getSelection()
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0)
+    let range = null
+    let selectionInOurEditor = false
+    try {
+      if (selection?.rangeCount) {
+        range = selection.getRangeAt(0)
+        const node = range.commonAncestorContainer
+        selectionInOurEditor = node && (editor === node || editor.contains(node))
+      }
+    } catch {
+      selectionInOurEditor = false
+    }
+
+    if (selectionInOurEditor) {
       range.deleteContents()
       const textNode = document.createTextNode(emoji)
       range.insertNode(textNode)
@@ -123,14 +164,11 @@ const SimpleWYSIWYG = forwardRef(function SimpleWYSIWYG(props, ref) {
       selection.removeAllRanges()
       selection.addRange(range)
     } else {
-      // Fallback - wstaw na końcu
-      if (editorRef.current) {
-        editorRef.current.innerHTML += emoji
-      }
+      editor.innerHTML += emoji
     }
-    
+
     handleChange()
-    editorRef.current?.focus()
+    editor.focus()
   }, [restoreSelection, handleChange])
 
   const insertTable = useCallback(() => {
@@ -183,12 +221,62 @@ const SimpleWYSIWYG = forwardRef(function SimpleWYSIWYG(props, ref) {
     }
   }, [executeCommand])
 
-  // Zamknij emoji panel gdy klikniemy poza
+  // Pozycjonowanie panelu emoji tuż przy przycisku; pomiar po layoutcie (rAF)
+  useEffect(() => {
+    if (!showEmojiPanel) {
+      setEmojiPanelPosition(null)
+      return
+    }
+    const anchor = emojiButtonRef.current || emojiContainerRef.current
+    if (!anchor) return
+
+    const run = () => {
+      const rect = anchor.getBoundingClientRect()
+      const MARGIN = 8
+      const PANEL_MAX_WIDTH = 280
+      const PANEL_MAX_HEIGHT = 280
+
+      const spaceBelow = window.innerHeight - rect.bottom - MARGIN
+      const spaceAbove = rect.top - MARGIN
+      const openUp = spaceBelow < 120 && spaceAbove >= spaceBelow
+
+      let top
+      let bottom
+      let maxHeight = PANEL_MAX_HEIGHT
+
+      if (openUp) {
+        bottom = window.innerHeight - rect.top + 4
+        maxHeight = Math.min(PANEL_MAX_HEIGHT, spaceAbove)
+      } else {
+        top = rect.bottom + 4
+        if (top + maxHeight > window.innerHeight - MARGIN) {
+          maxHeight = Math.min(PANEL_MAX_HEIGHT, window.innerHeight - top - MARGIN)
+        }
+      }
+      if (top !== undefined && top < MARGIN) {
+        top = MARGIN
+        maxHeight = Math.min(PANEL_MAX_HEIGHT, window.innerHeight - MARGIN * 2)
+      }
+
+      let left = rect.left
+      if (left + PANEL_MAX_WIDTH > window.innerWidth - MARGIN) {
+        left = window.innerWidth - PANEL_MAX_WIDTH - MARGIN
+      }
+      if (left < MARGIN) left = MARGIN
+
+      setEmojiPanelPosition({ top, bottom, left, maxHeight })
+    }
+
+    const id = requestAnimationFrame(() => run())
+    return () => cancelAnimationFrame(id)
+  }, [showEmojiPanel])
+
+  // Zamknij emoji panel gdy klikniemy poza (kontener lub panel w portalu)
   useEffect(() => {
     if (!showEmojiPanel) return
 
     const handleClickOutside = (e) => {
-      if (!e.target.closest('.swysiwyg-emoji-container')) {
+      if (!e.target.closest('.swysiwyg-emoji-container') && !e.target.closest('.swysiwyg-emoji-panel')) {
         setShowEmojiPanel(false)
       }
     }
@@ -307,52 +395,69 @@ const SimpleWYSIWYG = forwardRef(function SimpleWYSIWYG(props, ref) {
           </button>
         </div>
 
-        {/* Emoji button */}
-        <div className="swysiwyg-toolbar-group swysiwyg-emoji-container">
+        {/* Emoji button – zapis selekcji tylko gdy kursor już w edytorze, potem fokus i panel */}
+        <div ref={emojiContainerRef} className="swysiwyg-toolbar-group swysiwyg-emoji-container">
           <button
+            ref={emojiButtonRef}
             type="button"
             className={showEmojiPanel ? 'active' : ''}
             onClick={() => {
               saveSelection()
-              setShowEmojiPanel(!showEmojiPanel)
+              emojiOpenedWithCursorInEditorRef.current = savedSelectionRef.current != null
+              editorRef.current?.focus()
+              setShowEmojiPanel(prev => !prev)
             }}
             title="Insert emoji"
           >
             😀
           </button>
-
-          {/* Emoji Panel */}
-          {showEmojiPanel && (
-            <div className="swysiwyg-emoji-panel">
-              <div className="swysiwyg-emoji-tabs">
-                {EMOJI_GROUPS.map((group, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={activeEmojiGroup === idx ? 'active' : ''}
-                    onClick={() => setActiveEmojiGroup(idx)}
-                    title={group.title}
-                  >
-                    {group.name}
-                  </button>
-                ))}
-              </div>
-              <div className="swysiwyg-emoji-grid">
-                {EMOJI_GROUPS[activeEmojiGroup].emojis.map((emoji, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => insertEmoji(emoji)}
-                    title={emoji}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Emoji Panel – w portalu, zawsze na wierzchu i w granicach viewportu */}
+      {showEmojiPanel && emojiPanelPosition &&
+        createPortal(
+          <div
+            ref={emojiPanelRef}
+            className="swysiwyg-emoji-panel swysiwyg-emoji-panel-portal"
+            style={{
+              position: 'fixed',
+              ...(emojiPanelPosition.top !== undefined && { top: emojiPanelPosition.top }),
+              ...(emojiPanelPosition.bottom !== undefined && { bottom: emojiPanelPosition.bottom }),
+              left: emojiPanelPosition.left,
+              zIndex: 10050,
+              maxHeight: emojiPanelPosition.maxHeight ?? 260,
+              zIndex: 999999
+            }}
+          >
+            <div className="swysiwyg-emoji-tabs">
+              {EMOJI_GROUPS.map((group, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className={activeEmojiGroup === idx ? 'active' : ''}
+                  onClick={() => setActiveEmojiGroup(idx)}
+                  title={group.title}
+                >
+                  {group.name}
+                </button>
+              ))}
+            </div>
+            <div className="swysiwyg-emoji-grid">
+              {EMOJI_GROUPS[activeEmojiGroup].emojis.map((emoji, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => insertEmoji(emoji)}
+                  title={emoji}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* Editor */}
       <div className="swysiwyg-editor-container" style={{ height }}>
