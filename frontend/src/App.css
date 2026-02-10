@@ -100,6 +100,24 @@ body {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  scroll-behavior: smooth;
+}
+
+.sidebar-sections::-webkit-scrollbar {
+  width: 12px;
+}
+
+.sidebar-sections::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+.sidebar-sections::-webkit-scrollbar-thumb {
+  background: #adf;
+  border-radius: 3px;
+}
+
+.sidebar-sections::-webkit-scrollbar-thumb:hover {
+  background: #fff;
 }
 
 /* Wrapper wewnątrz scrolla: min-height 100% zapewnia przyklejenie zoom/footer do dołu przy małej ilości treści */
@@ -114,31 +132,13 @@ body {
   min-height: min-content;
 }
 
-.sidebar-footer {
-  padding: 0.5rem 1rem;
-  font-size: 0.7rem;
-  color: #666;
-  background: #0f3460;
-  flex-shrink: 0;
-  border-top: 1px solid #1a3a5c;
-}
-
-.sidebar-footer p {
-  margin-bottom: 0.125rem;
-}
-
-.sidebar-footer .hint {
-  color: #666;
-  font-style: italic;
-}
-
 /* Toggle Button dla Sidebara */
 .sidebar-toggle {
   position: fixed;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
+  width: 48px;
   height: 64px;
   background: #16213e;
   border: 2px solid #0f3460;
@@ -157,7 +157,7 @@ body {
 .sidebar-toggle:hover {
   background: #1a2a4a;
   color: white;
-  width: 32px;
+  width: 52px;
 }
 
 .sidebar-toggle.open {
@@ -216,14 +216,15 @@ body {
 }
 
 .sidebar-section.collapsible h2 {
+  border-bottom: 1px solid #0f3460;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 1.4rem 1rem;
   margin: 0;
   cursor: pointer;
   user-select: none;
-  transition: background 0.2s;
+  transition: 0.2s;
 }
 
 .sidebar-section.collapsible h2:hover {
@@ -254,7 +255,31 @@ body {
 .sidebar-section.closed .section-arrow { transform: rotate(-90deg); }
 
 .section-content {
-  padding: 0 1rem 1rem 1rem;
+  padding: 1rem;
+  position: relative;
+}
+
+.sidebar-section-assets {
+  position: relative;
+}
+
+.sidebar-asset-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 13, 26, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #888;
+  pointer-events: none;
+  animation: sidebar-loading-fade 0.2s ease-out;
+}
+
+@keyframes sidebar-loading-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* ============================================
@@ -421,18 +446,23 @@ body {
 }
 
 .token-breadcrumbs {
-  display: flex;
+  /* display: flex; */
+  display: none;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.15rem;
   margin-bottom: 0.5rem;
   font-size: 0.75rem;
+  padding: 0.2rem;
+  background: black;
+  border-radius: 8px;
+  margin: 1rem 0;
 }
 
 .breadcrumb-btn {
   background: none;
   border: none;
-  color: #8ab4f8;
+  color: green;
   cursor: pointer;
   padding: 0.2rem 0.35rem;
   border-radius: 3px;
@@ -458,6 +488,7 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+  margin-top: 1.5rem;
 }
 
 .token-folders .token-folder {
@@ -632,15 +663,15 @@ body {
 
 /* Scrollbar */
 .grid-container::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 .grid-container::-webkit-scrollbar-track { background: #0d0d1a; }
 .grid-container::-webkit-scrollbar-thumb {
-  background: #2a2a4a;
+  background: #adf;
   border-radius: 5px;
 }
-.grid-container::-webkit-scrollbar-thumb:hover { background: #3a3a5a; }
+.grid-container::-webkit-scrollbar-thumb:hover { background: #fff; }
 .grid-container::-webkit-scrollbar-corner { background: #0d0d1a; }
 
 /* Tryby kursora dla Grid */
@@ -731,7 +762,6 @@ body {
 .token img {
   display: block;
   object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.3);
   -webkit-user-drag: none;
@@ -871,7 +901,7 @@ body {
 }
 
 .map-element.erasable:hover img {
-  filter: drop-shadow(0 0 10px rgba(255, 193, 7, 0.6)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
 }
 
 .grid-container.eraser-mode .token {
@@ -1431,9 +1461,9 @@ body {
 }
 .history-item.l5r-roll .history-total { color: #ccc; font-size: 0.9rem; }
 
-.dice-panel-content::-webkit-scrollbar { width: 6px; }
+.dice-panel-content::-webkit-scrollbar { width: 12px; }
 .dice-panel-content::-webkit-scrollbar-track { background: transparent; }
-.dice-panel-content::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
+.dice-panel-content::-webkit-scrollbar-thumb { background: #adf; border-radius: 3px; }
 
 /* ============================================
    PANEL KOŚCI (L5R)
@@ -1926,6 +1956,7 @@ body {
 
 .note-editor-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
@@ -2228,7 +2259,7 @@ body {
 
 /* Scrollbar */
 .swysiwyg-editor-container::-webkit-scrollbar {
-  width: 6px;
+  width: 12px;
 }
 
 .swysiwyg-editor-container::-webkit-scrollbar-track {
@@ -2236,7 +2267,7 @@ body {
 }
 
 .swysiwyg-editor-container::-webkit-scrollbar-thumb {
-  background: #2a2a4a;
+  background: #adf;
   border-radius: 3px;
 }
 
@@ -2294,11 +2325,11 @@ body {
 }
 
 .swysiwyg-emoji-tabs::-webkit-scrollbar {
-  height: 4px;
+  height: 8px;
 }
 
 .swysiwyg-emoji-tabs::-webkit-scrollbar-thumb {
-  background: #2a2a4a;
+  background: #adf;
   border-radius: 2px;
 }
 
@@ -2334,7 +2365,7 @@ body {
 }
 
 .swysiwyg-emoji-grid::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .swysiwyg-emoji-grid::-webkit-scrollbar-track {
@@ -2342,7 +2373,7 @@ body {
 }
 
 .swysiwyg-emoji-grid::-webkit-scrollbar-thumb {
-  background: #2a2a4a;
+  background: #adf;
   border-radius: 3px;
 }
 

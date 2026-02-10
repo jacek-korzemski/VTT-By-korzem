@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, startTransition } from 'react'
 import Sidebar from './components/Sidebar'
 import Grid from './components/Grid'
 import { 
@@ -25,6 +25,8 @@ function App() {
   const [tokenPath, setTokenPath] = useState('')
   const [tokenFolders, setTokenFolders] = useState([])
   const [tokenFiles, setTokenFiles] = useState([])
+  const [mapListLoading, setMapListLoading] = useState(false)
+  const [tokenListLoading, setTokenListLoading] = useState(false)
   const [backgroundAssets, setBackgroundAssets] = useState([])
   const [selectedAsset, setSelectedAsset] = useState(null)
   const [selectedType, setSelectedType] = useState(null)
@@ -48,6 +50,10 @@ function App() {
   const [activePing, setActivePing] = useState(null)
   const lastPingTimestampRef = useRef(0)
   const gridContainerRef = useRef(null)
+  const isInitialMapFetch = useRef(true)
+  const isInitialTokenFetch = useRef(true)
+  const mapNavigationForwardRef = useRef(false)
+  const tokenNavigationForwardRef = useRef(false)
   const [isGameMaster, setIsGameMaster] = useState(false)
   
   const fogUpdateTimeoutRef = useRef(null)
@@ -178,29 +184,41 @@ function App() {
   }, [])
 
   useEffect(() => {
+    const isForward = mapNavigationForwardRef.current
+    if (!isInitialMapFetch.current && isForward) setMapListLoading(true)
+    isInitialMapFetch.current = false
     const q = mapPath ? `&path=${encodeURIComponent(mapPath)}` : ''
     fetch(`${API_BASE}?action=list-map${q}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setMapFolders(data.folders || [])
-          setMapFiles(data.files || [])
+          startTransition(() => {
+            setMapFolders(data.folders || [])
+            setMapFiles(data.files || [])
+          })
         }
+        setMapListLoading(false)
       })
-      .catch(console.error)
+      .catch(() => setMapListLoading(false))
   }, [mapPath])
 
   useEffect(() => {
+    const isForward = tokenNavigationForwardRef.current
+    if (!isInitialTokenFetch.current && isForward) setTokenListLoading(true)
+    isInitialTokenFetch.current = false
     const q = tokenPath ? `&path=${encodeURIComponent(tokenPath)}` : ''
     fetch(`${API_BASE}?action=list-tokens${q}`, { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setTokenFolders(data.folders || [])
-          setTokenFiles(data.files || [])
+          startTransition(() => {
+            setTokenFolders(data.folders || [])
+            setTokenFiles(data.files || [])
+          })
         }
+        setTokenListLoading(false)
       })
-      .catch(console.error)
+      .catch(() => setTokenListLoading(false))
   }, [tokenPath])
 
   
@@ -732,11 +750,25 @@ useEffect(() => {
         mapPath={mapPath}
         mapFolders={mapFolders}
         mapFiles={mapFiles}
-        onMapPathChange={setMapPath}
+        mapListLoading={mapListLoading}
+        mapNavigationForwardRef={mapNavigationForwardRef}
+        onMapPathChange={(newPath) => {
+          const prevSegs = (mapPath || '').split('/').filter(Boolean).length
+          const newSegs = (newPath || '').split('/').filter(Boolean).length
+          mapNavigationForwardRef.current = newSegs > prevSegs
+          setMapPath(newPath)
+        }}
         tokenPath={tokenPath}
         tokenFolders={tokenFolders}
         tokenFiles={tokenFiles}
-        onTokenPathChange={setTokenPath}
+        tokenListLoading={tokenListLoading}
+        tokenNavigationForwardRef={tokenNavigationForwardRef}
+        onTokenPathChange={(newPath) => {
+          const prevSegs = (tokenPath || '').split('/').filter(Boolean).length
+          const newSegs = (newPath || '').split('/').filter(Boolean).length
+          tokenNavigationForwardRef.current = newSegs > prevSegs
+          setTokenPath(newPath)
+        }}
         backgroundAssets={backgroundAssets}
         currentBackground={background}
         selectedAsset={selectedAsset}

@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react'
 import CollapsibleSection from './CollapsibleSection'
 import SceneManager from './SceneManager'
 import { t } from '../lang';
@@ -8,10 +9,14 @@ function Sidebar({
   mapPath,
   mapFolders,
   mapFiles,
+  mapListLoading,
+  mapNavigationForwardRef,
   onMapPathChange,
   tokenPath,
   tokenFolders,
   tokenFiles,
+  tokenListLoading,
+  tokenNavigationForwardRef,
   onTokenPathChange,
   backgroundAssets,
   currentBackground,
@@ -52,6 +57,31 @@ function Sidebar({
   onClearPing,
   onDeselectAsset,
 }) {
+  const mapSectionRef = useRef(null)
+  const tokenSectionRef = useRef(null)
+  const prevMapLoading = useRef(false)
+  const prevTokenLoading = useRef(false)
+
+  useEffect(() => {
+    if (prevMapLoading.current && !mapListLoading) {
+      if (mapNavigationForwardRef?.current) {
+        mapSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        mapNavigationForwardRef.current = false
+      }
+    }
+    prevMapLoading.current = mapListLoading
+  }, [mapListLoading, mapNavigationForwardRef])
+
+  useEffect(() => {
+    if (prevTokenLoading.current && !tokenListLoading) {
+      if (tokenNavigationForwardRef?.current) {
+        tokenSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        tokenNavigationForwardRef.current = false
+      }
+    }
+    prevTokenLoading.current = tokenListLoading
+  }, [tokenListLoading, tokenNavigationForwardRef])
+
   const isSelected = (asset, type) => {
     return selectedAsset?.id === asset.id && selectedType === type
   }
@@ -258,6 +288,8 @@ function Sidebar({
           badge={mapFolders.length + mapFiles.length || null}
           onToggle={onDeselectAsset}
         >
+          <div ref={mapSectionRef} className="sidebar-section-assets">
+            {mapListLoading && <div className="sidebar-asset-loading-overlay" aria-hidden>{t('app.loading')}</div>}
           <div 
             className={`ping-tool ${pingMode ? 'active' : ''}`}
             onClick={onTogglePing}
@@ -359,6 +391,7 @@ function Sidebar({
               </div>
             ))}
           </div>
+          </div>
         </CollapsibleSection>
 
         {/* Tokeny */}
@@ -369,6 +402,8 @@ function Sidebar({
           badge={tokenFolders.length + tokenFiles.length || null}
           onToggle={onDeselectAsset}
         >
+          <div ref={tokenSectionRef} className="sidebar-section-assets">
+            {tokenListLoading && <div className="sidebar-asset-loading-overlay" aria-hidden>{t('app.loading')}</div>}
           {(tokenPath || tokenFolders.length > 0) && (
             <div className="token-breadcrumbs">
               <button
@@ -439,6 +474,7 @@ function Sidebar({
               </div>
             ))}
           </div>
+          </div>
         </CollapsibleSection>
           </div>
 
@@ -478,18 +514,6 @@ function Sidebar({
             >
               ⟲
             </button>
-          </div>
-
-          <div className="sidebar-footer">
-            <p>
-              {getActiveTool() || `🖱️ ${t('sidebar.selectTool')}`}
-            </p>
-            <p className="hint">
-              {selectedAsset || isEraserActive || fogEditMode
-                ? t('sidebar.clickToDeselect')
-                : t('sidebar.hintLeftRight')
-              }
-            </p>
           </div>
         </div>
       </div>
