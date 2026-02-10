@@ -23,10 +23,15 @@ echo.
 echo  ----------------------------------------
 echo.
 
-:: Hasło
+:: Hasło dla graczy
 set "PASSWORD="
-set /p "PASSWORD=Password [2137]: "
+set /p "PASSWORD=Player password [2137]: "
 if "%PASSWORD%"=="" set "PASSWORD=2137"
+
+:: Hasło dla MG
+set "GM_PASSWORD="
+set /p "GM_PASSWORD=Game Master password [admin]: "
+if "%GM_PASSWORD%"=="" set "GM_PASSWORD=admin"
 
 :: Ścieżka bazowa
 set "BASE_PATH="
@@ -62,11 +67,12 @@ echo.
 echo  ----------------------------------------
 echo.
 echo  Configuration summary:
-echo    Password:        %PASSWORD%
-echo    Base path:       %BASE_PATH%
-echo    Language:        %LANGUAGE%
-echo    Enable L5R:      %ENABLE_L5R%
-echo    Allowed origins: %ALLOWED_ORIGINS%
+echo    Player password:  %PASSWORD%
+echo    GM password:      %GM_PASSWORD%
+echo    Base path:        %BASE_PATH%
+echo    Language:         %LANGUAGE%
+echo    Enable L5R:       %ENABLE_L5R%
+echo    Allowed origins:  %ALLOWED_ORIGINS%
 echo.
 echo  ----------------------------------------
 echo.
@@ -89,6 +95,7 @@ if /i "%LANGUAGE%"=="pl" (
     set "LOGIN_PLACEHOLDER=Haslo..."
     set "LOGIN_SUBMIT=Wejdz do gry"
     set "LOGIN_ERROR=Nieprawidlowe haslo!"
+    set "LOGIN_GM_CHECKBOX=Jestem Mistrzem Gry"
     set "LOGOUT=Wyloguj"
     set "APP_TITLE=Simple VTT"
 ) else (
@@ -97,6 +104,7 @@ if /i "%LANGUAGE%"=="pl" (
     set "LOGIN_PLACEHOLDER=Password..."
     set "LOGIN_SUBMIT=Enter game"
     set "LOGIN_ERROR=Invalid password!"
+    set "LOGIN_GM_CHECKBOX=I'm Game Master"
     set "LOGOUT=Logout"
     set "APP_TITLE=Simple VTT"
 )
@@ -181,7 +189,7 @@ powershell -Command "'' | Out-File -FilePath 'build\backend\data\.gitkeep' -Enco
 
 echo [5/5] Generating index.php...
 
-powershell -ExecutionPolicy Bypass -File "build-helper.ps1" -TemplatePath "index.php.template" -OutputPath "build\index.php" -Password "%PASSWORD%" -BasePath "%BASE_PATH%" -Lang "%LANGUAGE%" -LoginTitle "%LOGIN_TITLE%" -LoginSubtitle "%LOGIN_SUBTITLE%" -LoginPlaceholder "%LOGIN_PLACEHOLDER%" -LoginSubmit "%LOGIN_SUBMIT%" -LoginError "%LOGIN_ERROR%" -Logout "%LOGOUT%" -AppTitle "%APP_TITLE%"
+powershell -ExecutionPolicy Bypass -File "build-helper.ps1" -TemplatePath "index.php.template" -OutputPath "build\index.php" -Password "%PASSWORD%" -GmPassword "%GM_PASSWORD%" -BasePath "%BASE_PATH%" -Lang "%LANGUAGE%" -LoginTitle "%LOGIN_TITLE%" -LoginSubtitle "%LOGIN_SUBTITLE%" -LoginPlaceholder "%LOGIN_PLACEHOLDER%" -LoginSubmit "%LOGIN_SUBMIT%" -LoginError "%LOGIN_ERROR%" -LoginGmCheckbox "%LOGIN_GM_CHECKBOX%" -Logout "%LOGOUT%" -AppTitle "%APP_TITLE%"
 
 if %errorlevel% neq 0 (
     echo [ERROR] Generating index.php failed!
@@ -201,10 +209,11 @@ echo.
 echo   The 'build' folder contains the package.
 echo.
 echo   Configuration used:
-echo     Password:        %PASSWORD%
-echo     Base path:       %BASE_PATH%
-echo     Language:        %LANGUAGE%
-echo     L5R enabled:     %ENABLE_L5R%
+echo     Player password: %PASSWORD%
+echo     GM password:     %GM_PASSWORD%
+echo     Base path:      %BASE_PATH%
+echo     Language:       %LANGUAGE%
+echo     L5R enabled:    %ENABLE_L5R%
 echo.
 echo   Next steps:
 echo   1. Upload contents of 'build' folder to server

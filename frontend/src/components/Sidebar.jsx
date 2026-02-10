@@ -4,6 +4,7 @@ import { t } from '../lang';
 
 function Sidebar({ 
   isOpen,
+  isGameMaster = false,
   mapPath,
   mapFolders,
   mapFiles,
@@ -93,33 +94,38 @@ function Sidebar({
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
         <h1>🎲 {t('app.title')}</h1>
-        <button className="clear-btn" onClick={onClear}>
-          🗑️ {t('sidebar.clearMap')}
-        </button>
+        {isGameMaster && (
+          <button className="clear-btn" onClick={onClear}>
+            🗑️ {t('sidebar.clearMap')}
+          </button>
+        )}
       </div>
 
       <div className="sidebar-sections">
         <div className="sidebar-sections-inner">
           <div className="sidebar-sections-content">
-      <CollapsibleSection 
-        title={t('scenes.title')} 
-        icon="🎬" 
-        defaultOpen={true}
-        badge={scenes.length}
-        onToggle={onDeselectAsset}
-      >
-        <SceneManager
-          scenes={scenes}
-          activeSceneId={activeSceneId}
-          onSwitchScene={onSwitchScene}
-          onCreateScene={onCreateScene}
-          onDeleteScene={onDeleteScene}
-          onRenameScene={onRenameScene}
-          onDuplicateScene={onDuplicateScene}
-        />
-      </CollapsibleSection>
-        {/* Tła */}
-        <CollapsibleSection title={t('sidebar.backgrounds')} icon="🖼️" defaultOpen={false} onToggle={onDeselectAsset}>
+      {isGameMaster && (
+        <CollapsibleSection 
+          title={t('scenes.title')} 
+          icon="🎬" 
+          defaultOpen={true}
+          badge={scenes.length}
+          onToggle={onDeselectAsset}
+        >
+          <SceneManager
+            scenes={scenes}
+            activeSceneId={activeSceneId}
+            onSwitchScene={onSwitchScene}
+            onCreateScene={onCreateScene}
+            onDeleteScene={onDeleteScene}
+            onRenameScene={onRenameScene}
+            onDuplicateScene={onDuplicateScene}
+          />
+        </CollapsibleSection>
+      )}
+        {/* Tła - tylko dla MG */}
+        {isGameMaster && (
+          <CollapsibleSection title={t('sidebar.backgrounds')} icon="🖼️" defaultOpen={false} onToggle={onDeselectAsset}>
           {currentBackground && (
             <div className="current-background">
               <span className="current-bg-label">{t('sidebar.backgroundActive')}</span>
@@ -156,6 +162,7 @@ function Sidebar({
             ))}
           </div>
         </CollapsibleSection>
+        )}
 
         {/* Mgła Wojny */}
         <CollapsibleSection 
@@ -175,7 +182,7 @@ function Sidebar({
               <span>{t('sidebar.fogEnable')}</span>
             </label>
 
-            {fogOfWar.enabled && (
+            {fogOfWar.enabled && isGameMaster && (
               <>
                 <div className="fog-edit-toggle">
                   <button 

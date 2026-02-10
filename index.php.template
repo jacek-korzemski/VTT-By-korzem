@@ -2,22 +2,41 @@
 session_start();
 
 define('VTT_PASSWORD', '{{PASSWORD}}');
+define('VTT_GM_PASSWORD', '{{GM_PASSWORD}}');
 
 $error = '';
 
 if (isset($_GET['logout'])) {
     unset($_SESSION['vtt_authenticated']);
+    unset($_SESSION['vtt_is_gm']);
     header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?'));
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
-    if ($_POST['password'] === VTT_PASSWORD) {
-        $_SESSION['vtt_authenticated'] = true;
-        header('Location: ' . $_SERVER['REQUEST_URI']);
-        exit;
+    $isGm = isset($_POST['is_gm']) && $_POST['is_gm'] === '1';
+    $password = $_POST['password'];
+    
+    if ($isGm) {
+        // Sprawdź hasło MG
+        if ($password === VTT_GM_PASSWORD) {
+            $_SESSION['vtt_authenticated'] = true;
+            $_SESSION['vtt_is_gm'] = true;
+            header('Location: ' . $_SERVER['REQUEST_URI']);
+            exit;
+        } else {
+            $error = '{{LOGIN_ERROR}}';
+        }
     } else {
-        $error = '{{LOGIN_ERROR}}';
+        // Sprawdź hasło gracza
+        if ($password === VTT_PASSWORD) {
+            $_SESSION['vtt_authenticated'] = true;
+            $_SESSION['vtt_is_gm'] = false;
+            header('Location: ' . $_SERVER['REQUEST_URI']);
+            exit;
+        } else {
+            $error = '{{LOGIN_ERROR}}';
+        }
     }
 }
 
@@ -74,6 +93,25 @@ if (!isset($_SESSION['vtt_authenticated']) || $_SESSION['vtt_authenticated'] !==
         }
         input[type="password"]:focus { outline: none; border-color: #e94560; }
         input[type="password"]::placeholder { color: #666; }
+        .gm-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .gm-checkbox input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            cursor: pointer;
+            accent-color: #e94560;
+        }
+        .gm-checkbox label {
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
         button {
             padding: 0.875rem;
             background: #e94560;
@@ -100,6 +138,10 @@ if (!isset($_SESSION['vtt_authenticated']) || $_SESSION['vtt_authenticated'] !==
         <?php endif; ?>
         <form method="POST">
             <input type="password" name="password" placeholder="{{LOGIN_PLACEHOLDER}}" required autofocus>
+            <div class="gm-checkbox">
+                <input type="checkbox" id="is_gm" name="is_gm" value="1">
+                <label for="is_gm">{{LOGIN_GM_CHECKBOX}}</label>
+            </div>
             <button type="submit">{{LOGIN_SUBMIT}}</button>
         </form>
     </div>

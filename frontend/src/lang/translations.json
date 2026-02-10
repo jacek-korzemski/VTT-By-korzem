@@ -85,7 +85,8 @@
       "rollAgain": "Roll again",
       "reset": "Reset",
       "diceKept": "dice kept",
-      "finishKeeping": "Finish"
+      "finishKeeping": "Finish",
+      "rollResult": "Result"
     },
     "login": {
       "title": "Simple VTT",
@@ -206,7 +207,8 @@
       "rollAgain": "Rzuć ponownie",
       "reset": "Reset",
       "diceKept": "kości zatrzymanych",
-      "finishKeeping": "Zakończ"
+      "finishKeeping": "Zakończ",
+      "rollResult": "Wynik"
     },
     "login": {
       "title": "Simple VTT",

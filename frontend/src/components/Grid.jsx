@@ -7,6 +7,7 @@ import { GRID_SIZE, CELL_SIZE } from '../../config'
 const Grid = forwardRef(function Grid(props, ref) {
   // Destrukturyzacja props
   const {
+    isGameMaster = false,
     background,
     mapElements,
     tokens,
@@ -360,10 +361,10 @@ const Grid = forwardRef(function Grid(props, ref) {
             bitmap={fogBitmap}
             enabled={fogEnabled}
             gmOpacity={fogGmOpacity}
-            isEditing={fogEditMode}
+            isEditing={isGameMaster && fogEditMode}
             brushSize={fogBrushSize}
             revealMode={fogRevealMode}
-            onBitmapChange={onFogBitmapChange}
+            onBitmapChange={isGameMaster ? onFogBitmapChange : undefined}
             zoomLevel={zoomLevel}
           />
         </div>

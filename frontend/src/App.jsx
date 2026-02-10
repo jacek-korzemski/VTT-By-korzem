@@ -48,8 +48,25 @@ function App() {
   const [activePing, setActivePing] = useState(null)
   const lastPingTimestampRef = useRef(0)
   const gridContainerRef = useRef(null)
+  const [isGameMaster, setIsGameMaster] = useState(false)
   
   const fogUpdateTimeoutRef = useRef(null)
+
+  // Sprawdź rolę użytkownika na początku
+  useEffect(() => {
+    // W trybie deweloperskim sprawdź localStorage dla łatwego przełączania roli
+    const devGm = localStorage.getItem('dev_gm') === '1'
+    const gmParam = devGm ? '&gm=1' : ''
+    
+    fetch(`${API_BASE}?action=auth${gmParam}`, { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setIsGameMaster(data.isGameMaster || false)
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 575.98px)')
@@ -659,7 +676,7 @@ useEffect(() => {
 
   useEffect(() => {
     const preventSelection = (e) => {
-      if (e.target.closest('.grid-container')) {
+      if (e.target && typeof e.target.closest === 'function' && e.target.closest('.grid-container')) {
         e.preventDefault()
       }
     }
@@ -704,6 +721,7 @@ useEffect(() => {
 
       <Sidebar
         isOpen={sidebarOpen}
+        isGameMaster={isGameMaster}
         mapPath={mapPath}
         mapFolders={mapFolders}
         mapFiles={mapFiles}
@@ -755,6 +773,7 @@ useEffect(() => {
       <main className="main-content">
         <Grid
           ref={gridContainerRef}
+          isGameMaster={isGameMaster}
           background={background}
           mapElements={mapElements}
           tokens={tokens}

@@ -2,6 +2,55 @@
 session_start();
 
 // ============================================
+// Sprawdzanie autoryzacji
+// ============================================
+function isDevMode() {
+    // Tryb deweloperski - sprawdź czy origin to localhost (Vite dev server)
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $serverName = $_SERVER['SERVER_NAME'] ?? '';
+    
+    // Sprawdź czy to localhost na różnych portach (dev mode)
+    // Vite dev server zwykle działa na porcie 5173
+    if (strpos($origin, 'http://localhost:') === 0 || 
+        strpos($origin, 'http://127.0.0.1:') === 0 ||
+        strpos($host, 'localhost') !== false ||
+        strpos($host, '127.0.0.1') !== false ||
+        strpos($serverName, 'localhost') !== false ||
+        strpos($serverName, '127.0.0.1') !== false) {
+        return true;
+    }
+    
+    return false;
+}
+
+function isAuthenticated() {
+    // W trybie deweloperskim zawsze zwracaj true (pomijamy autoryzację)
+    if (isDevMode()) {
+        return true;
+    }
+    return isset($_SESSION['vtt_authenticated']) && $_SESSION['vtt_authenticated'] === true;
+}
+
+function isGameMaster() {
+    // W trybie deweloperskim sprawdź parametr URL lub cookie, w przeciwnym razie domyślnie false
+    if (isDevMode()) {
+        // Możliwość ustawienia przez parametr URL dla testów (np. ?action=auth&gm=1)
+        if (isset($_GET['gm']) && $_GET['gm'] === '1') {
+            return true;
+        }
+        // Lub przez cookie (można ustawić w konsoli przeglądarki: document.cookie = "dev_gm=1")
+        if (isset($_COOKIE['dev_gm']) && $_COOKIE['dev_gm'] === '1') {
+            return true;
+        }
+        // Domyślnie w trybie dev zwracaj false (gracz)
+        return false;
+    }
+    // W trybie produkcyjnym sprawdź sesję
+    return isAuthenticated() && isset($_SESSION['vtt_is_gm']) && $_SESSION['vtt_is_gm'] === true;
+}
+
+// ============================================
 // Ładowanie konfiguracji z .env
 // ============================================
 function loadEnv($path) {
@@ -160,9 +209,29 @@ $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
 try {
+    // Sprawdź autoryzację dla wszystkich endpointów oprócz 'auth'
+    if ($action !== 'auth' && !isAuthenticated()) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+        exit;
+    }
+
     switch ($method) {
         case 'GET':
             switch ($action) {
+                case 'auth':
+                    // Endpoint do sprawdzania roli użytkownika
+                    // W trybie dev zawsze zwracaj authenticated=true
+                    $authenticated = isDevMode() ? true : isAuthenticated();
+                    $isGM = isGameMaster();
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'authenticated' => $authenticated,
+                        'isGameMaster' => $isGM
+                    ]);
+                    break;
+
                 case 'state':
                     $state = getState();
                     $activeScene = getActiveScene($state);
