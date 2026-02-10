@@ -425,7 +425,6 @@ const SimpleWYSIWYG = forwardRef(function SimpleWYSIWYG(props, ref) {
               ...(emojiPanelPosition.top !== undefined && { top: emojiPanelPosition.top }),
               ...(emojiPanelPosition.bottom !== undefined && { bottom: emojiPanelPosition.bottom }),
               left: emojiPanelPosition.left,
-              zIndex: 10050,
               maxHeight: emojiPanelPosition.maxHeight ?? 260,
               zIndex: 999999
             }}

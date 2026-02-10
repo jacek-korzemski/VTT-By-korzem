@@ -164,6 +164,17 @@ body {
   left: 280px;
 }
 
+/* Dynamiczny z-index – ikona otwartego panelu zawsze na wierzchu */
+.app:has(.sidebar.open) .sidebar-toggle.open {
+  z-index: 1003;
+}
+.app:has(.dice-panel.open) .dice-panel-toggle.open {
+  z-index: 1003;
+}
+.app:has(.sidebar.open) .dice-panel-toggle {
+  z-index: 1002;
+}
+
 /* ============================================
    SIDEBAR ELEMENTY UI
    ============================================ */
@@ -702,6 +713,7 @@ body {
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
+  touch-action: none; /* Umożliwia przeciąganie tokena na urządzeniach dotykowych bez uruchamiania scrollowania mapy */
 }
 
 .token:hover {
@@ -2353,4 +2365,49 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
   transform: scale(1.15);
+}
+
+/* ============================================
+   RESPONSYWNOŚĆ – panele na małych ekranach (< 576px)
+   Lewy i prawy panel: 100% szerokości minus 32px na ikonkę zwijania
+   ============================================ */
+@media (max-width: 575.98px) {
+  .sidebar {
+    width: calc(100vw - 32px);
+  }
+
+  .sidebar-toggle.open {
+    left: calc(100vw - 32px);
+  }
+
+  .app:has(.sidebar.open) .main-content {
+    margin-left: calc(100vw - 32px);
+  }
+
+  @supports not selector(:has(*)) {
+    .sidebar.open ~ .main-content {
+      margin-left: calc(100vw - 32px);
+    }
+  }
+
+  .dice-panel {
+    width: calc(100vw - 32px);
+  }
+
+  /* Gdy zamknięty – całkowicie poza ekranem (panel jest szerszy niż 320px) */
+  .dice-panel:not(.open) {
+    right: calc(-100vw + 32px);
+  }
+
+  .dice-panel-toggle.open {
+    right: calc(100vw - 32px);
+  }
+
+  /* Gdy lewy panel otwarty – ukryj przycisk prawego; gdy prawy otwarty – ukryj przycisk lewego */
+  .app:has(.sidebar.open) .dice-panel-toggle {
+    display: none;
+  }
+  .app:has(.dice-panel.open) .sidebar-toggle {
+    display: none;
+  }
 }

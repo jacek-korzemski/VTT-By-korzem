@@ -9,6 +9,12 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
     onDragStart(token, e)
   }, [token, onDragStart])
 
+  const handleTouchStart = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onDragStart(token, e)
+  }, [token, onDragStart])
+
   const posX = isDragging && dragPosition 
     ? dragPosition.x 
     : token.x * cellSize + cellSize / 2
@@ -25,6 +31,7 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
         top: posY
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
     >
       <img
         src={`${basePath}${token.src}`}

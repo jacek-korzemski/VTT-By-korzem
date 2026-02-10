@@ -39,7 +39,9 @@ function App() {
   const [fogGmOpacity, setFogGmOpacity] = useState(false)
   const [dicePanelOpen, setDicePanelOpen] = useState(false)
   const [rollHistory, setRollHistory] = useState([])
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(() => 
+    typeof window !== 'undefined' && window.innerWidth >= 576
+  )
   const [zoomLevel, setZoomLevel] = useState(1)
   const [pingMode, setPingMode] = useState(false)
   const [pingAnimation, setPingAnimation] = useState(null)
@@ -48,6 +50,18 @@ function App() {
   const gridContainerRef = useRef(null)
   
   const fogUpdateTimeoutRef = useRef(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 575.98px)')
+    const handler = () => {
+      if (mq.matches) {
+        setSidebarOpen(false)
+        setDicePanelOpen(false)
+      }
+    }
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   const handleZoomChange = useCallback((newZoom) => {
     const clamped = Math.max(0.4, Math.min(1.4, newZoom))

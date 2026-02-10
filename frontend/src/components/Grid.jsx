@@ -41,6 +41,20 @@ const Grid = forwardRef(function Grid(props, ref) {
   // Expose gridRef via forwarded ref
   useImperativeHandle(ref, () => gridRef.current, [])
 
+  const getClientCoords = useCallback((e) => {
+    if (e.touches?.[0]) {
+      return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY }
+    }
+    return { clientX: e.clientX, clientY: e.clientY }
+  }, [])
+
+  const getClientCoordsFromChange = useCallback((e) => {
+    if (e.changedTouches?.[0]) {
+      return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY }
+    }
+    return { clientX: e.clientX, clientY: e.clientY }
+  }, [])
+
   const getCellFromMousePosition = useCallback((clientX, clientY) => {
     if (!gridRef.current) return null
     
@@ -116,6 +130,29 @@ const Grid = forwardRef(function Grid(props, ref) {
     }
   }, [isPanning, panStart, scrollStart, draggedToken, getPixelPosition])
 
+  const handleTouchMove = useCallback((e) => {
+    if (draggedToken) {
+      e.preventDefault()
+      const { clientX, clientY } = getClientCoords(e)
+      const pos = getPixelPosition(clientX, clientY)
+      if (pos) {
+        setDragPosition(pos)
+      }
+    }
+  }, [draggedToken, getPixelPosition, getClientCoords])
+
+  const handleTouchEnd = useCallback((e) => {
+    if (draggedToken) {
+      e.preventDefault()
+      const { clientX, clientY } = getClientCoordsFromChange(e)
+      const cell = getCellFromMousePosition(clientX, clientY)
+      if (cell) {
+        onTokenMove(draggedToken.id, cell.x, cell.y)
+      }
+      setDraggedToken(null)
+    }
+  }, [draggedToken, getCellFromMousePosition, getClientCoordsFromChange, onTokenMove])
+
   const handleMouseUp = useCallback((e) => {
     if (isPanning) {
       setIsPanning(false)
@@ -163,12 +200,13 @@ const Grid = forwardRef(function Grid(props, ref) {
     e.preventDefault()
     e.stopPropagation()
     
-    const pos = getPixelPosition(e.clientX, e.clientY)
+    const { clientX, clientY } = getClientCoords(e)
+    const pos = getPixelPosition(clientX, clientY)
     if (pos) {
       setDraggedToken(token)
       setDragPosition(pos)
     }
-  }, [getPixelPosition, isEraserActive, fogEditMode, pingMode])
+  }, [getPixelPosition, getClientCoords, isEraserActive, fogEditMode, pingMode])
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
@@ -231,6 +269,9 @@ const Grid = forwardRef(function Grid(props, ref) {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={() => setDraggedToken(null)}
       onClick={handleGridClick}
       onContextMenu={handleContextMenu}
       onDragStart={handleDragStart}
