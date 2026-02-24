@@ -1,10 +1,9 @@
-import { t } from '../lang'
-import { getPathSegments } from '../utils/pathHelpers'
+import { t } from '../../lang'
+import { getPathSegments } from '../../utils/pathHelpers'
 
 function Breadcrumbs({ path, onPathChange, rootIcon, rootTitle }) {
   const segments = getPathSegments(path)
   
-  // If no path segments, only show root button
   if (segments.length === 0) {
     return (
       <div className="token-breadcrumbs">

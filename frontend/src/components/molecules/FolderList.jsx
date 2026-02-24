@@ -1,5 +1,5 @@
-import { t } from '../lang'
-import { getPathSegments, getParentPath } from '../utils/pathHelpers'
+import { t } from '../../lang'
+import { getPathSegments, getParentPath } from '../../utils/pathHelpers'
 
 function FolderList({ path, folders, onPathChange }) {
   const pathSegments = getPathSegments(path)

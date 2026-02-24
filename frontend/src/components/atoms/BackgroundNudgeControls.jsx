@@ -1,4 +1,4 @@
-import { t } from '../lang'
+import { t } from '../../lang'
 
 function BackgroundNudgeControls({ currentBackground, onNudgeBackground, onResetBackgroundPosition }) {
   return (

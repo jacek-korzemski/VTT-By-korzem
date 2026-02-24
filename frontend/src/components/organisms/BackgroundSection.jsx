@@ -1,7 +1,7 @@
-import { t } from '../lang'
-import CollapsibleSection from './CollapsibleSection'
-import { isCurrentBackground } from '../utils/sidebarHelpers'
-import BackgroundAdjust from './BackgroundAdjust'
+import { t } from '../../lang'
+import CollapsibleSection from '../atoms/CollapsibleSection'
+import { isCurrentBackground } from '../../utils/sidebarHelpers'
+import BackgroundAdjust from '../molecules/BackgroundAdjust'
 
 function BackgroundSection({
   backgroundAssets,

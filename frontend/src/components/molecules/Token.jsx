@@ -13,7 +13,6 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
   const isLongPressRef = useRef(false)
   const hasMovedRef = useRef(false)
 
-  // Resetuj wartości edycji gdy token się zmienia
   useEffect(() => {
     setEditSize(token.size ?? 1)
     setEditUpperLabel(token.upperLabel ?? '')
@@ -58,21 +57,19 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
   const handleIncreaseSize = useCallback((e) => {
     e.preventDefault()
     e.stopPropagation()
-    setEditSize(prev => Math.min(prev * 1.2, 3)) // Max 300%
+    setEditSize(prev => Math.min(prev * 1.2, 3))
   }, [])
 
   const handleDecreaseSize = useCallback((e) => {
     e.preventDefault()
     e.stopPropagation()
-    setEditSize(prev => Math.max(prev * 0.8, 0.2)) // Min 20%
+    setEditSize(prev => Math.max(prev * 0.8, 0.2))
   }, [])
 
-  // Desktop: przeciąganie - rozpoczyna się od razu przy ruchu myszy
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return
     if (isEditMode) return
     
-    // Jeśli kliknięto w trybik lub elementy edycji, nie rozpoczynaj przeciągania
     if (e.target.closest('.token-gear, .token-edit-controls, .token-size-controls, .token-labels, .token-save-controls')) {
       return
     }
@@ -106,11 +103,9 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
     document.addEventListener('mouseup', handleMouseUp)
   }, [token, onDragStart, isEditMode])
 
-  // Mobile: długie przytrzymanie dla edycji, przeciąganie nadal działa
   const handleTouchStart = useCallback((e) => {
     if (isEditMode) return
     
-    // Jeśli dotknięto elementy edycji, nie rozpoczynaj przeciągania
     if (e.target.closest('.token-gear, .token-edit-controls, .token-size-controls, .token-labels, .token-save-controls')) {
       return
     }
@@ -123,7 +118,6 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
     hasMovedRef.current = false
     isLongPressRef.current = false
     
-    // Długie przytrzymanie (500ms) otwiera tryb edycji
     longPressTimerRef.current = setTimeout(() => {
       if (!hasMovedRef.current) {
         isLongPressRef.current = true
@@ -142,7 +136,6 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
             clearTimeout(longPressTimerRef.current)
             longPressTimerRef.current = null
           }
-          // Jeśli nie było długiego przytrzymania, pozwól na przeciąganie
           if (!isLongPressRef.current) {
             onDragStart(token, e)
           }
@@ -163,7 +156,6 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
     document.addEventListener('touchend', handleTouchEnd)
   }, [token, onDragStart, isEditMode])
 
-  // Cleanup timers
   useEffect(() => {
     return () => {
       if (longPressTimerRef.current) {
@@ -195,7 +187,6 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >
-      {/* Górny label */}
       {(isEditMode || token.upperLabel) && (
         <div className="token-label token-label-upper">
           {isEditMode ? (
@@ -216,7 +207,6 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
         </div>
       )}
 
-      {/* Trybik - pokazuje się przy najechaniu */}
       {isHovered && !isEditMode && !isDragging && (
         <button
           className="token-gear"
@@ -232,12 +222,9 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
         </button>
       )}
 
-      {/* Kontener dla obrazu i kontrolek edycji */}
       <div className="token-content">
-        {/* Kontrolki edycji */}
         {isEditMode && (
           <div className="token-edit-controls">
-            {/* Kontrolki rozmiaru */}
             <div className="token-size-controls">
               <button
                 className="token-size-btn token-size-decrease"
@@ -259,7 +246,6 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
               </button>
             </div>
 
-            {/* Kontrolki zapisu */}
             <div className="token-save-controls">
               <button
                 className="token-save-btn token-save-confirm"
@@ -294,7 +280,6 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
         />
       </div>
 
-      {/* Dolny label */}
       {(isEditMode || token.lowerLabel) && (
         <div className="token-label token-label-lower">
           {isEditMode ? (

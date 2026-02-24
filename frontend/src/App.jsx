@@ -1,16 +1,13 @@
 import { useState, useEffect, useCallback, useRef, startTransition } from 'react'
-import Sidebar from './components/Sidebar'
-import Grid from './components/Grid'
+import { Sidebar, Grid, DicePanel, NotesPanel } from './components'
 import { 
   createEmptyFog, 
   createRevealedFog, 
   encodeToBase64, 
   decodeFromBase64,
 } from './utils/fogBitmap'
-import DicePanel from './components/DicePanel'
 import { BASE_PATH, API_BASE } from '../config'
-import { t } from './lang';
-import NotesPanel from './components/NotesPanel'
+import { t } from './lang'
 
 function App() {
   const [scenes, setScenes] = useState([])

@@ -1,9 +1,9 @@
-import { t } from '../lang'
-import Breadcrumbs from './Breadcrumbs'
-import FolderList from './FolderList'
-import AssetGrid from './AssetGrid'
-import PingTool from './PingTool'
-import EraserTool from './EraserTool'
+import { t } from '../../lang'
+import Breadcrumbs from '../atoms/Breadcrumbs'
+import FolderList from '../molecules/FolderList'
+import AssetGrid from '../molecules/AssetGrid'
+import PingTool from '../atoms/PingTool'
+import EraserTool from '../atoms/EraserTool'
 
 function AssetBrowser({
   path,
@@ -19,12 +19,10 @@ function AssetBrowser({
   assetType,
   rootIcon,
   rootTitle,
-  // Ping tool props
   pingMode,
   activePing,
   onTogglePing,
   onClearPing,
-  // Eraser tool props
   isEraserActive,
   hasMapElements,
   onToggleEraser,

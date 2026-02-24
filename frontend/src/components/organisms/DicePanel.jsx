@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { RING_DICE_IMAGES, SKILL_DICE_IMAGES } from '../assets/l5r'
-import { t } from '../lang'
-import L5RDicePanel from './L5RDicePanel'
+import { t } from '../../lang'
+import L5RDicePanel from '../molecules/L5RDicePanel'
 
 const DICE_TYPES = [
   { type: 'd4', sides: 4, color: '#e74c3c' },
@@ -14,7 +13,7 @@ const DICE_TYPES = [
 ]
 
 function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
-  const [mode, setMode] = useState('standard') // 'standard' | 'l5r'
+  const [mode, setMode] = useState('standard')
   const [selectedDice, setSelectedDice] = useState([])
   const [modifier, setModifier] = useState(0)
   const [playerName, setPlayerName] = useState('')
@@ -142,7 +141,6 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
         </div>
 
         <div className="dice-panel-content">
-        {/* Nazwa gracza */}
         <div className="dice-player-name">
           <input
             type="text"
@@ -153,7 +151,6 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           />
         </div>
 
-        {/* Przełącznik trybu */}
         <div className="dice-mode-switch">
           <button 
             className={mode === 'standard' ? 'active' : ''}
@@ -169,7 +166,6 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           </button>
         </div>
 
-        {/* Tryb standardowy */}
         {mode === 'standard' && (
           <>
             <div className="dice-types">
@@ -245,12 +241,10 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           </>
         )}
 
-        {/* Tryb L5R */}
         {mode === 'l5r' && (
           <L5RDicePanel playerName={playerName} onRoll={onRoll} />
         )}
 
-        {/* Historia rzutów */}
         <div className="dice-history">
           <h3>{t('dice.history')}</h3>
           <div className="history-list">

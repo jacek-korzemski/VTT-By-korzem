@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { t } from '../lang'
+import { t } from '../../lang'
 
 function SceneManager({ 
   scenes, 

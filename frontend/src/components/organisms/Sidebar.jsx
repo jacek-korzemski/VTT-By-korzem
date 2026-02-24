@@ -1,13 +1,13 @@
-import CollapsibleSection from './CollapsibleSection'
+import CollapsibleSection from '../atoms/CollapsibleSection'
 import SceneManager from './SceneManager'
-import SidebarHeader from './SidebarHeader'
+import SidebarHeader from '../atoms/SidebarHeader'
 import BackgroundSection from './BackgroundSection'
 import FogOfWarSection from './FogOfWarSection'
 import AssetBrowser from './AssetBrowser'
-import ZoomControls from './ZoomControls'
-import { useScrollToSection } from '../hooks/useScrollToSection'
-import { useBackgroundZoom } from '../hooks/useBackgroundZoom'
-import { t } from '../lang'
+import ZoomControls from '../atoms/ZoomControls'
+import { useScrollToSection } from '../../hooks/useScrollToSection'
+import { useBackgroundZoom } from '../../hooks/useBackgroundZoom'
+import { t } from '../../lang'
 
 function Sidebar({ 
   isOpen,

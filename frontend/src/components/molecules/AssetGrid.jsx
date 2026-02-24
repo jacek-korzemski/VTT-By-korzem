@@ -1,5 +1,5 @@
-import { t } from '../lang'
-import { isSelected, getImageSrc, handleAssetDragStart } from '../utils/sidebarHelpers'
+import { t } from '../../lang'
+import { isSelected, getImageSrc, handleAssetDragStart } from '../../utils/sidebarHelpers'
 
 function AssetGrid({ 
   assets, 

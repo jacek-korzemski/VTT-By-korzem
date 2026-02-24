@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from 'react'
-import { t } from '../lang'
+import { t } from '../../lang'
 import { 
   RING_DICE_IMAGES, 
   SKILL_DICE_IMAGES, 
   RING_PREVIEW, 
   SKILL_PREVIEW 
-} from '../assets/l5r'
+} from '../../assets/l5r'
 
 // Ring Die (d6) - mapowanie ścianek
 const RING_DIE_FACES = [
@@ -47,7 +47,6 @@ function L5RDicePanel({ playerName, onRoll }) {
   const [selectedForKeep, setSelectedForKeep] = useState(new Set())
   const [selectedForExplode, setSelectedForExplode] = useState(new Set())
 
-  // Pobierz obrazek dla kości
   const getDieImage = (die) => {
     if (die.type === 'ring') {
       return RING_DICE_IMAGES[die.faceId]
@@ -189,7 +188,6 @@ function L5RDicePanel({ playerName, onRoll }) {
     setSelectedForExplode(new Set())
   }, [])
 
-  // Komponent pojedynczej kości z obrazkiem
   const DieDisplay = ({ die, selected, onClick, disabled }) => {
     const imageSrc = getDieImage(die)
     
@@ -227,7 +225,6 @@ function L5RDicePanel({ playerName, onRoll }) {
 
   return (
     <div className="l5r-dice-panel">
-      {/* Faza setup */}
       {phase === 'setup' && (
         <div className="l5r-setup">
           <div className="l5r-dice-selector">
@@ -265,7 +262,6 @@ function L5RDicePanel({ playerName, onRoll }) {
         </div>
       )}
 
-      {/* Faza rolled */}
       {phase === 'rolled' && (
         <div className="l5r-rolled">
           <p className="l5r-instruction">{t('l5r.selectToKeep')}</p>
@@ -304,7 +300,6 @@ function L5RDicePanel({ playerName, onRoll }) {
               ✓ {t('l5r.keepSelected')} ({selectedForKeep.size})
             </button>
             
-            {/* NOWE: Przycisk zakończenia gdy mamy już zatrzymane kości */}
             {keptDice.length > 0 && (
               <button 
                 className="l5r-finish-early-btn"
@@ -321,7 +316,6 @@ function L5RDicePanel({ playerName, onRoll }) {
         </div>
       )}
 
-      {/* Faza explode */}
       {phase === 'explode' && (
         <div className="l5r-explode">
           <p className="l5r-instruction">{t('l5r.selectToExplode')}</p>
@@ -356,7 +350,6 @@ function L5RDicePanel({ playerName, onRoll }) {
         </div>
       )}
 
-      {/* Faza kept */}
       {phase === 'kept' && (
         <div className="l5r-summary">
           <h4>{t('l5r.result')}</h4>

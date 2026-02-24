@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
-import SimpleWYSIWYG from './SimpleWYSIWYG'
-import { t } from '../lang'
+import SimpleWYSIWYG from '../atoms/SimpleWYSIWYG'
+import { t } from '../../lang'
 
 function NoteEditor({ id, onRemove, canRemove }) {
   const storageKey = `vtt_notes_${id}`
@@ -8,7 +8,6 @@ function NoteEditor({ id, onRemove, canRemove }) {
   const [initialContent, setInitialContent] = useState('')
   const [title, setTitle] = useState('')
 
-  // Załaduj z localStorage
   useEffect(() => {
     const saved = localStorage.getItem(storageKey)
     if (saved) {
@@ -24,7 +23,6 @@ function NoteEditor({ id, onRemove, canRemove }) {
     }
   }, [storageKey])
 
-  // Zapisz zawartość
   const saveToStorage = useCallback((content, newTitle) => {
     const data = {
       content: content ?? editorRef.current?.getContent() ?? '',
@@ -34,19 +32,16 @@ function NoteEditor({ id, onRemove, canRemove }) {
     localStorage.setItem(storageKey, JSON.stringify(data))
   }, [storageKey, title])
 
-  // Zmiana zawartości edytora
   const handleChange = useCallback((content) => {
     saveToStorage(content, title)
   }, [saveToStorage, title])
 
-  // Zmiana tytułu
   const handleTitleChange = useCallback((e) => {
     const newTitle = e.target.value
     setTitle(newTitle)
     saveToStorage(undefined, newTitle)
   }, [saveToStorage])
 
-  // Eksport
   const handleExport = useCallback(() => {
     if (!editorRef.current) return
     
@@ -79,7 +74,6 @@ ${content}
     URL.revokeObjectURL(url)
   }, [title, id])
 
-  // Import
   const handleImport = useCallback(() => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -93,13 +87,11 @@ ${content}
       reader.onload = (event) => {
         let content = event.target?.result || ''
         
-        // Wyciągnij tytuł z HTML jeśli jest
         const titleMatch = content.match(/<title[^>]*>([^<]*)<\/title>/i)
         if (titleMatch) {
           setTitle(titleMatch[1])
         }
         
-        // Wyciągnij body
         if (content.includes('<body>')) {
           const match = content.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
           if (match) {
@@ -116,7 +108,6 @@ ${content}
     input.click()
   }, [saveToStorage, title])
 
-  // Wyczyść
   const handleClear = useCallback(() => {
     if (confirm(t('notes.clearConfirm'))) {
       editorRef.current?.clear()
@@ -125,7 +116,6 @@ ${content}
     }
   }, [storageKey])
 
-  // Usuń edytor
   const handleRemove = useCallback(() => {
     if (confirm(t('notes.removeConfirm'))) {
       localStorage.removeItem(storageKey)
@@ -135,7 +125,6 @@ ${content}
 
   return (
     <div className="note-editor">
-      {/* Header edytora */}
       <div className="note-editor-header">
         <input
           type="text"
@@ -163,7 +152,6 @@ ${content}
         </div>
       </div>
 
-      {/* Editor */}
       <div className="note-editor-content">
           {initialContent && <SimpleWYSIWYG
           ref={editorRef}

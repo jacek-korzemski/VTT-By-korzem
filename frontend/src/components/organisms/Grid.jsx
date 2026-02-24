@@ -1,11 +1,10 @@
 import React, { useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
-import Token from './Token'
-import MapElement from './MapElement'
-import FogOfWar from './FogOfWar'
-import { GRID_SIZE, CELL_SIZE } from '../../config'
+import Token from '../molecules/Token'
+import MapElement from '../molecules/MapElement'
+import FogOfWar from '../molecules/FogOfWar'
+import { GRID_SIZE, CELL_SIZE } from '../../../config'
 
 const Grid = forwardRef(function Grid(props, ref) {
-  // Destrukturyzacja props
   const {
     isGameMaster = false,
     background,
@@ -42,7 +41,6 @@ const Grid = forwardRef(function Grid(props, ref) {
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
   const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 })
 
-  // Expose gridRef via forwarded ref
   useImperativeHandle(ref, () => gridRef.current, [])
 
   const getClientCoords = useCallback((e) => {
@@ -185,7 +183,6 @@ const Grid = forwardRef(function Grid(props, ref) {
     const cell = getCellFromMousePosition(e.clientX, e.clientY)
     if (!cell) return
     
-    // Obsługa pinga
     if (pingMode && onSendPing) {
       onSendPing(cell.x, cell.y)
       return
@@ -356,7 +353,6 @@ const Grid = forwardRef(function Grid(props, ref) {
             />
           ))}
           
-          {/* Animacja Ping */}
           {pingAnimation && (
             <div 
               className="ping-animation"

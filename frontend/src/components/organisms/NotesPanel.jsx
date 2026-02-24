@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import NoteEditor from './NoteEditor'
-import { t } from '../lang'
+import NoteEditor from '../molecules/NoteEditor'
+import { t } from '../../lang'
 
 const STORAGE_KEY_CONFIG = 'vtt_notes_config'
 const MIN_HEIGHT_PERCENT = 30
@@ -13,7 +13,6 @@ function NotesPanel({ isOpen, onToggle }) {
   const [isResizing, setIsResizing] = useState(false)
   const [editorIds, setEditorIds] = useState(['1'])
 
-  // Załaduj konfigurację (które edytory są otwarte)
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY_CONFIG)
     if (saved) {
@@ -31,7 +30,6 @@ function NotesPanel({ isOpen, onToggle }) {
     }
   }, [])
 
-  // Zapisz konfigurację
   const saveConfig = useCallback((ids, height) => {
     const config = {
       editorIds: ids,
@@ -40,7 +38,6 @@ function NotesPanel({ isOpen, onToggle }) {
     localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config))
   }, [])
 
-  // Dodaj edytor
   const handleAddEditor = useCallback(() => {
     if (editorIds.length >= MAX_EDITORS) return
     
@@ -50,7 +47,6 @@ function NotesPanel({ isOpen, onToggle }) {
     saveConfig(newIds, heightPercent)
   }, [editorIds, heightPercent, saveConfig])
 
-  // Usuń edytor
   const handleRemoveEditor = useCallback((id) => {
     if (editorIds.length <= 1) return
     
@@ -59,13 +55,11 @@ function NotesPanel({ isOpen, onToggle }) {
     saveConfig(newIds, heightPercent)
   }, [editorIds, heightPercent, saveConfig])
 
-  // Resize - rozpoczęcie
   const handleResizeStart = useCallback((e) => {
     e.preventDefault()
     setIsResizing(true)
   }, [])
 
-  // Resize - ruch myszy
   useEffect(() => {
     if (!isResizing) return
 
@@ -94,7 +88,6 @@ function NotesPanel({ isOpen, onToggle }) {
 
   return (
     <>
-      {/* Panel */}
       <div 
         className={`notes-panel ${isOpen ? 'open' : ''}`}
         style={{ height: isOpen ? `${heightPercent}vh` : '0' }}
@@ -106,7 +99,6 @@ function NotesPanel({ isOpen, onToggle }) {
         >
           {isOpen ? '▼' : '📝'}
         </button>
-        {/* Resize handle */}
         <div 
           className={`notes-resize-handle ${isResizing ? 'active' : ''}`}
           onMouseDown={handleResizeStart}
@@ -114,7 +106,6 @@ function NotesPanel({ isOpen, onToggle }) {
           <div className="notes-resize-bar" />
         </div>
 
-        {/* Header */}
         <div className="notes-header">
           <div className="notes-header-left">
             <h2>📝 {t('notes.title')}</h2>
@@ -132,7 +123,6 @@ function NotesPanel({ isOpen, onToggle }) {
           </div>
         </div>
 
-        {/* Editors container */}
         <div className="notes-editors-container">
           {editorIds.map(id => (
             <NoteEditor
@@ -145,7 +135,6 @@ function NotesPanel({ isOpen, onToggle }) {
         </div>
       </div>
 
-      {/* Overlay przy resize */}
       {isResizing && <div className="notes-resize-overlay" />}
     </>
   )

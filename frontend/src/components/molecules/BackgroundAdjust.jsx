@@ -1,5 +1,5 @@
-import BackgroundNudgeControls from './BackgroundNudgeControls'
-import BackgroundZoomControls from './BackgroundZoomControls'
+import BackgroundNudgeControls from '../atoms/BackgroundNudgeControls'
+import BackgroundZoomControls from '../atoms/BackgroundZoomControls'
 
 function BackgroundAdjust({
   currentBackground,

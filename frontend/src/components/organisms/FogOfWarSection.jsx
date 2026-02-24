@@ -1,5 +1,5 @@
-import { t } from '../lang'
-import CollapsibleSection from './CollapsibleSection'
+import { t } from '../../lang'
+import CollapsibleSection from '../atoms/CollapsibleSection'
 
 function FogOfWarSection({
   fogOfWar,
