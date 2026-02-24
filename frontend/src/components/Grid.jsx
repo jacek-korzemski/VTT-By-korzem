@@ -268,12 +268,25 @@ const Grid = forwardRef(function Grid(props, ref) {
     setIsPanning(false)
   }, [])
 
-  const backgroundStyle = background ? {
-    backgroundImage: `url(${basePath}${background.src})`,
-    backgroundPosition: 'top left',
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: 'auto'
-  } : {}
+  const backgroundStyle = background ? (() => {
+    const offsetX = background.offsetX ?? 0
+    const offsetY = background.offsetY ?? 0
+    const scale = background.scale ?? 1
+    const imgWidth = background.width || 0
+    const imgHeight = background.height || 0
+
+    let backgroundSize = 'auto'
+    if (imgWidth > 0 && imgHeight > 0 && scale !== 1) {
+      backgroundSize = `${imgWidth * scale}px ${imgHeight * scale}px`
+    }
+
+    return {
+      backgroundImage: `url(${basePath}${background.src})`,
+      backgroundPosition: `${offsetX}px ${offsetY}px`,
+      backgroundRepeat: 'no-repeat',
+      backgroundSize
+    }
+  })() : {}
 
   const containerClasses = [
     'grid-container',

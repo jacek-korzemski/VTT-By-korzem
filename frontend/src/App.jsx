@@ -57,6 +57,8 @@ function App() {
   const [isGameMaster, setIsGameMaster] = useState(false)
   
   const fogUpdateTimeoutRef = useRef(null)
+  const backgroundUpdateTimeoutRef = useRef(null)
+  const backgroundRemovedRef = useRef(false)
 
   // Sprawdź rolę użytkownika na początku
   useEffect(() => {
@@ -436,17 +438,66 @@ useEffect(() => {
   }, [isEraserActive])
 
   
+  const scheduleBackgroundSave = useCallback((bgConfig) => {
+    if (backgroundUpdateTimeoutRef.current) {
+      clearTimeout(backgroundUpdateTimeoutRef.current)
+    }
+
+    backgroundUpdateTimeoutRef.current = setTimeout(() => {
+      // Sprawdź czy tło nie zostało usunięte w międzyczasie
+      if (backgroundRemovedRef.current) {
+        return // Tło zostało usunięte, nie zapisuj
+      }
+
+      fetch(`${API_BASE}?action=set-background`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          src: bgConfig.src,
+          name: bgConfig.name,
+          width: bgConfig.width,
+          height: bgConfig.height,
+          offsetX: bgConfig.offsetX ?? 0,
+          offsetY: bgConfig.offsetY ?? 0,
+          scale: bgConfig.scale ?? 1
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && !backgroundRemovedRef.current) {
+            setBackground(data.background)
+            setVersion(data.version)
+          }
+        })
+        .catch(console.error)
+    }, 5000)
+  }, [])
+
   const handleSetBackground = useCallback((bg) => {
+    // Wyczyść flagę usunięcia i anuluj pending updates
+    backgroundRemovedRef.current = false
+    if (backgroundUpdateTimeoutRef.current) {
+      clearTimeout(backgroundUpdateTimeoutRef.current)
+      backgroundUpdateTimeoutRef.current = null
+    }
+
+    // Ustawienie nowego tła – brak debounce, żeby gracze od razu je zobaczyli
+    const initialConfig = {
+      src: bg.src,
+      name: bg.name,
+      width: bg.width,
+      height: bg.height,
+      offsetX: 0,
+      offsetY: 0,
+      scale: 1
+    }
+
     fetch(`${API_BASE}?action=set-background`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({
-        src: bg.src,
-        name: bg.name,
-        width: bg.width,
-        height: bg.height
-      })
+      body: JSON.stringify(initialConfig)
     })
       .then(res => res.json())
       .then(data => {
@@ -458,8 +509,81 @@ useEffect(() => {
       .catch(console.error)
   }, [])
 
+  const handleNudgeBackground = useCallback((dx, dy) => {
+    setBackground(prev => {
+      if (!prev) return prev
+      const next = {
+        ...prev,
+        offsetX: (prev.offsetX ?? 0) + dx,
+        offsetY: (prev.offsetY ?? 0) + dy
+      }
+      scheduleBackgroundSave(next)
+      return next
+    })
+  }, [scheduleBackgroundSave])
+
+  const handleScaleBackground = useCallback((delta) => {
+    setBackground(prev => {
+      if (!prev) return prev
+      const currentScale = prev.scale ?? 1
+      const nextScale = Math.max(0.5, Math.min(3, currentScale + delta))
+      const next = {
+        ...prev,
+        scale: nextScale
+      }
+      scheduleBackgroundSave(next)
+      return next
+    })
+  }, [scheduleBackgroundSave])
+
+  const handleResetBackgroundPosition = useCallback(() => {
+    setBackground(prev => {
+      if (!prev) return prev
+      const next = {
+        ...prev,
+        offsetX: 0,
+        offsetY: 0
+      }
+      scheduleBackgroundSave(next)
+      return next
+    })
+  }, [scheduleBackgroundSave])
+
+  const handleResetBackgroundScale = useCallback(() => {
+    setBackground(prev => {
+      if (!prev) return prev
+      const next = {
+        ...prev,
+        scale: 1
+      }
+      scheduleBackgroundSave(next)
+      return next
+    })
+  }, [scheduleBackgroundSave])
+
+  const handleResetBackgroundAll = useCallback(() => {
+    setBackground(prev => {
+      if (!prev) return prev
+      const next = {
+        ...prev,
+        offsetX: 0,
+        offsetY: 0,
+        scale: 1
+      }
+      scheduleBackgroundSave(next)
+      return next
+    })
+  }, [scheduleBackgroundSave])
+
   
   const handleRemoveBackground = useCallback(() => {
+    // Ustaw flagę że tło zostało usunięte i anuluj pending updates
+    backgroundRemovedRef.current = true
+    if (backgroundUpdateTimeoutRef.current) {
+      clearTimeout(backgroundUpdateTimeoutRef.current)
+      backgroundUpdateTimeoutRef.current = null
+    }
+
     fetch(`${API_BASE}?action=remove-background`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -715,6 +839,9 @@ useEffect(() => {
       if (fogUpdateTimeoutRef.current) {
         clearTimeout(fogUpdateTimeoutRef.current)
       }
+      if (backgroundUpdateTimeoutRef.current) {
+        clearTimeout(backgroundUpdateTimeoutRef.current)
+      }
     }
   }, [])
 
@@ -791,6 +918,11 @@ useEffect(() => {
         onToggleEraser={handleToggleEraser}
         onSetBackground={handleSetBackground}
         onRemoveBackground={handleRemoveBackground}
+        onNudgeBackground={handleNudgeBackground}
+        onScaleBackground={handleScaleBackground}
+        onResetBackgroundPosition={handleResetBackgroundPosition}
+        onResetBackgroundScale={handleResetBackgroundScale}
+        onResetBackgroundAll={handleResetBackgroundAll}
         onClear={handleClear}
         basePath={BASE_PATH}
         zoomLevel={zoomLevel}

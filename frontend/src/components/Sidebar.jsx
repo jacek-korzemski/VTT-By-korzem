@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import CollapsibleSection from './CollapsibleSection'
 import SceneManager from './SceneManager'
 import { t } from '../lang';
@@ -40,6 +40,11 @@ function Sidebar({
   onToggleEraser,
   onSetBackground,
   onRemoveBackground,
+  onNudgeBackground,
+  onScaleBackground,
+  onResetBackgroundPosition,
+  onResetBackgroundScale,
+  onResetBackgroundAll,
   onClear,
   basePath,
   zoomLevel,
@@ -61,6 +66,7 @@ function Sidebar({
   const tokenSectionRef = useRef(null)
   const prevMapLoading = useRef(false)
   const prevTokenLoading = useRef(false)
+  const [bgZoomStep, setBgZoomStep] = useState(1) // w procentach (1% domyślnie)
 
   useEffect(() => {
     if (prevMapLoading.current && !mapListLoading) {
@@ -167,6 +173,13 @@ function Sidebar({
               <span className="current-bg-name">{currentBackground.name}</span>
               <button 
                 className="remove-bg-btn" 
+                onClick={onResetBackgroundAll}
+                title={t('sidebar.backgroundResetAll') || 'Reset background position and zoom'}
+              >
+                ⟲
+              </button>
+              <button 
+                className="remove-bg-btn" 
                 onClick={onRemoveBackground}
                 title={t('sidebar.backgroundRemove')}
               >
@@ -196,6 +209,188 @@ function Sidebar({
               </div>
             ))}
           </div>
+
+          {currentBackground && (
+            <div className="background-adjust">
+              <div className="background-adjust-section">
+                <span className="bg-adjust-label">{t('sidebar.backgroundPosition')}</span>
+                <div className="bg-nudge-grid">
+                  <div className="bg-nudge-row bg-nudge-row-top">
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(0, -1)}
+                    >
+                      ↑ 1
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(0, -5)}
+                    >
+                      ↑ 5
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(0, -10)}
+                    >
+                      ↑ 10
+                    </button>
+                  </div>
+                  <div className="bg-nudge-row bg-nudge-row-middle">
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(-1, 0)}
+                    >
+                      ← 1
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      disabled
+                    >
+                      {/* center empty cell */}
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(1, 0)}
+                    >
+                      1 →
+                    </button>
+                  </div>
+                  <div className="bg-nudge-row bg-nudge-row-middle">
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(-5, 0)}
+                    >
+                      ← 5
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      disabled
+                    >
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(5, 0)}
+                    >
+                      5 →
+                    </button>
+                  </div>
+                  <div className="bg-nudge-row bg-nudge-row-middle">
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(-10, 0)}
+                    >
+                      ← 10
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      disabled
+                    >
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(10, 0)}
+                    >
+                      10 →
+                    </button>
+                  </div>
+                  <div className="bg-nudge-row bg-nudge-row-bottom">
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(0, 1)}
+                    >
+                      1 ↓
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(0, 5)}
+                    >
+                      5 ↓
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-nudge-btn"
+                      onClick={() => onNudgeBackground(0, 10)}
+                    >
+                      10 ↓
+                    </button>
+                  </div>
+                  <div className="bg-nudge-row bg-nudge-offset-row">
+                    <span className="bg-nudge-center">
+                      {t('sidebar.backgroundOffsetShort', {
+                        x: currentBackground.offsetX ?? 0,
+                        y: currentBackground.offsetY ?? 0,
+                      })}
+                    </span>
+                    <button
+                      type="button"
+                      className="bg-nudge-reset-btn"
+                      onClick={onResetBackgroundPosition}
+                    >
+                      {t('sidebar.backgroundResetPosition') || 'Reset position'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="background-adjust-section">
+                <span className="bg-adjust-label">{t('sidebar.backgroundZoom')}</span>
+                <div className="bg-zoom-controls">
+                  <button
+                    type="button"
+                    className="bg-zoom-btn"
+                    onClick={() => onScaleBackground(-(bgZoomStep / 100))}
+                    title={t('zoom.zoomOut')}
+                  >
+                    −
+                  </button>
+                  <span className="bg-zoom-display">
+                    {Math.round((currentBackground.scale ?? 1) * 100)}%
+                  </span>
+                  <select
+                    className="bg-zoom-step-select"
+                    value={bgZoomStep}
+                    onChange={(e) => setBgZoomStep(parseFloat(e.target.value))}
+                  >
+                    <option value={10}>10%</option>
+                    <option value={1}>1%</option>
+                    <option value={0.1}>0.1%</option>
+                    <option value={0.001}>0.001%</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="bg-zoom-btn"
+                    onClick={() => onScaleBackground(bgZoomStep / 100)}
+                    title={t('zoom.zoomIn')}
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="bg-zoom-reset-row">
+                  <button
+                    type="button"
+                    className="bg-nudge-reset-btn"
+                    onClick={onResetBackgroundScale}
+                  >
+                    {t('sidebar.backgroundResetScale') || 'Reset zoom'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </CollapsibleSection>
         )}
 

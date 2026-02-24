@@ -377,6 +377,159 @@ body {
   font-weight: bold;
 }
 
+/* Dopasowanie tła (offset + zoom) */
+.background-adjust {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.background-adjust-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.bg-adjust-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+}
+
+.bg-nudge-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bg-nudge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.bg-nudge-row-middle {
+  margin: 0.1rem 0;
+}
+
+.bg-nudge-center-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.bg-nudge-btn {
+  min-width: 44px;
+  height: 28px;
+  padding: 0 0.35rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bg-nudge-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.bg-nudge-center {
+  flex: 1;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #999;
+  padding: 0 0.25rem;
+}
+
+.bg-nudge-offset-row {
+  margin-top: 0.35rem;
+  justify-content: space-between;
+}
+
+.bg-nudge-reset-btn {
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 0.7rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.bg-nudge-reset-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.bg-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bg-zoom-btn {
+  width: 32px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.bg-zoom-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.bg-zoom-display {
+  flex: 1;
+  font-size: 0.75rem;
+  color: #ccc;
+  text-align: center;
+}
+
+.bg-zoom-step-select {
+  height: 28px;
+  padding: 0 0.35rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.bg-zoom-step-select:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.bg-zoom-reset-row {
+  margin-top: 0.4rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* ============================================
    ASSETS / GRID W SIDEBARZE
    ============================================ */

@@ -544,15 +544,45 @@ try {
                 case 'set-background':
                     $state = getState();
                     $activeScene = getActiveScene($state);
-                    $activeScene['background'] = [
+
+                    // Podstawowe dane tła
+                    $background = [
                         'src' => $input['src'],
                         'name' => $input['name'] ?? '',
                         'width' => intval($input['width'] ?? 0),
-                        'height' => intval($input['height'] ?? 0)
+                        'height' => intval($input['height'] ?? 0),
                     ];
+
+                    // Opcjonalne dopasowanie tła do siatki (przesunięcie i skala)
+                    // W razie braku danych używamy wartości domyślnych: brak przesunięcia i skala 1.0
+                    if (isset($input['offsetX'])) {
+                        $background['offsetX'] = intval($input['offsetX']);
+                    } else {
+                        $background['offsetX'] = $activeScene['background']['offsetX'] ?? 0;
+                    }
+
+                    if (isset($input['offsetY'])) {
+                        $background['offsetY'] = intval($input['offsetY']);
+                    } else {
+                        $background['offsetY'] = $activeScene['background']['offsetY'] ?? 0;
+                    }
+
+                    if (isset($input['scale'])) {
+                        $background['scale'] = floatval($input['scale']);
+                    } else {
+                        $background['scale'] = isset($activeScene['background']['scale'])
+                            ? floatval($activeScene['background']['scale'])
+                            : 1.0;
+                    }
+
+                    $activeScene['background'] = $background;
                     updateActiveScene($state, $activeScene);
                     $state = saveState($state);
-                    echo json_encode(['success' => true, 'background' => $activeScene['background'], 'version' => $state['version']]);
+                    echo json_encode([
+                        'success' => true,
+                        'background' => $activeScene['background'],
+                        'version' => $state['version']
+                    ]);
                     break;
 
                 case 'remove-background':
