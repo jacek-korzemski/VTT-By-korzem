@@ -900,7 +900,7 @@ body {
   touch-action: none; /* Umożliwia przeciąganie tokena na urządzeniach dotykowych bez uruchamiania scrollowania mapy */
 }
 
-.token:hover {
+.token:hover:not(.edit-mode) {
   transform: translate(-50%, -50%) scale(1.1);
   z-index: 100;
 }
@@ -912,6 +912,11 @@ body {
   z-index: 1000;
 }
 
+.token-content {
+  position: relative;
+  display: inline-block;
+}
+
 .token img {
   display: block;
   object-fit: contain;
@@ -921,6 +926,189 @@ body {
   user-drag: none;
   pointer-events: none;
   width: 64px;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+/* Token edit mode */
+.token.edit-mode {
+  z-index: 1000;
+}
+
+.token.edit-mode img {
+  outline: 2px solid #4a9eff;
+  outline-offset: 2px;
+}
+
+/* Token gear icon */
+.token-gear {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.2s ease;
+}
+
+.token-gear:hover {
+  background: rgba(0, 0, 0, 0.95);
+}
+
+/* Token edit controls */
+.token-edit-controls {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+/* Token size controls */
+.token-size-controls {
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 6px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.token-size-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.2s ease;
+}
+
+.token-size-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.token-size-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Token labels */
+.token-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  pointer-events: auto;
+  z-index: 25;
+}
+
+.token-label-upper {
+  bottom: 100%;
+  margin-bottom: 4px;
+}
+
+.token-label-lower {
+  top: 100%;
+  margin-top: 4px;
+}
+
+.token-label-input {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0;
+  margin: 0;
+  width: 120px;
+  text-align: center;
+  outline: none;
+}
+
+.token-label-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Token save controls */
+.token-save-controls {
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 6px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 4px;
+}
+
+.token-save-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.2s ease;
+}
+
+.token-save-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.token-save-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.token-save-confirm {
+  background: rgba(76, 175, 80, 0.3);
+}
+
+.token-save-confirm:hover {
+  background: rgba(76, 175, 80, 0.5);
+}
+
+.token-save-cancel {
+  background: rgba(244, 67, 54, 0.3);
+}
+
+.token-save-cancel:hover {
+  background: rgba(244, 67, 54, 0.5);
 }
 
 /* ============================================

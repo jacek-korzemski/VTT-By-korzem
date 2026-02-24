@@ -23,6 +23,7 @@ const Grid = forwardRef(function Grid(props, ref) {
     onFogBitmapChange,
     onCellClick,
     onTokenMove,
+    onTokenUpdate,
     onRemoveMapElement,
     onRemoveToken,
     onDropPlace,
@@ -350,6 +351,7 @@ const Grid = forwardRef(function Grid(props, ref) {
               isDragging={draggedToken?.id === token.id}
               dragPosition={draggedToken?.id === token.id ? dragPosition : null}
               onDragStart={handleTokenDragStart}
+              onTokenUpdate={onTokenUpdate}
               basePath={basePath}
             />
           ))}

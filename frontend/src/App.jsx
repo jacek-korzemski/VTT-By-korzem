@@ -676,6 +676,26 @@ useEffect(() => {
       .catch(console.error)
   }, [tokens])
 
+  const handleTokenUpdate = useCallback((tokenId, updates) => {
+    setTokens(prev => prev.map(t => 
+      t.id === tokenId ? { ...t, ...updates } : t
+    ))
+
+    fetch(`${API_BASE}?action=update-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id: tokenId, ...updates })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setVersion(data.version)
+        }
+      })
+      .catch(console.error)
+  }, [])
+
   
   const handleRemoveMapElement = useCallback((elementId) => {
     fetch(`${API_BASE}?action=remove-map-element`, {
@@ -960,6 +980,7 @@ useEffect(() => {
           onFogBitmapChange={handleFogBitmapChange}
           onCellClick={handleCellClick}
           onTokenMove={handleTokenMove}
+          onTokenUpdate={handleTokenUpdate}
           onRemoveMapElement={handleRemoveMapElement}
           onRemoveToken={handleRemoveToken}
           onDropPlace={handleDropOnGrid}

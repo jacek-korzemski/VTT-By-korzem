@@ -709,6 +709,39 @@ try {
                     echo json_encode(['success' => true, 'version' => $state['version']]);
                     break;
 
+                case 'update-token':
+                    $state = getState();
+                    $activeScene = getActiveScene($state);
+                    $tokenId = $input['id'];
+                    
+                    $found = false;
+                    foreach ($activeScene['tokens'] as &$token) {
+                        if ($token['id'] === $tokenId) {
+                            // Aktualizuj tylko przekazane pola
+                            if (isset($input['size'])) {
+                                $token['size'] = floatval($input['size']);
+                            }
+                            if (isset($input['upperLabel'])) {
+                                $token['upperLabel'] = $input['upperLabel'] !== null ? htmlspecialchars($input['upperLabel']) : null;
+                            }
+                            if (isset($input['lowerLabel'])) {
+                                $token['lowerLabel'] = $input['lowerLabel'] !== null ? htmlspecialchars($input['lowerLabel']) : null;
+                            }
+                            $found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!$found) {
+                        echo json_encode(['success' => false, 'error' => 'Token not found']);
+                        exit;
+                    }
+                    
+                    updateActiveScene($state, $activeScene);
+                    $state = saveState($state);
+                    echo json_encode(['success' => true, 'version' => $state['version']]);
+                    break;
+
                 case 'remove-map-element':
                     $state = getState();
                     $activeScene = getActiveScene($state);
