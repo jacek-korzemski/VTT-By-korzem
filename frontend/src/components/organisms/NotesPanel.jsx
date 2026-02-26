@@ -3,14 +3,9 @@ import NoteEditor from '../molecules/NoteEditor'
 import { t } from '../../lang'
 
 const STORAGE_KEY_CONFIG = 'vtt_notes_config'
-const MIN_HEIGHT_PERCENT = 30
-const MAX_HEIGHT_PERCENT = 90
-const DEFAULT_HEIGHT_PERCENT = 50
 const MAX_EDITORS = 3
 
-function NotesPanel({ isOpen, onToggle }) {
-  const [heightPercent, setHeightPercent] = useState(DEFAULT_HEIGHT_PERCENT)
-  const [isResizing, setIsResizing] = useState(false)
+function NotesPanel() {
   const [editorIds, setEditorIds] = useState(['1'])
 
   useEffect(() => {
@@ -21,21 +16,14 @@ function NotesPanel({ isOpen, onToggle }) {
         if (config.editorIds && config.editorIds.length > 0) {
           setEditorIds(config.editorIds)
         }
-        if (config.heightPercent) {
-          setHeightPercent(config.heightPercent)
-        }
       } catch {
-        // Ignoruj błędy
+        // ignore
       }
     }
   }, [])
 
-  const saveConfig = useCallback((ids, height) => {
-    const config = {
-      editorIds: ids,
-      heightPercent: height
-    }
-    localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config))
+  const saveConfig = useCallback((ids) => {
+    localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify({ editorIds: ids }))
   }, [])
 
   const handleAddEditor = useCallback(() => {
@@ -44,98 +32,43 @@ function NotesPanel({ isOpen, onToggle }) {
     const newId = Date.now().toString()
     const newIds = [...editorIds, newId]
     setEditorIds(newIds)
-    saveConfig(newIds, heightPercent)
-  }, [editorIds, heightPercent, saveConfig])
+    saveConfig(newIds)
+  }, [editorIds, saveConfig])
 
   const handleRemoveEditor = useCallback((id) => {
     if (editorIds.length <= 1) return
     
     const newIds = editorIds.filter(eid => eid !== id)
     setEditorIds(newIds)
-    saveConfig(newIds, heightPercent)
-  }, [editorIds, heightPercent, saveConfig])
-
-  const handleResizeStart = useCallback((e) => {
-    e.preventDefault()
-    setIsResizing(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isResizing) return
-
-    const handleMouseMove = (e) => {
-      const windowHeight = window.innerHeight
-      const mouseY = e.clientY
-      const newHeightPercent = ((windowHeight - mouseY) / windowHeight) * 100
-      const clamped = Math.min(MAX_HEIGHT_PERCENT, Math.max(MIN_HEIGHT_PERCENT, newHeightPercent))
-      
-      setHeightPercent(clamped)
-    }
-
-    const handleMouseUp = () => {
-      setIsResizing(false)
-      saveConfig(editorIds, heightPercent)
-    }
-
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [isResizing, editorIds, heightPercent, saveConfig])
+    saveConfig(newIds)
+  }, [editorIds, saveConfig])
 
   return (
     <>
-      <div 
-        className={`notes-panel ${isOpen ? 'open' : ''}`}
-        style={{ height: isOpen ? `${heightPercent}vh` : '0' }}
-      >
-        <button 
-          className="notes-panel-toggle"
-          onClick={onToggle}
-          title={isOpen ? t('notes.close') : t('notes.title')}
-        >
-          {isOpen ? '▼' : '📝'}
-        </button>
-        <div 
-          className={`notes-resize-handle ${isResizing ? 'active' : ''}`}
-          onMouseDown={handleResizeStart}
-        >
-          <div className="notes-resize-bar" />
+      <div className="notes-header">
+        <div className="notes-header-left">
+          <h2>📝 {t('notes.title')}</h2>
+          <span className="notes-count">({editorIds.length}/{MAX_EDITORS})</span>
         </div>
-
-        <div className="notes-header">
-          <div className="notes-header-left">
-            <h2>📝 {t('notes.title')}</h2>
-            <span className="notes-count">({editorIds.length}/{MAX_EDITORS})</span>
-          </div>
-          <div className="notes-header-actions">
-            {editorIds.length < MAX_EDITORS && (
-              <button onClick={handleAddEditor} className="notes-add-btn">
-                + {t('notes.addEditor')}
-              </button>
-            )}
-            <button onClick={onToggle} className="notes-close-btn" title={t('notes.close')}>
-              ✕
+        <div className="notes-header-actions">
+          {editorIds.length < MAX_EDITORS && (
+            <button onClick={handleAddEditor} className="notes-add-btn">
+              + {t('notes.addEditor')}
             </button>
-          </div>
-        </div>
-
-        <div className="notes-editors-container">
-          {editorIds.map(id => (
-            <NoteEditor
-              key={id}
-              id={id}
-              onRemove={handleRemoveEditor}
-              canRemove={editorIds.length > 1}
-            />
-          ))}
+          )}
         </div>
       </div>
 
-      {isResizing && <div className="notes-resize-overlay" />}
+      <div className="notes-editors-container">
+        {editorIds.map(id => (
+          <NoteEditor
+            key={id}
+            id={id}
+            onRemove={handleRemoveEditor}
+            canRemove={editorIds.length > 1}
+          />
+        ))}
+      </div>
     </>
   )
 }

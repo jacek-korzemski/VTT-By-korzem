@@ -28,6 +28,7 @@ body {
 .app {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
 }
@@ -64,6 +65,7 @@ body {
   top: 0;
   width: 280px;
   height: 100vh;
+  height: 100dvh;
   background: #16213e;
   display: flex;
   flex-direction: column;
@@ -1119,6 +1121,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
+  padding-bottom: max(0.625rem, env(safe-area-inset-bottom, 0px));
   background: #0d1829;
   border-top: 1px solid #0f3460;
   flex-shrink: 0;
@@ -1546,6 +1549,7 @@ body {
   top: 0;
   width: 320px;
   height: 100vh;
+  height: 100dvh;
   background: #16213e;
   border-left: 2px solid #0f3460;
   z-index: 1000;
@@ -1553,6 +1557,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .dice-panel.open { right: 0; }
@@ -1667,6 +1672,15 @@ body {
   to { transform: scale(1); opacity: 1; }
 }
 .die-chip:hover { opacity: 0.7; transform: scale(0.95); }
+
+.dice-pool-modifier {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ccc;
+  padding: 0.375rem 0.25rem;
+}
 
 .dice-summary { display: flex; gap: 0.5rem; padding: 0 1rem 0.5rem; flex-wrap: wrap; }
 .dice-count {
@@ -2105,50 +2119,9 @@ body {
 .l5r-ht.strife { background: rgba(233, 69, 96, 0.2); color: #e94560; }
 
 /* ============================================
-   Notes Panel Toggle
+   Bottom Panel
    ============================================ */
-.notes-panel-toggle {
-  position: absolute;
-  /* Pozycjonujemy względem panelu, ale na zewnątrz (powyżej) */
-  top: -36px; 
-  left: 50%;
-  transform: translateX(-50%);
-  width: 64px;
-  height: 40px;
-  
-  background: #16213e;
-  border: 2px solid #0f3460;
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
-  
-  color: white;
-  font-size: 1.25rem;
-  cursor: pointer;
-  z-index: 7909;
-  
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  /* Brak transition dla pozycji, bo jest dzieckiem panelu */
-  transition: background 0.2s, height 0.2s;
-}
-
-.notes-panel-toggle:hover {
-  background: #1a2a4a;
-  height: 44px; /* Lekki efekt hover */
-  top: -40px;
-}
-
-/* Gdy panel jest otwarty, przycisk jest nadal widoczny i służy do zamknięcia */
-.notes-panel.open .notes-panel-toggle {
-  background: #0f3460; /* Opcjonalnie inny kolor gdy aktywny */
-}
-
-/* ============================================
-   Notes Panel
-   ============================================ */
-.notes-panel {
+.bottom-panel {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -2157,13 +2130,87 @@ body {
   background: #16213e;
   border-top: 2px solid #0f3460;
   z-index: 791000;
-  transition: height 0s ease;
+  transition: height 0.3s ease;
   display: flex;
   flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Toolbar (tab bar above the panel) */
+.bottom-panel-toolbar {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  padding: 4px 6px;
+  z-index: 7909;
+}
+
+.bottom-panel-toolbar:hover {
+  top: -44px;
+  padding-top: 8px;
+}
+
+.bottom-panel-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.bottom-panel-tab {
+  width: 40px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.bottom-panel-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bottom-panel-tab.active {
+  background: #0f3460;
+}
+
+.bottom-panel-close {
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  transition: all 0.2s;
+  border-radius: 0 6px 0 0;
+}
+
+.bottom-panel-close:hover {
+  background: rgba(233, 69, 96, 0.2);
+  color: #e94560;
 }
 
 /* Resize Handle */
-.notes-resize-handle {
+.bottom-panel-resize-handle {
   position: absolute;
   top: -8px;
   left: 0;
@@ -2176,7 +2223,7 @@ body {
   z-index: 7910;
 }
 
-.notes-resize-bar {
+.bottom-panel-resize-bar {
   width: 320px;
   height: 4px;
   background: #0f3460;
@@ -2184,12 +2231,12 @@ body {
   transition: background 0.2s;
 }
 
-.notes-resize-handle:hover .notes-resize-bar,
-.notes-resize-handle.active .notes-resize-bar {
+.bottom-panel-resize-handle:hover .bottom-panel-resize-bar,
+.bottom-panel-resize-handle.active .bottom-panel-resize-bar {
   background: #e94560;
 }
 
-.notes-resize-overlay {
+.bottom-panel-resize-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -2198,6 +2245,30 @@ body {
   z-index: 799999;
   cursor: ns-resize;
 }
+
+/* Content area */
+.bottom-panel-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bottom-panel-tab-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.bottom-panel-tab-pane.hidden {
+  display: none;
+}
+
+/* ============================================
+   Notes Panel (content inside bottom panel)
+   ============================================ */
 
 /* Header */
 .notes-header {
@@ -2246,25 +2317,150 @@ body {
   background: rgba(74, 222, 128, 0.25);
 }
 
-.notes-close-btn {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  color: #888;
-  font-size: 1rem;
+/* ============================================
+   PDF Panel (content inside bottom panel)
+   ============================================ */
+.pdf-panel {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pdf-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a2e;
+  border-right: 1px solid #0f3460;
+  overflow-y: auto;
+}
+
+.pdf-section {
+  padding: 0.5rem 0;
+}
+
+.pdf-section-title {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666;
+  font-weight: 600;
+}
+
+.pdf-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 0.8rem;
   cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.pdf-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pdf-item.active {
+  background: #0f3460;
+  color: white;
+}
+
+.pdf-item.missing {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pdf-item.missing em {
+  font-style: italic;
+  font-size: 0.75rem;
+  color: #e94560;
+}
+
+.pdf-item-icon {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.pdf-item-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-item-remove {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  color: #666;
+  opacity: 0;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.pdf-item:hover .pdf-item-remove {
+  opacity: 1;
+}
+
+.pdf-item-remove:hover {
+  background: rgba(233, 69, 96, 0.3);
+  color: #e94560;
+}
+
+.pdf-add-btn {
+  display: block;
+  width: calc(100% - 1rem);
+  margin: 0.5rem auto;
+  padding: 0.375rem 0.75rem;
+  background: rgba(74, 222, 128, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 4px;
+  color: #4ade80;
+  font-size: 0.8rem;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-.notes-close-btn:hover {
-  background: rgba(233, 69, 96, 0.2);
-  color: #e94560;
+.pdf-add-btn:hover {
+  background: rgba(74, 222, 128, 0.25);
+}
+
+.pdf-viewer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a14;
+  overflow: hidden;
+}
+
+.pdf-viewer iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+.pdf-placeholder {
+  color: #555;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 2rem;
 }
 
 /* ============================================

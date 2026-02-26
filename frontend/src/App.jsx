@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, startTransition } from 'react'
-import { Sidebar, Grid, DicePanel, NotesPanel } from './components'
+import { Sidebar, Grid, DicePanel, BottomPanel } from './components'
 import { 
   createEmptyFog, 
   createRevealedFog, 
@@ -11,7 +11,7 @@ import { t } from './lang'
 
 function App() {
   const [scenes, setScenes] = useState([])
-  const [notesPanelOpen, setNotesPanelOpen] = useState(false)
+  const [bottomPanelTab, setBottomPanelTab] = useState(null)
   const [activeSceneId, setActiveSceneId] = useState(null)
   const [background, setBackground] = useState(null)
   const [mapElements, setMapElements] = useState([])
@@ -997,9 +997,9 @@ useEffect(() => {
         onRoll={handleDiceRoll}
       />
 
-      <NotesPanel
-        isOpen={notesPanelOpen}
-        onToggle={() => setNotesPanelOpen(prev => !prev)}
+      <BottomPanel
+        activeTab={bottomPanelTab}
+        onTabChange={setBottomPanelTab}
       />
     </div>
   )

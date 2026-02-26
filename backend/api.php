@@ -406,6 +406,27 @@ try {
                     ]);
                     break;
 
+                case 'list-papers':
+                    $papers = [];
+                    $papersDir = __DIR__ . '/assets/papers';
+                    if (is_dir($papersDir)) {
+                        foreach (glob($papersDir . '/*.pdf') as $file) {
+                            $filename = basename($file);
+                            $name = pathinfo($filename, PATHINFO_FILENAME);
+                            $papers[] = [
+                                'id' => $filename,
+                                'name' => ucfirst(str_replace(['_', '-'], ' ', $name)),
+                                'src' => 'backend/assets/papers/' . $filename
+                            ];
+                        }
+                    }
+                    usort($papers, fn($a, $b) => strcasecmp($a['name'], $b['name']));
+                    echo json_encode([
+                        'success' => true,
+                        'papers' => $papers
+                    ]);
+                    break;
+
                 case 'rolls':
                     $rollsFile = __DIR__ . '/data/rolls.json';
                     if (file_exists($rollsFile)) {

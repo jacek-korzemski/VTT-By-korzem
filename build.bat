@@ -118,39 +118,48 @@ mkdir "build\backend\assets"
 mkdir "build\backend\assets\map"
 mkdir "build\backend\assets\tokens"
 mkdir "build\backend\assets\backgrounds"
+mkdir "build\backend\assets\papers"
 mkdir "build\assets"
 
 echo [2/5] Configuring frontend...
+set "ROOT=%~dp0"
+if "!ROOT:~-1!"=="\" set "ROOT=!ROOT:~0,-1!"
+if exist "!ROOT!\frontend\.env" (
+    ren "!ROOT!\frontend\.env" ".env.devbackup"
+)
 (
     echo VITE_BASE_PATH=%BASE_PATH%
     echo VITE_API_PATH=backend/api.php
     echo VITE_LANGUAGE=%LANGUAGE%
     echo VITE_ENABLE_L5R=%ENABLE_L5R%
-) > "frontend\.env"
+) > "!ROOT!\frontend\.env"
 
 echo [3/5] Building frontend (this may take a while)...
-cd frontend
+cd /d "!ROOT!\frontend"
 
 if not exist "node_modules" (
     echo [INFO] Installing npm dependencies...
     call npm install
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         echo [ERROR] npm install failed!
-        cd ..
+        cd /d "!ROOT!"
+        call :restore_frontend_env
         pause
         exit /b 1
     )
 )
 
 call npm run build
-if %errorlevel% neq 0 (
+if !errorlevel! neq 0 (
     echo [ERROR] Frontend build failed!
-    cd ..
+    cd /d "!ROOT!"
+    call :restore_frontend_env
     pause
     exit /b 1
 )
 
-cd ..
+cd /d "!ROOT!"
+call :restore_frontend_env
 
 echo [4/5] Copying files...
 
@@ -185,6 +194,7 @@ copy /y "backend\api.php" "build\backend\" >nul
 powershell -Command "'' | Out-File -FilePath 'build\backend\assets\map\.gitkeep' -Encoding ASCII"
 powershell -Command "'' | Out-File -FilePath 'build\backend\assets\tokens\.gitkeep' -Encoding ASCII"
 powershell -Command "'' | Out-File -FilePath 'build\backend\assets\backgrounds\.gitkeep' -Encoding ASCII"
+powershell -Command "'' | Out-File -FilePath 'build\backend\assets\papers\.gitkeep' -Encoding ASCII"
 powershell -Command "'' | Out-File -FilePath 'build\backend\data\.gitkeep' -Encoding ASCII"
 
 echo [5/5] Generating index.php...
@@ -222,6 +232,7 @@ echo   2. Add images to:
 echo      - backend/assets/map/
 echo      - backend/assets/tokens/
 echo      - backend/assets/backgrounds/
+echo      - backend/assets/papers/
 echo   3. Ensure backend/data/ folder is writable
 echo   4. Open the page and login with your password
 echo.
@@ -229,3 +240,13 @@ echo  ========================================
 echo.
 
 pause
+exit /b 0
+
+:restore_frontend_env
+set "ROOT=%~dp0"
+if "!ROOT:~-1!"=="\" set "ROOT=!ROOT:~0,-1!"
+if exist "!ROOT!\frontend\.env.devbackup" (
+    del "!ROOT!\frontend\.env" >nul 2>nul
+    ren "!ROOT!\frontend\.env.devbackup" ".env"
+)
+goto :eof

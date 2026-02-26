@@ -74,14 +74,6 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
     }, 500)
   }, [selectedDice, modifier, playerName, onRoll])
 
-  const getDiceCounts = () => {
-    const counts = {}
-    selectedDice.forEach(d => {
-      counts[d.type] = (counts[d.type] || 0) + 1
-    })
-    return counts
-  }
-
   const formatRoll = (roll) => {
     if (roll.type === 'l5r') {
       return t('l5r.rollResult', {
@@ -197,17 +189,14 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
                       {die.type}
                     </span>
                   ))}
+                  {modifier !== 0 && (
+                    <span className="dice-pool-modifier">
+                      {modifier > 0 ? `+${modifier}` : modifier}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
-
-            {selectedDice.length > 0 && (
-              <div className="dice-summary">
-                {Object.entries(getDiceCounts()).map(([type, count]) => (
-                  <span key={type} className="dice-count">{count}{type}</span>
-                ))}
-              </div>
-            )}
 
             <div className="dice-modifier">
               <label>{t('dice.modifier')}</label>

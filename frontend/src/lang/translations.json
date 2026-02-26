@@ -120,6 +120,18 @@
       "current": "Current scene",
       "switchTo": "Click to switch"
     },
+    "pdf": {
+      "title": "PDF Reader",
+      "serverPdfs": "Server",
+      "localPdfs": "Local",
+      "addLocal": "Add PDF",
+      "remove": "Remove",
+      "removeConfirm": "Are you sure you want to remove this PDF?",
+      "noPdfs": "No PDFs available",
+      "selectPdf": "Select a PDF to view",
+      "removed": "Removed",
+      "loading": "Loading..."
+    },
     "ping": {
       "tool": "Attention Ping",
       "toolHint": "Click on map to focus all players there",
@@ -248,6 +260,18 @@
       "namePlaceholder": "Nazwa sceny...",
       "current": "Aktualna scena",
       "switchTo": "Kliknij aby przełączyć"
+    },
+    "pdf": {
+      "title": "Czytnik PDF",
+      "serverPdfs": "Serwer",
+      "localPdfs": "Lokalne",
+      "addLocal": "Dodaj PDF",
+      "remove": "Usuń",
+      "removeConfirm": "Czy na pewno chcesz usunąć ten PDF?",
+      "noPdfs": "Brak plików PDF",
+      "selectPdf": "Wybierz PDF do wyświetlenia",
+      "removed": "Usunięty",
+      "loading": "Ładowanie..."
     },
     "ping": {
       "tool": "Przyciągnij uwagę",
