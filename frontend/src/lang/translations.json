@@ -43,13 +43,20 @@
       "titlePlaceholder": "Notepad title...",
       "placeholder": "Write your notes here...",
       "import": "Load",
+      "importLocal": "Local file",
+      "importTemplate": "Server template",
       "export": "Save",
       "clear": "Clear",
       "close": "Close",
       "remove": "Remove notepad",
       "addEditor": "Add notepad",
       "clearConfirm": "Are you sure you want to clear this notepad?",
-      "removeConfirm": "Are you sure you want to remove this notepad? Content will be lost."
+      "removeConfirm": "Are you sure you want to remove this notepad? Content will be lost.",
+      "templateModalTitle": "Select template",
+      "templateLoading": "Loading templates...",
+      "templateEmpty": "No templates available",
+      "templateLoadError": "Failed to load templates",
+      "templateCancel": "Cancel"
     },
     "zoom": {
       "zoomOut": "Zoom out",
@@ -186,13 +193,20 @@
       "titlePlaceholder": "Tytuł notatnika...",
       "placeholder": "Pisz swoje notatki tutaj...",
       "import": "Wczytaj",
+      "importLocal": "Plik lokalny",
+      "importTemplate": "Szablon z serwera",
       "export": "Zapisz",
       "clear": "Wyczyść",
       "close": "Zamknij",
       "remove": "Usuń notatnik",
       "addEditor": "Dodaj notatnik",
       "clearConfirm": "Czy na pewno chcesz wyczyścić ten notatnik?",
-      "removeConfirm": "Czy na pewno chcesz usunąć ten notatnik? Zawartość zostanie utracona."
+      "removeConfirm": "Czy na pewno chcesz usunąć ten notatnik? Zawartość zostanie utracona.",
+      "templateModalTitle": "Wybierz szablon",
+      "templateLoading": "Ładowanie szablonów...",
+      "templateEmpty": "Brak dostępnych szablonów",
+      "templateLoadError": "Nie udało się załadować szablonów",
+      "templateCancel": "Anuluj"
     },
     "zoom": {
       "zoomOut": "Oddal",

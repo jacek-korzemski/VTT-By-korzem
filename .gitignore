@@ -8,11 +8,15 @@
 backend/data/*
 !backend/data/.gitkeep
 
-# Backend assets (ale nie .gitkeep)
+# Backend assets (tylko templates trafia do repo)
+backend/assets/*
+!backend/assets/templates/
+!backend/assets/map/
+!backend/assets/tokens/
+!backend/assets/backgrounds/
 backend/assets/map/*
 backend/assets/tokens/*
 backend/assets/backgrounds/*
-backend/assets/papers/*
 !backend/assets/map/.gitkeep
 !backend/assets/tokens/.gitkeep
 !backend/assets/backgrounds/.gitkeep

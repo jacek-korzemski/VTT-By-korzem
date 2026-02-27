@@ -440,6 +440,35 @@ try {
                     }
                     break;
 
+                case 'list-templates':
+                    $templates = [];
+                    $templatesDir = __DIR__ . '/assets/templates';
+                    if (is_dir($templatesDir)) {
+                        foreach (glob($templatesDir . '/*.html') as $file) {
+                            $filename = basename($file);
+                            $name = pathinfo($filename, PATHINFO_FILENAME);
+                            $templates[] = [
+                                'id' => $filename,
+                                'name' => ucfirst(str_replace(['_', '-'], ' ', $name))
+                            ];
+                        }
+                    }
+                    usort($templates, fn($a, $b) => strcasecmp($a['name'], $b['name']));
+                    echo json_encode(['success' => true, 'templates' => $templates]);
+                    break;
+
+                case 'get-template':
+                    $id = basename($_GET['id'] ?? '');
+                    $filePath = __DIR__ . '/assets/templates/' . $id;
+                    if ($id && preg_match('/\.html?$/i', $id) && is_file($filePath)) {
+                        header('Content-Type: text/html; charset=utf-8');
+                        readfile($filePath);
+                    } else {
+                        http_response_code(404);
+                        echo json_encode(['success' => false, 'error' => 'Template not found']);
+                    }
+                    break;
+
                 case 'rolls':
                     $rollsFile = __DIR__ . '/data/rolls.json';
                     if (file_exists($rollsFile)) {
