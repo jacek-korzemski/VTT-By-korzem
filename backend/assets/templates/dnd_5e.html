@@ -1,378 +1,417 @@
 <!DOCTYPE html>
 <html lang="pl">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Locheły i Smokeły</title>
 </head>
-
 <body>
 
   <!-- NAGŁÓWEK POSTACI -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td colspan="2"><strong>Imię:</strong> </td>
+      <td colspan="2"><strong>Imię:</strong> <input data-field="name" type="text" class="plain wide"></td>
     </tr>
     <tr>
-      <td><strong>Rasa:</strong> </td>
-      <td><strong>Klasa:</strong> </td>
+      <td><strong>Rasa:</strong> <input data-field="race" type="text" class="plain"></td>
+      <td><strong>Klasa:</strong> <input data-field="class" type="text" class="plain"></td>
     </tr>
     <tr>
-      <td><strong>Poziom:</strong> </td>
-      <td><strong>Pochodzenie:</strong> </td>
+      <td><strong>Poziom:</strong> <input data-field="level" type="text" class="box sm"></td>
+      <td><strong>Pochodzenie:</strong> <input data-field="background" type="text" class="plain"></td>
     </tr>
   </table>
-
-  <br>
 
   <!-- PODSTAWOWE STATYSTYKI -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td colspan="3" align="center"><strong>⚔️ STATYSTYKI BOJOWE</strong></td>
+      <td colspan="3" class="section-header">⚔️ STATYSTYKI BOJOWE</td>
     </tr>
     <tr>
-      <td align="center"><strong>KP</strong><br></td>
-      <td align="center"><strong>Inicjatywa</strong><br></td>
-      <td align="center"><strong>Szybkość</strong><br></td>
+      <td class="center"><strong>KP</strong><br><input data-field="ac" type="text" class="circle"></td>
+      <td class="center"><strong>Inicjatywa</strong><br><input data-field="initiative" type="text" class="circle"> <button data-roll="d20+@initiative" data-roll-label="Inicjatywa" class="roll-btn">🎲</button></td>
+      <td class="center"><strong>Szybkość</strong><br><input data-field="speed" type="text" class="circle"></td>
     </tr>
     <tr>
-      <td colspan="3" align="center">
-        <strong>Punkty Wytrzymałości:</strong> /
+      <td colspan="3" class="center">
+        <strong>Punkty Wytrzymałości:</strong>
+        <input data-field="hp_current" type="text" class="box sm"> / <input data-field="hp_max" type="text" class="box sm">
       </td>
     </tr>
     <tr>
-      <td colspan="3" align="center">
-        <strong>Tymczasowe PW:</strong>
+      <td colspan="3" class="center">
+        <strong>Tymczasowe PW:</strong> <input data-field="hp_temp" type="text" class="box sm">
       </td>
     </tr>
     <tr>
-      <td colspan="3" align="center">
-        <strong>Kości Wytrzymałości:</strong>
+      <td colspan="3" class="center">
+        <strong>Kości Wytrzymałości:</strong> <input data-field="hit_dice" type="text" class="plain sm">
       </td>
     </tr>
   </table>
-
-  <br>
 
   <!-- CECHY -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td colspan="3" align="center"><strong>📊 CECHY</strong></td>
+      <td colspan="3" class="section-header">📊 CECHY</td>
     </tr>
     <tr>
-      <td align="center"><strong>SIŁ</strong></td>
-      <td align="center"><strong>ZRC</strong></td>
-      <td align="center"><strong>KON</strong></td>
+      <td class="center"><strong>SIŁ</strong></td>
+      <td class="center"><strong>ZRC</strong></td>
+      <td class="center"><strong>KON</strong></td>
     </tr>
     <tr>
-      <td align="center">10 (+0)</td>
-      <td align="center">10 (+0)</td>
-      <td align="center">10 (+0)</td>
+      <td class="center">
+        <input data-field="str_score" type="text" class="circle"> (<input data-field="str_mod" type="text" class="box xs">)
+        <button data-roll="d20+@str_mod" data-roll-label="Siła" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="dex_score" type="text" class="circle"> (<input data-field="dex_mod" type="text" class="box xs">)
+        <button data-roll="d20+@dex_mod" data-roll-label="Zręczność" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="con_score" type="text" class="circle"> (<input data-field="con_mod" type="text" class="box xs">)
+        <button data-roll="d20+@con_mod" data-roll-label="Kondycja" class="roll-btn">🎲</button>
+      </td>
     </tr>
     <tr>
-      <td align="center"><strong>INT</strong></td>
-      <td align="center"><strong>MDR</strong></td>
-      <td align="center"><strong>CHA</strong></td>
+      <td class="center"><strong>INT</strong></td>
+      <td class="center"><strong>MDR</strong></td>
+      <td class="center"><strong>CHA</strong></td>
     </tr>
     <tr>
-      <td align="center">10 (+0)</td>
-      <td align="center">10 (+0)</td>
-      <td align="center">10 (+0)</td>
+      <td class="center">
+        <input data-field="int_score" type="text" class="circle"> (<input data-field="int_mod" type="text" class="box xs">)
+        <button data-roll="d20+@int_mod" data-roll-label="Inteligencja" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="wis_score" type="text" class="circle"> (<input data-field="wis_mod" type="text" class="box xs">)
+        <button data-roll="d20+@wis_mod" data-roll-label="Mądrość" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="cha_score" type="text" class="circle"> (<input data-field="cha_mod" type="text" class="box xs">)
+        <button data-roll="d20+@cha_mod" data-roll-label="Charyzma" class="roll-btn">🎲</button>
+      </td>
     </tr>
     <tr>
-      <td colspan="3" align="center">
-        <strong>Premia z biegłości:</strong> +2
+      <td colspan="3" class="center">
+        <strong>Premia z biegłości:</strong> <input data-field="prof" type="text" class="box xs" value="+2">
       </td>
     </tr>
   </table>
 
-  <br>
-
   <!-- RZUTY OBRONNE -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td colspan="2" align="center"><strong>🛡️ RZUTY OBRONNE</strong></td>
+      <td colspan="3" class="section-header">🛡️ RZUTY OBRONNE</td>
     </tr>
     <tr>
-      <td>☐ Siła</td>
-      <td align="right">+0</td>
+      <td><input data-field="save_str_prof" type="checkbox"> Siła</td>
+      <td class="right"><input data-field="save_str" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@save_str+@prof?@save_str_prof" data-roll-label="RO Siła" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Zręczność</td>
-      <td align="right">+0</td>
+      <td><input data-field="save_dex_prof" type="checkbox"> Zręczność</td>
+      <td class="right"><input data-field="save_dex" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@save_dex+@prof?@save_dex_prof" data-roll-label="RO Zręczność" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Kondycja</td>
-      <td align="right">+0</td>
+      <td><input data-field="save_con_prof" type="checkbox"> Kondycja</td>
+      <td class="right"><input data-field="save_con" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@save_con+@prof?@save_con_prof" data-roll-label="RO Kondycja" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Inteligencja</td>
-      <td align="right">+0</td>
+      <td><input data-field="save_int_prof" type="checkbox"> Inteligencja</td>
+      <td class="right"><input data-field="save_int" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@save_int+@prof?@save_int_prof" data-roll-label="RO Inteligencja" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Mądrość</td>
-      <td align="right">+0</td>
+      <td><input data-field="save_wis_prof" type="checkbox"> Mądrość</td>
+      <td class="right"><input data-field="save_wis" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@save_wis+@prof?@save_wis_prof" data-roll-label="RO Mądrość" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Charyzma</td>
-      <td align="right">+0</td>
+      <td><input data-field="save_cha_prof" type="checkbox"> Charyzma</td>
+      <td class="right"><input data-field="save_cha" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@save_cha+@prof?@save_cha_prof" data-roll-label="RO Charyzma" class="roll-btn">🎲</button></td>
     </tr>
   </table>
-
-  <br>
 
   <!-- UMIEJĘTNOŚCI -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td colspan="2" align="center"><strong>🎯 UMIEJĘTNOŚCI</strong></td>
+      <td colspan="3" class="section-header">🎯 UMIEJĘTNOŚCI</td>
     </tr>
     <tr>
-      <td>☐ Akrobatyka (Zrc)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_acrobatics_prof" type="checkbox"> Akrobatyka <small>(Zrc)</small></td>
+      <td class="right"><input data-field="skill_acrobatics" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_acrobatics+@prof?@skill_acrobatics_prof" data-roll-label="Akrobatyka" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Atletyka (Sił)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_athletics_prof" type="checkbox"> Atletyka <small>(Sił)</small></td>
+      <td class="right"><input data-field="skill_athletics" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_athletics+@prof?@skill_athletics_prof" data-roll-label="Atletyka" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Historia (Int)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_history_prof" type="checkbox"> Historia <small>(Int)</small></td>
+      <td class="right"><input data-field="skill_history" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_history+@prof?@skill_history_prof" data-roll-label="Historia" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Intuicja (Mdr)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_insight_prof" type="checkbox"> Intuicja <small>(Mdr)</small></td>
+      <td class="right"><input data-field="skill_insight" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_insight+@prof?@skill_insight_prof" data-roll-label="Intuicja" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Medycyna (Mdr)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_medicine_prof" type="checkbox"> Medycyna <small>(Mdr)</small></td>
+      <td class="right"><input data-field="skill_medicine" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_medicine+@prof?@skill_medicine_prof" data-roll-label="Medycyna" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Natura (Int)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_nature_prof" type="checkbox"> Natura <small>(Int)</small></td>
+      <td class="right"><input data-field="skill_nature" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_nature+@prof?@skill_nature_prof" data-roll-label="Natura" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Oswajanie (Mdr)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_animal_prof" type="checkbox"> Oswajanie <small>(Mdr)</small></td>
+      <td class="right"><input data-field="skill_animal" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_animal+@prof?@skill_animal_prof" data-roll-label="Oswajanie" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Percepcja (Mdr)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_perception_prof" type="checkbox"> Percepcja <small>(Mdr)</small></td>
+      <td class="right"><input data-field="skill_perception" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_perception+@prof?@skill_perception_prof" data-roll-label="Percepcja" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Perswazja (Cha)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_persuasion_prof" type="checkbox"> Perswazja <small>(Cha)</small></td>
+      <td class="right"><input data-field="skill_persuasion" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_persuasion+@prof?@skill_persuasion_prof" data-roll-label="Perswazja" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Religia (Int)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_religion_prof" type="checkbox"> Religia <small>(Int)</small></td>
+      <td class="right"><input data-field="skill_religion" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_religion+@prof?@skill_religion_prof" data-roll-label="Religia" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Skradanie (Zrc)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_stealth_prof" type="checkbox"> Skradanie <small>(Zrc)</small></td>
+      <td class="right"><input data-field="skill_stealth" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_stealth+@prof?@skill_stealth_prof" data-roll-label="Skradanie" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Śledztwo (Int)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_investigation_prof" type="checkbox"> Śledztwo <small>(Int)</small></td>
+      <td class="right"><input data-field="skill_investigation" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_investigation+@prof?@skill_investigation_prof" data-roll-label="Śledztwo" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Sztuka (Cha)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_performance_prof" type="checkbox"> Sztuka <small>(Cha)</small></td>
+      <td class="right"><input data-field="skill_performance" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_performance+@prof?@skill_performance_prof" data-roll-label="Sztuka" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Wiedza Tajemna (Int)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_arcana_prof" type="checkbox"> Wiedza Tajemna <small>(Int)</small></td>
+      <td class="right"><input data-field="skill_arcana" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_arcana+@prof?@skill_arcana_prof" data-roll-label="Wiedza Tajemna" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Wnikliwość (Mdr)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_perception2_prof" type="checkbox"> Wnikliwość <small>(Mdr)</small></td>
+      <td class="right"><input data-field="skill_perception2" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_perception2+@prof?@skill_perception2_prof" data-roll-label="Wnikliwość" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Zastraszanie (Cha)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_intimidation_prof" type="checkbox"> Zastraszanie <small>(Cha)</small></td>
+      <td class="right"><input data-field="skill_intimidation" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_intimidation+@prof?@skill_intimidation_prof" data-roll-label="Zastraszanie" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Zwinne dłonie (Zrc)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_sleight_prof" type="checkbox"> Zwinne dłonie <small>(Zrc)</small></td>
+      <td class="right"><input data-field="skill_sleight" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_sleight+@prof?@skill_sleight_prof" data-roll-label="Zwinne dłonie" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td>☐ Zwodzenie (Cha)</td>
-      <td align="right">+0</td>
+      <td><input data-field="skill_deception_prof" type="checkbox"> Zwodzenie <small>(Cha)</small></td>
+      <td class="right"><input data-field="skill_deception" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@skill_deception+@prof?@skill_deception_prof" data-roll-label="Zwodzenie" class="roll-btn">🎲</button></td>
     </tr>
   </table>
 
-  <br>
-
   <!-- ATAKI -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td colspan="3" align="center"><strong>⚔️ ATAKI</strong></td>
+      <td colspan="4" class="section-header">⚔️ ATAKI</td>
     </tr>
     <tr>
       <td><strong>Nazwa</strong></td>
-      <td align="center"><strong>Trafienie</strong></td>
-      <td align="center"><strong>Obrażenia</strong></td>
+      <td class="center"><strong>Trafienie</strong></td>
+      <td class="center"><strong>Obrażenia</strong></td>
+      <td></td>
     </tr>
     <tr>
-      <td> </td>
-      <td align="center">+0</td>
-      <td align="center"> </td>
+      <td><input data-field="atk1_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk1_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk1_dmg" type="text" class="plain sm"></td>
+      <td class="center"><button data-roll="d20+@atk1_hit" data-roll-label="Atak: @atk1_name" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td> </td>
-      <td align="center">+0</td>
-      <td align="center"> </td>
+      <td><input data-field="atk2_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk2_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk2_dmg" type="text" class="plain sm"></td>
+      <td class="center"><button data-roll="d20+@atk2_hit" data-roll-label="Atak: @atk2_name" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td> </td>
-      <td align="center">+0</td>
-      <td align="center"> </td>
+      <td><input data-field="atk3_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk3_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk3_dmg" type="text" class="plain sm"></td>
+      <td class="center"><button data-roll="d20+@atk3_hit" data-roll-label="Atak: @atk3_name" class="roll-btn">🎲</button></td>
     </tr>
   </table>
 
-  <br>
-
-  <!-- MAGIA (jeśli dotyczy) -->
-  <table border="1" width="100%">
+  <!-- MAGIA -->
+  <table class="tpl-table">
     <tr>
-      <td colspan="2" align="center"><strong>✨ MAGIA</strong></td>
+      <td colspan="2" class="section-header">✨ MAGIA</td>
     </tr>
     <tr>
       <td><strong>Cecha czarów:</strong></td>
-      <td> </td>
+      <td><input data-field="spell_ability" type="text" class="plain sm"></td>
     </tr>
     <tr>
       <td><strong>ST czaru:</strong></td>
-      <td> </td>
+      <td><input data-field="spell_dc" type="text" class="box xs"></td>
     </tr>
     <tr>
       <td><strong>Atak czarem:</strong></td>
-      <td>+0</td>
+      <td><input data-field="spell_atk" type="text" class="box xs"> <button data-roll="d20+@spell_atk" data-roll-label="Atak czarem" class="roll-btn">🎲</button></td>
     </tr>
     <tr>
-      <td colspan="2" align="center"><strong>Miejsca na czary</strong></td>
+      <td colspan="2" class="section-header-sm">Miejsca na czary</td>
     </tr>
     <tr>
-      <td>1 krąg: [_] [_] [_] [_]</td>
-      <td>2 krąg: [_] [_] [_]</td>
+      <td>1 krąg: <input data-field="slots_1" type="text" class="plain xs"></td>
+      <td>2 krąg: <input data-field="slots_2" type="text" class="plain xs"></td>
     </tr>
     <tr>
-      <td>3 krąg: [_] [_] [_]</td>
-      <td>4 krąg: [_] [_] [_]</td>
+      <td>3 krąg: <input data-field="slots_3" type="text" class="plain xs"></td>
+      <td>4 krąg: <input data-field="slots_4" type="text" class="plain xs"></td>
     </tr>
     <tr>
-      <td>5 krąg: [_] [_] [_]</td>
-      <td>6 krąg: [_] [_]</td>
+      <td>5 krąg: <input data-field="slots_5" type="text" class="plain xs"></td>
+      <td>6 krąg: <input data-field="slots_6" type="text" class="plain xs"></td>
     </tr>
     <tr>
-      <td>7 krąg: [_] [_]</td>
-      <td>8 krąg: [_]</td>
+      <td>7 krąg: <input data-field="slots_7" type="text" class="plain xs"></td>
+      <td>8 krąg: <input data-field="slots_8" type="text" class="plain xs"></td>
     </tr>
     <tr>
-      <td colspan="2">9 krąg: [_]</td>
+      <td colspan="2">9 krąg: <input data-field="slots_9" type="text" class="plain xs"></td>
     </tr>
   </table>
-
-  <br>
 
   <!-- CECHY I ZDOLNOŚCI -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td align="center"><strong>🌟 CECHY I ZDOLNOŚCI</strong></td>
+      <td class="section-header">🌟 CECHY I ZDOLNOŚCI</td>
     </tr>
     <tr>
-      <td>
-        • <br>
-        • <br>
-        • <br>
-        • <br>
-        • <br>
-      </td>
+      <td><textarea data-field="features" class="plain wide" rows="6"></textarea></td>
     </tr>
   </table>
-
-  <br>
 
   <!-- BIEGŁOŚCI -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td align="center"><strong>🔧 BIEGŁOŚCI</strong></td>
+      <td class="section-header">🔧 BIEGŁOŚCI</td>
     </tr>
     <tr>
-      <td><strong>Broń:</strong> </td>
+      <td><strong>Broń:</strong> <input data-field="prof_weapons" type="text" class="plain wide"></td>
     </tr>
     <tr>
-      <td><strong>Pancerze:</strong> </td>
+      <td><strong>Pancerze:</strong> <input data-field="prof_armor" type="text" class="plain wide"></td>
     </tr>
     <tr>
-      <td><strong>Narzędzia:</strong> </td>
+      <td><strong>Narzędzia:</strong> <input data-field="prof_tools" type="text" class="plain wide"></td>
     </tr>
     <tr>
-      <td><strong>Języki:</strong> </td>
+      <td><strong>Języki:</strong> <input data-field="prof_languages" type="text" class="plain wide"></td>
     </tr>
   </table>
 
-  <br>
-
   <!-- EKWIPUNEK -->
-  <table border="1" width="100%">
+  <table class="tpl-table">
     <tr>
-      <td align="center"><strong>🎒 EKWIPUNEK</strong></td>
+      <td class="section-header">🎒 EKWIPUNEK</td>
     </tr>
     <tr>
       <td>
         <strong>Monety:</strong>
-        PC [ ] SR [ ] EL [ ] ZŁ [ ] PL [ ]
+        PC <input data-field="coin_cp" type="text" class="box xs">
+        SR <input data-field="coin_sp" type="text" class="box xs">
+        EL <input data-field="coin_ep" type="text" class="box xs">
+        ZŁ <input data-field="coin_gp" type="text" class="box xs">
+        PL <input data-field="coin_pp" type="text" class="box xs">
       </td>
     </tr>
     <tr>
-      <td>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-      </td>
+      <td><textarea data-field="equipment" class="plain wide" rows="6"></textarea></td>
     </tr>
   </table>
 
-  <br>
-
-  <!-- ZMĘCZENIE I STANY -->
-  <table border="1" width="100%">
+  <!-- STANY -->
+  <table class="tpl-table">
     <tr>
-      <td colspan="2" align="center"><strong>😫 STANY</strong></td>
+      <td colspan="2" class="section-header">😫 STANY</td>
     </tr>
     <tr>
       <td><strong>Zmęczenie:</strong></td>
-      <td>[ ] 1 [ ] 2 [ ] 3 [ ] 4 [ ] 5 [ ] 6</td>
+      <td>
+        <input data-field="exhaustion_1" type="checkbox"> 1
+        <input data-field="exhaustion_2" type="checkbox"> 2
+        <input data-field="exhaustion_3" type="checkbox"> 3
+        <input data-field="exhaustion_4" type="checkbox"> 4
+        <input data-field="exhaustion_5" type="checkbox"> 5
+        <input data-field="exhaustion_6" type="checkbox"> 6
+      </td>
     </tr>
     <tr>
-      <td colspan="2">
-        <strong>Aktywne stany:</strong><br>
+      <td colspan="2"><strong>Aktywne stany:</strong><br><textarea data-field="conditions" class="plain wide" rows="2"></textarea></td>
+    </tr>
+  </table>
 
+  <!-- RZUTY PRZECIW ŚMIERCI -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">💀 RZUTY PRZECIW ŚMIERCI</td>
+    </tr>
+    <tr>
+      <td>Sukcesy:</td>
+      <td>
+        <input data-field="death_s1" type="checkbox">
+        <input data-field="death_s2" type="checkbox">
+        <input data-field="death_s3" type="checkbox">
+      </td>
+    </tr>
+    <tr>
+      <td>Porażki:</td>
+      <td>
+        <input data-field="death_f1" type="checkbox">
+        <input data-field="death_f2" type="checkbox">
+        <input data-field="death_f3" type="checkbox">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="center">
+        <button data-roll="d20" data-roll-label="Rzut przeciw śmierci" class="roll-btn">🎲 Rzut przeciw śmierci</button>
       </td>
     </tr>
   </table>
 
-  <br>
-
-  <!-- RZUTY PRZECIW ŚMIERCI -->
-  <table border="1" width="100%">
+  <!-- NOTATKI -->
+  <table class="tpl-table">
     <tr>
-      <td colspan="2" align="center"><strong>💀 RZUTY PRZECIW ŚMIERCI</strong></td>
+      <td class="section-header">📝 NOTATKI</td>
     </tr>
     <tr>
-      <td>Sukcesy:</td>
-      <td>[ ] [ ] [ ]</td>
-    </tr>
-    <tr>
-      <td>Porażki:</td>
-      <td>[ ] [ ] [ ]</td>
+      <td><textarea data-field="notes" class="plain wide" rows="8"></textarea></td>
     </tr>
   </table>
 
 </body>
-
 </html>

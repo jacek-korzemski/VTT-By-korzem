@@ -409,6 +409,12 @@ useEffect(() => {
       })
       .catch(console.error)
   }, [])
+
+  useEffect(() => {
+    const handler = (e) => handleDiceRoll(e.detail)
+    window.addEventListener('vtt:dice-roll', handler)
+    return () => window.removeEventListener('vtt:dice-roll', handler)
+  }, [handleDiceRoll])
   
   const handleSelectAsset = useCallback((asset, type) => {
     setIsEraserActive(false)

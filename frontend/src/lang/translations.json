@@ -46,6 +46,8 @@
       "importLocal": "Local file",
       "importTemplate": "Server template",
       "export": "Save",
+      "saveJson": "Save data (.json)",
+      "saveHtml": "Export as HTML",
       "clear": "Clear",
       "close": "Close",
       "remove": "Remove notepad",
@@ -56,7 +58,9 @@
       "templateLoading": "Loading templates...",
       "templateEmpty": "No templates available",
       "templateLoadError": "Failed to load templates",
-      "templateCancel": "Cancel"
+      "templateCancel": "Cancel",
+      "modeNotepad": "Notepad",
+      "modeTemplate": "Template"
     },
     "zoom": {
       "zoomOut": "Zoom out",
@@ -196,6 +200,8 @@
       "importLocal": "Plik lokalny",
       "importTemplate": "Szablon z serwera",
       "export": "Zapisz",
+      "saveJson": "Zapisz dane (.json)",
+      "saveHtml": "Eksport jako HTML",
       "clear": "Wyczyść",
       "close": "Zamknij",
       "remove": "Usuń notatnik",
@@ -206,7 +212,9 @@
       "templateLoading": "Ładowanie szablonów...",
       "templateEmpty": "Brak dostępnych szablonów",
       "templateLoadError": "Nie udało się załadować szablonów",
-      "templateCancel": "Anuluj"
+      "templateCancel": "Anuluj",
+      "modeNotepad": "Notatnik",
+      "modeTemplate": "Szablon"
     },
     "zoom": {
       "zoomOut": "Oddal",

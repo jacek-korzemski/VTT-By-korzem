@@ -2620,6 +2620,211 @@ body {
   flex-direction: column;
 }
 
+/* Template mode indicator */
+.note-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  color: #888;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.note-mode-badge.template {
+  color: #e94560;
+  background: rgba(233, 69, 96, 0.1);
+  border-color: rgba(233, 69, 96, 0.25);
+}
+
+/* ============================================
+   Template Renderer
+   ============================================ */
+.note-template-renderer {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 14px;
+  background: #1a1a2e;
+  color: #ccc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.note-template-renderer .tpl-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0 0 10px 0;
+}
+
+.note-template-renderer .tpl-table td {
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 5px 8px;
+  vertical-align: middle;
+}
+
+.note-template-renderer .tpl-table .section-header {
+  text-align: center;
+  font-weight: bold;
+  background: rgba(233, 69, 96, 0.12);
+  color: #e94560;
+  font-size: 0.9rem;
+  padding: 6px 8px;
+  letter-spacing: 0.3px;
+}
+
+.note-template-renderer .tpl-table .section-header-sm {
+  text-align: center;
+  font-weight: bold;
+  color: #aaa;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.03);
+}
+
+.note-template-renderer .tpl-table .center { text-align: center; }
+.note-template-renderer .tpl-table .right { text-align: right; }
+
+.note-template-renderer .tpl-table small {
+  color: #666;
+  font-size: 0.75rem;
+}
+
+/* Template input variants */
+.note-template-renderer input[type="text"],
+.note-template-renderer textarea {
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: #eee;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 2px 4px;
+  line-height: 1.4;
+}
+
+.note-template-renderer input[type="text"]:focus,
+.note-template-renderer textarea:focus {
+  box-shadow: 0 0 0 1px rgba(233, 69, 96, 0.4);
+  border-radius: 2px;
+}
+
+/* .box - bordered input */
+.note-template-renderer input.box {
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 3px;
+  background: rgba(255,255,255,0.04);
+  text-align: center;
+  padding: 2px 4px;
+}
+
+.note-template-renderer input.box:focus {
+  border-color: #e94560;
+  box-shadow: none;
+}
+
+/* .plain - invisible input, text appears naturally */
+.note-template-renderer input.plain,
+.note-template-renderer textarea.plain {
+  border: none;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  padding: 2px 2px;
+  min-height: 1.4em;
+  min-width: 40px;
+}
+
+.note-template-renderer input.plain:hover,
+.note-template-renderer textarea.plain:hover {
+  border-bottom-color: rgba(255,255,255,0.15);
+}
+
+.note-template-renderer input.plain:focus,
+.note-template-renderer textarea.plain:focus {
+  border-bottom-color: #e94560;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* .circle - round stat bubble */
+.note-template-renderer input.circle {
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 50%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 0;
+  background: rgba(255,255,255,0.04);
+}
+
+.note-template-renderer input.circle:focus {
+  border-color: #e94560;
+  box-shadow: none;
+}
+
+/* Size modifiers */
+.note-template-renderer input.xs,
+.note-template-renderer .plain.xs { width: 36px; min-width: 36px; }
+.note-template-renderer input.sm,
+.note-template-renderer .plain.sm { width: 60px; min-width: 60px; }
+.note-template-renderer input.wide,
+.note-template-renderer textarea.wide { width: 100%; box-sizing: border-box; }
+
+.note-template-renderer textarea.plain {
+  resize: vertical;
+  min-height: 2em;
+}
+
+/* Checkbox */
+.note-template-renderer input[type="checkbox"] {
+  accent-color: #e94560;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+/* Roll button */
+.note-template-renderer .roll-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border: 1px solid rgba(233, 69, 96, 0.3);
+  border-radius: 4px;
+  background: rgba(233, 69, 96, 0.08);
+  color: #e94560;
+  font-size: 0.8rem;
+  cursor: pointer;
+  vertical-align: middle;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.note-template-renderer .roll-btn:hover {
+  background: rgba(233, 69, 96, 0.2);
+  border-color: #e94560;
+}
+
+.note-template-renderer .roll-btn:active {
+  background: rgba(233, 69, 96, 0.3);
+  transform: scale(0.96);
+}
+
+/* Save menu (extends load menu styling) */
+.note-save-wrapper {
+  position: relative;
+}
+
 /* Load context menu */
 .note-load-wrapper {
   position: relative;
