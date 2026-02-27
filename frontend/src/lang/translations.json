@@ -60,7 +60,12 @@
       "templateLoadError": "Failed to load templates",
       "templateCancel": "Cancel",
       "modeNotepad": "Notepad",
-      "modeTemplate": "Template"
+      "modeTemplate": "Template",
+      "importJson": "Load saved data (.json)",
+      "jsonMismatchTitle": "Incompatible data",
+      "jsonMismatchMessage": "This data was saved from a different template (\"{source}\"). Current template is \"{current}\". Some fields may not match.",
+      "jsonMismatchConfirm": "Load anyway",
+      "jsonMismatchCancel": "Cancel"
     },
     "zoom": {
       "zoomOut": "Zoom out",
@@ -214,7 +219,12 @@
       "templateLoadError": "Nie udało się załadować szablonów",
       "templateCancel": "Anuluj",
       "modeNotepad": "Notatnik",
-      "modeTemplate": "Szablon"
+      "modeTemplate": "Szablon",
+      "importJson": "Wczytaj dane (.json)",
+      "jsonMismatchTitle": "Niekompatybilne dane",
+      "jsonMismatchMessage": "Te dane zostały zapisane z innego szablonu (\"{source}\"). Aktualny szablon to \"{current}\". Niektóre pola mogą nie pasować.",
+      "jsonMismatchConfirm": "Wczytaj mimo to",
+      "jsonMismatchCancel": "Anuluj"
     },
     "zoom": {
       "zoomOut": "Oddal",

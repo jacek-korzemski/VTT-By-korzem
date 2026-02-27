@@ -119,6 +119,7 @@ mkdir "build\backend\assets\map"
 mkdir "build\backend\assets\tokens"
 mkdir "build\backend\assets\backgrounds"
 mkdir "build\backend\assets\papers"
+mkdir "build\backend\assets\templates"
 mkdir "build\assets"
 
 echo [2/5] Configuring frontend...
@@ -167,6 +168,11 @@ echo [4/5] Copying files...
 xcopy /s /y "frontend\dist\assets\*" "build\assets\" >nul 2>nul
 
 copy /y "backend\api.php" "build\backend\" >nul
+
+:: Copy templates
+if exist "backend\assets\templates\*.html" (
+    xcopy /y "backend\assets\templates\*.html" "build\backend\assets\templates\" >nul 2>nul
+)
 
 (
     echo ^<FilesMatch "^\.env"^>

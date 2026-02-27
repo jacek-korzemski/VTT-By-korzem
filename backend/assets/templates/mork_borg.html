@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MÖRK BORG</title>
+</head>
+<body>
+
+  <!-- CHARACTER -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">💀 CHARACTER</td>
+    </tr>
+    <tr>
+      <td><strong>Name:</strong> <input data-field="name" type="text" class="plain wide"></td>
+      <td><strong>Class:</strong> <input data-field="class" type="text" class="plain"></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <strong>HP:</strong>
+        <input data-field="hp_current" type="text" class="box sm"> / <input data-field="hp_max" type="text" class="box sm">
+        &nbsp;&nbsp;
+        <strong>Omens:</strong>
+        <input data-field="omens_current" type="text" class="box xs"> / <input data-field="omens_max" type="text" class="box xs">
+      </td>
+    </tr>
+  </table>
+
+  <!-- ABILITIES -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="3" class="section-header">⚔️ ABILITIES</td>
+    </tr>
+    <tr>
+      <td class="center">
+        <strong>Strength</strong><br>
+        <input data-field="str" type="text" class="circle">
+        <button data-roll="d20+@str" data-roll-label="Strength" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <strong>Agility</strong><br>
+        <input data-field="agi" type="text" class="circle">
+        <button data-roll="d20+@agi" data-roll-label="Agility" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <strong>Presence</strong><br>
+        <input data-field="pre" type="text" class="circle">
+        <button data-roll="d20+@pre" data-roll-label="Presence" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+    <tr>
+      <td class="center" colspan="3">
+        <strong>Toughness</strong>
+        <input data-field="tou" type="text" class="circle">
+        <button data-roll="d20+@tou" data-roll-label="Toughness" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- COMBAT -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">🗡️ COMBAT</td>
+    </tr>
+    <tr>
+      <td><strong>Armor</strong></td>
+      <td><input data-field="armor_name" type="text" class="plain"> — tier <input data-field="armor_tier" type="text" class="box xs"> (DR d<input data-field="armor_dr" type="text" class="box xs">)
+        <button data-roll="d@armor_dr" data-roll-label="Armor DR" class="roll-btn">🎲 DR</button>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="section-header-sm">Weapons</td>
+    </tr>
+    <tr>
+      <td><input data-field="wpn1_name" type="text" class="plain"></td>
+      <td>
+        d<input data-field="wpn1_dmg" type="text" class="box xs"> dmg
+        <button data-roll="d20+@str" data-roll-label="Attack: @wpn1_name" class="roll-btn">🎲 Hit</button>
+        <button data-roll="d@wpn1_dmg" data-roll-label="Damage: @wpn1_name" class="roll-btn">🎲 Dmg</button>
+      </td>
+    </tr>
+    <tr>
+      <td><input data-field="wpn2_name" type="text" class="plain"></td>
+      <td>
+        d<input data-field="wpn2_dmg" type="text" class="box xs"> dmg
+        <button data-roll="d20+@str" data-roll-label="Attack: @wpn2_name" class="roll-btn">🎲 Hit</button>
+        <button data-roll="d@wpn2_dmg" data-roll-label="Damage: @wpn2_name" class="roll-btn">🎲 Dmg</button>
+      </td>
+    </tr>
+    <tr>
+      <td><input data-field="wpn3_name" type="text" class="plain"></td>
+      <td>
+        d<input data-field="wpn3_dmg" type="text" class="box xs"> dmg
+        <button data-roll="d20+@agi" data-roll-label="Attack: @wpn3_name" class="roll-btn">🎲 Hit</button>
+        <button data-roll="d@wpn3_dmg" data-roll-label="Damage: @wpn3_name" class="roll-btn">🎲 Dmg</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- POWERS -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">✨ POWERS / SCROLLS</td>
+    </tr>
+    <tr>
+      <td>
+        <input data-field="power1" type="text" class="plain wide"><br>
+        <input data-field="power2" type="text" class="plain wide"><br>
+        <input data-field="power3" type="text" class="plain wide"><br>
+        <input data-field="power4" type="text" class="plain wide">
+      </td>
+    </tr>
+    <tr>
+      <td class="center">
+        <button data-roll="d4+@pre" data-roll-label="Use Power (d4)" class="roll-btn">🎲 Use Power (DR 4)</button>
+        <button data-roll="d6+@pre" data-roll-label="Use Power (d6)" class="roll-btn">🎲 Use Power (DR 6)</button>
+        <button data-roll="d8+@pre" data-roll-label="Use Power (d8)" class="roll-btn">🎲 Use Power (DR 8)</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- EQUIPMENT -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🎒 EQUIPMENT</td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Silver:</strong> <input data-field="silver" type="text" class="box sm">
+      </td>
+    </tr>
+    <tr>
+      <td><textarea data-field="equipment" class="plain wide" rows="6"></textarea></td>
+    </tr>
+  </table>
+
+  <!-- TRAITS -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🖤 TRAITS & DESCRIPTION</td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Body:</strong> <input data-field="trait_body" type="text" class="plain wide"><br>
+        <strong>Habit:</strong> <input data-field="trait_habit" type="text" class="plain wide"><br>
+        <strong>Quirk:</strong> <input data-field="trait_quirk" type="text" class="plain wide">
+      </td>
+    </tr>
+  </table>
+
+  <!-- BROKEN -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">💀 DEATH & MISERY</td>
+    </tr>
+    <tr>
+      <td><strong>Broken:</strong></td>
+      <td><input data-field="broken" type="checkbox"> Character is Broken (0 HP)</td>
+    </tr>
+    <tr>
+      <td colspan="2"><textarea data-field="miseries" class="plain wide" rows="3" placeholder="Miseries, infections, curses..."></textarea></td>
+    </tr>
+  </table>
+
+  <!-- NOTES -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">📝 NOTES</td>
+    </tr>
+    <tr>
+      <td><textarea data-field="notes" class="plain wide" rows="6"></textarea></td>
+    </tr>
+  </table>
+
+</body>
+</html>

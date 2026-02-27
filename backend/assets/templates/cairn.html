@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cairn</title>
+</head>
+<body>
+
+  <!-- CHARACTER -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">🪨 CHARACTER</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>Name:</strong> <input data-field="name" type="text" class="plain wide"></td>
+    </tr>
+    <tr>
+      <td><strong>Background:</strong> <input data-field="background" type="text" class="plain"></td>
+      <td><strong>Age:</strong> <input data-field="age" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <strong>Description:</strong> <input data-field="description" type="text" class="plain wide">
+      </td>
+    </tr>
+  </table>
+
+  <!-- ABILITY SCORES -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="3" class="section-header">📊 ABILITY SCORES</td>
+    </tr>
+    <tr>
+      <td class="center">
+        <strong>Strength</strong><br>
+        <input data-field="str" type="text" class="circle">
+        <button data-roll="d20" data-roll-label="STR Save (vs @str)" class="roll-btn">🎲 Save</button>
+      </td>
+      <td class="center">
+        <strong>Dexterity</strong><br>
+        <input data-field="dex" type="text" class="circle">
+        <button data-roll="d20" data-roll-label="DEX Save (vs @dex)" class="roll-btn">🎲 Save</button>
+      </td>
+      <td class="center">
+        <strong>Willpower</strong><br>
+        <input data-field="wil" type="text" class="circle">
+        <button data-roll="d20" data-roll-label="WIL Save (vs @wil)" class="roll-btn">🎲 Save</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- PROTECTION -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">🛡️ PROTECTION</td>
+    </tr>
+    <tr>
+      <td>
+        <strong>HP:</strong>
+        <input data-field="hp_current" type="text" class="box sm"> / <input data-field="hp_max" type="text" class="box sm">
+      </td>
+      <td>
+        <strong>Armor:</strong> <input data-field="armor" type="text" class="box xs">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <strong>Armor worn:</strong> <input data-field="armor_name" type="text" class="plain wide">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <input data-field="deprived" type="checkbox"> <strong>Deprived</strong> <small>(cannot recover HP)</small>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ATTACKS -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="3" class="section-header">⚔️ WEAPONS</td>
+    </tr>
+    <tr>
+      <td><strong>Weapon</strong></td>
+      <td class="center"><strong>Damage</strong></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><input data-field="wpn1_name" type="text" class="plain"></td>
+      <td class="center">d<input data-field="wpn1_die" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d@wpn1_die" data-roll-label="@wpn1_name" class="roll-btn">🎲 Dmg</button></td>
+    </tr>
+    <tr>
+      <td><input data-field="wpn2_name" type="text" class="plain"></td>
+      <td class="center">d<input data-field="wpn2_die" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d@wpn2_die" data-roll-label="@wpn2_name" class="roll-btn">🎲 Dmg</button></td>
+    </tr>
+    <tr>
+      <td><input data-field="wpn3_name" type="text" class="plain"></td>
+      <td class="center">d<input data-field="wpn3_die" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d@wpn3_die" data-roll-label="@wpn3_name" class="roll-btn">🎲 Dmg</button></td>
+    </tr>
+  </table>
+
+  <!-- INVENTORY -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🎒 INVENTORY <small>(max 10 slots)</small></td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Gold:</strong> <input data-field="gold" type="text" class="box sm">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        1. <input data-field="inv1" type="text" class="plain wide"><br>
+        2. <input data-field="inv2" type="text" class="plain wide"><br>
+        3. <input data-field="inv3" type="text" class="plain wide"><br>
+        4. <input data-field="inv4" type="text" class="plain wide"><br>
+        5. <input data-field="inv5" type="text" class="plain wide"><br>
+        6. <input data-field="inv6" type="text" class="plain wide"><br>
+        7. <input data-field="inv7" type="text" class="plain wide"><br>
+        8. <input data-field="inv8" type="text" class="plain wide"><br>
+        9. <input data-field="inv9" type="text" class="plain wide"><br>
+        10. <input data-field="inv10" type="text" class="plain wide">
+      </td>
+    </tr>
+    <tr>
+      <td class="section-header-sm">Fatigue</td>
+    </tr>
+    <tr>
+      <td>
+        <input data-field="fatigue1" type="checkbox"> 1
+        <input data-field="fatigue2" type="checkbox"> 2
+        <input data-field="fatigue3" type="checkbox"> 3
+        <input data-field="fatigue4" type="checkbox"> 4
+        <input data-field="fatigue5" type="checkbox"> 5
+        <small>(each checked = 1 inventory slot used)</small>
+      </td>
+    </tr>
+  </table>
+
+  <!-- SPELLBOOK -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">✨ SPELLBOOKS</td>
+    </tr>
+    <tr>
+      <td>
+        <input data-field="spell1" type="text" class="plain wide"><br>
+        <input data-field="spell2" type="text" class="plain wide"><br>
+        <input data-field="spell3" type="text" class="plain wide">
+      </td>
+    </tr>
+  </table>
+
+  <!-- SCARS -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🩸 SCARS</td>
+    </tr>
+    <tr>
+      <td><textarea data-field="scars" class="plain wide" rows="3"></textarea></td>
+    </tr>
+  </table>
+
+  <!-- BONDS & OMENS -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🔗 BONDS & OMENS</td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Bond:</strong> <input data-field="bond" type="text" class="plain wide"><br>
+        <strong>Omen:</strong> <input data-field="omen" type="text" class="plain wide">
+      </td>
+    </tr>
+  </table>
+
+  <!-- NOTES -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">📝 NOTES</td>
+    </tr>
+    <tr>
+      <td><textarea data-field="notes" class="plain wide" rows="8"></textarea></td>
+    </tr>
+  </table>
+
+</body>
+</html>

@@ -104,9 +104,13 @@ function NoteEditor({ id, onRemove, canRemove }) {
   const [showLoadMenu, setShowLoadMenu] = useState(false)
   const [showSaveMenu, setShowSaveMenu] = useState(false)
   const [showTemplateModal, setShowTemplateModal] = useState(false)
+  const [showMismatchModal, setShowMismatchModal] = useState(false)
+  const [pendingJsonFields, setPendingJsonFields] = useState(null)
+  const [mismatchInfo, setMismatchInfo] = useState({ source: '', current: '' })
   const [templates, setTemplates] = useState([])
   const [templatesLoading, setTemplatesLoading] = useState(false)
   const [templatesError, setTemplatesError] = useState(false)
+  const [templateRenderKey, setTemplateRenderKey] = useState(0)
 
   useEffect(() => {
     const saved = localStorage.getItem(storageKey)
@@ -232,7 +236,7 @@ function NoteEditor({ id, onRemove, canRemove }) {
         executeDiceRoll(expr, label, getFieldValue)
       })
     })
-  }, [mode, templateHtml])
+  }, [mode, templateHtml, templateRenderKey])
 
   // --- Export ---
   const handleExportHtml = useCallback(() => {
@@ -392,6 +396,69 @@ ${content}
     input.click()
   }, [storageKey, title, saveNotepad])
 
+  const applyJsonFields = useCallback((fields) => {
+    fieldsRef.current = { ...fieldsRef.current, ...fields }
+    setTemplateFields(fieldsRef.current)
+    const data = {
+      mode: 'template',
+      templateHtml,
+      templateId,
+      fields: fieldsRef.current,
+      title,
+      lastModified: Date.now()
+    }
+    localStorage.setItem(storageKey, JSON.stringify(data))
+    setTemplateRenderKey(k => k + 1)
+  }, [storageKey, templateHtml, templateId, title])
+
+  const handleImportJson = useCallback(() => {
+    setShowLoadMenu(false)
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const file = e.target.files?.[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target?.result || '')
+          if (!data.fields || typeof data.fields !== 'object') return
+
+          const sourceId = data.templateId || data.title || ''
+          const currentId = templateId || title || ''
+          const isCompatible = !sourceId || !currentId || sourceId === currentId
+
+          if (isCompatible) {
+            applyJsonFields(data.fields)
+          } else {
+            setPendingJsonFields(data.fields)
+            setMismatchInfo({
+              source: data.title || data.templateId || '?',
+              current: title || templateId || '?'
+            })
+            setShowMismatchModal(true)
+          }
+        } catch { /* invalid json */ }
+      }
+      reader.readAsText(file)
+    }
+    input.click()
+  }, [templateId, title, applyJsonFields])
+
+  const handleMismatchConfirm = useCallback(() => {
+    if (pendingJsonFields) {
+      applyJsonFields(pendingJsonFields)
+    }
+    setShowMismatchModal(false)
+    setPendingJsonFields(null)
+  }, [pendingJsonFields, applyJsonFields])
+
+  const handleMismatchCancel = useCallback(() => {
+    setShowMismatchModal(false)
+    setPendingJsonFields(null)
+  }, [])
+
   const handleImportTemplate = useCallback(async () => {
     setShowLoadMenu(false)
     setShowTemplateModal(true)
@@ -486,6 +553,10 @@ ${content}
               <div className="note-load-menu">
                 <button onClick={handleImportLocal}>{t('notes.importLocal')}</button>
                 <button onClick={handleImportTemplate}>{t('notes.importTemplate')}</button>
+                {mode === 'template' && (<>
+                  <hr className="note-load-menu-separator" />
+                  <button onClick={handleImportJson}>{t('notes.importJson')}</button>
+                </>)}
               </div>
             )}
           </div>
@@ -555,6 +626,28 @@ ${content}
             <div className="note-template-modal-footer">
               <button onClick={() => setShowTemplateModal(false)} className="note-template-cancel">
                 {t('notes.templateCancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMismatchModal && (
+        <div className="note-template-modal" onClick={handleMismatchCancel}>
+          <div className="note-template-modal-content" onClick={e => e.stopPropagation()}>
+            <h3>{t('notes.jsonMismatchTitle')}</h3>
+            <p className="note-mismatch-message">
+              {t('notes.jsonMismatchMessage', {
+                source: mismatchInfo.source,
+                current: mismatchInfo.current
+              })}
+            </p>
+            <div className="note-template-modal-footer">
+              <button onClick={handleMismatchCancel} className="note-template-cancel">
+                {t('notes.jsonMismatchCancel')}
+              </button>
+              <button onClick={handleMismatchConfirm} className="note-mismatch-confirm">
+                {t('notes.jsonMismatchConfirm')}
               </button>
             </div>
           </div>

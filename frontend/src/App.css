@@ -2519,7 +2519,8 @@ body {
 .notes-editors-container {
   flex: 1;
   display: flex;
-  gap: 2px;
+  justify-content: center;
+  gap: 0;
   padding: 0;
   overflow: hidden;
   background: #0a0a14;
@@ -2533,12 +2534,10 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  max-width: 1280px;
   background: #1a1a2e;
   border-right: 1px solid #0f3460;
-}
-
-.note-editor:last-child {
-  border-right: none;
+  border-left: 1px solid #0f3460;
 }
 
 .note-editor-header {
@@ -2862,6 +2861,12 @@ body {
   color: #e94560;
 }
 
+.note-load-menu-separator {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 2px 0;
+}
+
 /* Template modal */
 .note-template-modal {
   position: fixed;
@@ -2953,6 +2958,27 @@ body {
 
 .note-template-cancel:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.note-mismatch-message {
+  color: #ccc;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.note-mismatch-confirm {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  background: #e94560;
+  color: #fff;
+}
+
+.note-mismatch-confirm:hover {
+  background: #d13550;
 }
 
 /* ============================================
