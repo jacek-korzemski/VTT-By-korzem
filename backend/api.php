@@ -427,6 +427,19 @@ try {
                     ]);
                     break;
 
+                case 'get-paper':
+                    $id = basename($_GET['id'] ?? '');
+                    $filePath = __DIR__ . '/assets/papers/' . $id;
+                    if ($id && preg_match('/\.pdf$/i', $id) && is_file($filePath)) {
+                        header('Content-Type: application/pdf');
+                        header('Content-Length: ' . filesize($filePath));
+                        readfile($filePath);
+                    } else {
+                        http_response_code(404);
+                        echo json_encode(['success' => false, 'error' => 'Paper not found']);
+                    }
+                    break;
+
                 case 'rolls':
                     $rollsFile = __DIR__ . '/data/rolls.json';
                     if (file_exists($rollsFile)) {

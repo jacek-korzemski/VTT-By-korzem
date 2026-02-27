@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react'
 import NotesPanel from './NotesPanel'
-import PdfPanel from './PdfPanel'
 import { t } from '../../lang'
+
+const PdfPanel = lazy(() => import('./PdfPanel'))
 
 const STORAGE_KEY = 'vtt_bottom_panel_height'
 const MIN_HEIGHT_PERCENT = 30
@@ -130,7 +131,9 @@ function BottomPanel({ activeTab, onTabChange }) {
           )}
           {mountedTabs.has('pdf') && (
             <div className={`bottom-panel-tab-pane ${activeTab !== 'pdf' ? 'hidden' : ''}`}>
-              <PdfPanel />
+              <Suspense fallback={<div className="pdf-placeholder">{t('pdf.loading')}</div>}>
+                <PdfPanel />
+              </Suspense>
             </div>
           )}
         </div>

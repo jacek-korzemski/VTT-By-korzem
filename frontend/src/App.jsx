@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, startTransition } from 'react'
 import { Sidebar, Grid, DicePanel, BottomPanel } from './components'
+import DebugOverlay from './components/atoms/DebugOverlay'
 import { 
   createEmptyFog, 
   createRevealedFog, 
@@ -8,6 +9,8 @@ import {
 } from './utils/fogBitmap'
 import { BASE_PATH, API_BASE } from '../config'
 import { t } from './lang'
+
+const DEBUG_MODE = new URLSearchParams(window.location.search).has('debug')
 
 function App() {
   const [scenes, setScenes] = useState([])
@@ -1001,6 +1004,8 @@ useEffect(() => {
         activeTab={bottomPanelTab}
         onTabChange={setBottomPanelTab}
       />
+
+      {DEBUG_MODE && <DebugOverlay />}
     </div>
   )
 }

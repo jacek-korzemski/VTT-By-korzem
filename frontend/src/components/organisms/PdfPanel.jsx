@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, Component } from 'react'
+import { Document, Page, pdfjs } from 'react-pdf'
 import { API_BASE, BASE_PATH } from '../../../config'
 import { t } from '../../lang'
 import {
@@ -8,6 +9,55 @@ import {
   deleteLocalPdf,
 } from '../../utils/pdfStorage'
 
+try {
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+  ).toString()
+} catch {
+  pdfjs.GlobalWorkerOptions.workerSrc = ''
+}
+
+class PdfErrorBoundary extends Component {
+  state = { error: null }
+
+  static getDerivedStateFromError(error) {
+    return { error }
+  }
+
+  componentDidCatch(error, info) {
+    console.error('PDF render crash:', error, info?.componentStack)
+  }
+
+  reset = () => this.setState({ error: null })
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="pdf-placeholder" style={{ flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ color: '#e94560' }}>
+            PDF render error: {this.state.error?.message || 'Unknown'}
+          </div>
+          <button
+            onClick={this.reset}
+            style={{
+              padding: '0.4rem 1rem',
+              background: 'rgba(74,222,128,0.15)',
+              border: '1px solid rgba(74,222,128,0.3)',
+              borderRadius: '4px',
+              color: '#4ade80',
+              cursor: 'pointer',
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 function PdfPanel() {
   const [serverPdfs, setServerPdfs] = useState([])
   const [localPdfs, setLocalPdfs] = useState([])
@@ -15,7 +65,11 @@ function PdfPanel() {
   const [pdfUrl, setPdfUrl] = useState(null)
   const [loading, setLoading] = useState(false)
   const [missingIds, setMissingIds] = useState(new Set())
+  const [numPages, setNumPages] = useState(null)
   const blobUrlRef = useRef(null)
+  const serverCacheRef = useRef(new Map())
+  const viewerRef = useRef(null)
+  const [viewerWidth, setViewerWidth] = useState(null)
 
   useEffect(() => {
     fetch(`${API_BASE}?action=list-papers`, { credentials: 'include' })
@@ -33,22 +87,65 @@ function PdfPanel() {
   useEffect(() => {
     return () => {
       if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current)
+      serverCacheRef.current.forEach(url => URL.revokeObjectURL(url))
+      serverCacheRef.current.clear()
     }
   }, [])
 
-  const openServerPdf = useCallback((pdf) => {
+  useEffect(() => {
+    const el = viewerRef.current
+    if (!el) return
+
+    const updateWidth = () => setViewerWidth(el.clientWidth)
+    updateWidth()
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => updateWidth())
+      observer.observe(el)
+      return () => observer.disconnect()
+    }
+    window.addEventListener('resize', updateWidth)
+    return () => window.removeEventListener('resize', updateWidth)
+  }, [])
+
+  const onDocumentLoadSuccess = useCallback(({ numPages: n }) => {
+    setNumPages(n)
+  }, [])
+
+  const openServerPdf = useCallback(async (pdf) => {
     if (blobUrlRef.current) {
       URL.revokeObjectURL(blobUrlRef.current)
       blobUrlRef.current = null
     }
+    setNumPages(null)
     setActivePdf({ type: 'server', id: pdf.id, name: pdf.name })
-    setPdfUrl(`${BASE_PATH}${pdf.src}`)
+
+    const cached = serverCacheRef.current.get(pdf.id)
+    if (cached) {
+      setPdfUrl(cached)
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_BASE}?action=get-paper&id=${encodeURIComponent(pdf.id)}`, { credentials: 'include' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      serverCacheRef.current.set(pdf.id, url)
+      setPdfUrl(url)
+    } catch (err) {
+      console.error('Failed to load server PDF:', err)
+      setPdfUrl(null)
+    }
+    setLoading(false)
   }, [])
 
   const openLocalPdf = useCallback(async (meta) => {
     if (missingIds.has(meta.id)) return
 
     setLoading(true)
+    setNumPages(null)
     setActivePdf({ type: 'local', id: meta.id, name: meta.name })
 
     if (blobUrlRef.current) {
@@ -78,6 +175,7 @@ function PdfPanel() {
       if (!file) return
 
       setLoading(true)
+      setNumPages(null)
       try {
         const meta = await saveLocalPdf(file)
         setLocalPdfs(getLocalPdfMeta())
@@ -113,6 +211,7 @@ function PdfPanel() {
     if (activePdf?.id === meta.id) {
       setActivePdf(null)
       setPdfUrl(null)
+      setNumPages(null)
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current)
         blobUrlRef.current = null
@@ -120,7 +219,17 @@ function PdfPanel() {
     }
   }, [activePdf])
 
+  const errorBoundaryRef = useRef(null)
+
+  useEffect(() => {
+    errorBoundaryRef.current?.reset()
+  }, [pdfUrl])
+
   const hasPdfs = serverPdfs.length > 0 || localPdfs.length > 0
+  const MAX_CANVAS_WIDTH = 1024
+  const pageWidth = viewerWidth
+    ? Math.min(viewerWidth - 20, MAX_CANVAS_WIDTH)
+    : undefined
 
   return (
     <div className="pdf-panel">
@@ -174,7 +283,7 @@ function PdfPanel() {
         </div>
       </div>
 
-      <div className="pdf-viewer">
+      <div className="pdf-viewer" ref={viewerRef}>
         {loading && <div className="pdf-placeholder">{t('pdf.loading')}</div>}
         {!loading && !pdfUrl && (
           <div className="pdf-placeholder">
@@ -182,9 +291,66 @@ function PdfPanel() {
           </div>
         )}
         {!loading && pdfUrl && (
-          <iframe src={pdfUrl} title={activePdf?.name || 'PDF'} />
+          <PdfErrorBoundary ref={errorBoundaryRef}>
+            <Document
+              file={pdfUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              loading={<div className="pdf-placeholder">{t('pdf.loading')}</div>}
+            >
+              {numPages && Array.from({ length: numPages }, (_, i) => (
+                <LazyPage
+                  key={i + 1}
+                  pageNumber={i + 1}
+                  width={pageWidth}
+                  scrollRoot={viewerRef}
+                />
+              ))}
+            </Document>
+          </PdfErrorBoundary>
         )}
       </div>
+    </div>
+  )
+}
+
+function LazyPage({ pageNumber, width, scrollRoot }) {
+  const [visible, setVisible] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { root: scrollRoot?.current, rootMargin: '200px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [scrollRoot])
+
+  const placeholderHeight = width ? Math.round(width * 1.414) : 800
+
+  return (
+    <div ref={ref} style={{ minHeight: visible ? undefined : placeholderHeight }}>
+      {visible && (
+        <Page
+          pageNumber={pageNumber}
+          width={width}
+          renderTextLayer={false}
+          renderAnnotationLayer={false}
+        />
+      )}
     </div>
   )
 }
