@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Dungeon Smashers</title>
+</head>
+
+<body>
+
+  <!-- NAGLOWEK POSTACI -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">🧙 DUNGEON SMASHERS</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>Imie:</strong> <input data-field="name" type="text" class="plain wide"></td>
+    </tr>
+    <tr>
+      <td><strong>Klasa:</strong> <input data-field="class" type="text" class="plain"></td>
+      <td><strong>Tytul:</strong> <input data-field="title" type="text" class="plain"></td>
+    </tr>
+    <tr>
+      <td><strong>Poziom:</strong> <input data-field="level" type="text" class="box sm"></td>
+      <td><strong>Charakter:</strong> <input data-field="alignment" type="text" class="plain"></td>
+    </tr>
+  </table>
+
+  <!-- ATRYBUTY -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="3" class="section-header">📊 ATRYBUTY</td>
+    </tr>
+    <tr>
+      <td class="center"><strong>SIL (STR)</strong></td>
+      <td class="center"><strong>ZRC (DEX)</strong></td>
+      <td class="center"><strong>KON (CON)</strong></td>
+    </tr>
+    <tr>
+      <td class="center">
+        <input data-field="str_score" type="text" class="circle"> (<input data-field="str_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@str_mod" data-roll-label="Sila" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="dex_score" type="text" class="circle"> (<input data-field="dex_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@dex_mod" data-roll-label="Zrecznosc" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="con_score" type="text" class="circle"> (<input data-field="con_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@con_mod" data-roll-label="Kondycja" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+    <tr>
+      <td class="center"><strong>INT (INT)</strong></td>
+      <td class="center"><strong>MDR (WIS)</strong></td>
+      <td class="center"><strong>CHA (CHA)</strong></td>
+    </tr>
+    <tr>
+      <td class="center">
+        <input data-field="int_score" type="text" class="circle"> (<input data-field="int_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@int_mod" data-roll-label="Inteligencja" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="wis_score" type="text" class="circle"> (<input data-field="wis_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@wis_mod" data-roll-label="Madrosc" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="cha_score" type="text" class="circle"> (<input data-field="cha_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@cha_mod" data-roll-label="Charyzma" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" class="center">
+        <em>Modyfikatory: 3 = -2 | 4-5 = -1 | 6-15 = 0 | 16-17 = +1 | 18-19 = +2 | 20+ = +3</em>
+      </td>
+    </tr>
+  </table>
+
+  <!-- STATYSTYKI BOJOWE -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="3" class="section-header">⚔️ STATYSTYKI BOJOWE</td>
+    </tr>
+    <tr>
+      <td class="center"><strong>Klasa Pancerza (AC)</strong><br><input data-field="ac" type="text" class="circle"></td>
+      <td class="center">
+        <strong>Rzut Obronny</strong><br>
+        <input data-field="save" type="text" class="circle">
+        <button data-roll="d20+@save" data-roll-label="Rzut Obronny" class="roll-btn">🎲</button>
+      </td>
+      <td class="center"><strong>Szybkosc</strong><br><input data-field="move" type="text" class="circle"></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="center">
+        <strong>Punkty Wytrzymalosci (HP):</strong>
+        <input data-field="hp_current" type="text" class="box sm"> / <input data-field="hp_max" type="text"
+          class="box sm">
+      </td>
+      <td class="center">
+        <strong>Mana:</strong>
+        <input data-field="mana_current" type="text" class="box sm"> / <input data-field="mana_max" type="text"
+          class="box sm">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" class="center">
+        <button data-roll="d20+@dex_mod" data-roll-label="Inicjatywa" class="roll-btn">🎲 Inicjatywa</button>
+        <button data-roll="d20+@cha_mod" data-roll-label="Reakcja NPC" class="roll-btn">🎲 Reakcja NPC</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- MODYFIKATORY Z ATRYBUTOW -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="3" class="section-header">📋 MODYFIKATORY Z ATRYBUTOW</td>
+    </tr>
+    <tr>
+      <td>SIL -> Trafienie i obrazenia (wrecz)</td>
+      <td>ZRC -> Trafienie i obrazenia (dystans)</td>
+      <td>KON -> Bonus HP / poziom</td>
+    </tr>
+    <tr>
+      <td>MDR -> Modyfikator Rzutu Obronnego</td>
+      <td>CHA -> Modyfikator reakcji NPC</td>
+      <td>INT -> Bonus Many / poziom</td>
+    </tr>
+  </table>
+
+  <!-- NAJEMNICY -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">👥 NAJEMNICY</td>
+    </tr>
+    <tr>
+      <td><strong>Maks. najemnikow (z CHA):</strong></td>
+      <td class="right"><input data-field="hirelings_max" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td><strong>Morale najemnikow:</strong></td>
+      <td class="right">
+        <input data-field="hirelings_morale" type="text" class="box xs">
+        <button data-roll="2d6+@hirelings_morale" data-roll-label="Morale Najemnikow" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>Aktywni najemnicy:</strong><br><textarea data-field="hirelings_active" class="plain wide"
+          rows="4"></textarea></td>
+    </tr>
+  </table>
+
+  <!-- MODYFIKATORY BOJOWE KLASY -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">🗡️ MODYFIKATORY BOJOWE Z KLASY</td>
+    </tr>
+    <tr>
+      <td>Bonus Trafienia (To Hit):</td>
+      <td class="right"><input data-field="class_to_hit" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td>Bonus Obrazen (Damage):</td>
+      <td class="right"><input data-field="class_damage" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td>Liczba Atakow (Attacks):</td>
+      <td class="right"><input data-field="class_attacks" type="text" class="box xs"></td>
+    </tr>
+  </table>
+
+  <!-- ATAKI -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="6" class="section-header">⚔️ ATAKI</td>
+    </tr>
+    <tr>
+      <td><strong>Broń</strong></td>
+      <td class="center"><strong>Typ</strong></td>
+      <td class="center"><strong>Trafienie</strong></td>
+      <td class="center"><strong>Obrażenia</strong></td>
+      <td class="center"></td>
+      <td class="center"></td>
+    </tr>
+    <tr>
+      <td><input data-field="atk1_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk1_type" type="text" class="box sm"></td>
+      <td class="center"><input data-field="atk1_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk1_dmg" type="text" class="plain sm"></td>
+      <td class="center"><button data-roll="d20+@atk1_hit+@class_to_hit" data-roll-label="Trafienie: @atk1_name"
+          class="roll-btn">🎲 Hit</button></td>
+      <td class="center"><button data-roll="@atk1_dmg+@class_damage" data-roll-label="Obrazenia: @atk1_name"
+          class="roll-btn">🎲 Dmg</button></td>
+    </tr>
+    <tr>
+      <td><input data-field="atk2_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk2_type" type="text" class="box sm"></td>
+      <td class="center"><input data-field="atk2_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk2_dmg" type="text" class="plain sm"></td>
+      <td class="center"><button data-roll="d20+@atk2_hit+@class_to_hit" data-roll-label="Trafienie: @atk2_name"
+          class="roll-btn">🎲 Hit</button></td>
+      <td class="center"><button data-roll="@atk2_dmg+@class_damage" data-roll-label="Obrazenia: @atk2_name"
+          class="roll-btn">🎲 Dmg</button></td>
+    </tr>
+    <tr>
+      <td><input data-field="atk3_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk3_type" type="text" class="box sm"></td>
+      <td class="center"><input data-field="atk3_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk3_dmg" type="text" class="plain sm"></td>
+      <td class="center"><button data-roll="d20+@atk3_hit+@class_to_hit" data-roll-label="Trafienie: @atk3_name"
+          class="roll-btn">🎲 Hit</button></td>
+      <td class="center"><button data-roll="@atk3_dmg+@class_damage" data-roll-label="Obrazenia: @atk3_name"
+          class="roll-btn">🎲 Dmg</button></td>
+    </tr>
+  </table>
+
+  <!-- PANCERZ -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="4" class="section-header">🛡️ PANCERZ</td>
+    </tr>
+    <tr>
+      <td><strong>Typ pancerza</strong></td>
+      <td class="center"><strong>Bonus AC</strong></td>
+      <td class="center"><strong>Kara do Save</strong></td>
+      <td class="center"></td>
+    </tr>
+    <tr>
+      <td><input data-field="armor_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="armor_ac_bonus" type="text" class="box xs"></td>
+      <td class="center"><input data-field="armor_save_penalty" type="text" class="box xs"></td>
+      <td class="center"><button data-roll="d20+@save+@armor_save_penalty" data-roll-label="Save w pancerzu"
+          class="roll-btn">🎲 Save</button></td>
+    </tr>
+    <tr>
+      <td>Tarcza: <input data-field="shield_name" type="text" class="plain sm"></td>
+      <td class="center"><input data-field="shield_ac_bonus" type="text" class="box xs"></td>
+      <td class="center">0</td>
+      <td class="center"></td>
+    </tr>
+  </table>
+
+  <!-- MAGIA -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">✨ MAGIA</td>
+    </tr>
+    <tr>
+      <td><strong>Typ czarow:</strong></td>
+      <td>
+        <input data-field="magic_arcane" type="checkbox"> Arcane
+        <input data-field="magic_divine" type="checkbox"> Divine
+        <input data-field="magic_nature" type="checkbox"> Nature
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Mana (akt. / maks.):</strong></td>
+      <td>
+        <input data-field="mana_current_2" type="text" class="box sm"> /
+        <input data-field="mana_max_2" type="text" class="box sm">
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Atak czarem:</strong></td>
+      <td><input data-field="spell_attack" type="text" class="box xs"> <button data-roll="d20+@spell_attack"
+          data-roll-label="Atak czarem" class="roll-btn">🎲</button></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="section-header-sm">Znane czary wg poziomu</td>
+    </tr>
+    <tr>
+      <td>1: <input data-field="spell_slots_1" type="text" class="box xs"></td>
+      <td>2: <input data-field="spell_slots_2" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td>3: <input data-field="spell_slots_3" type="text" class="box xs"></td>
+      <td>4: <input data-field="spell_slots_4" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td>5: <input data-field="spell_slots_5" type="text" class="box xs"></td>
+      <td>6: <input data-field="spell_slots_6" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td>7: <input data-field="spell_slots_7" type="text" class="box xs"></td>
+      <td>8: <input data-field="spell_slots_8" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td colspan="2">9: <input data-field="spell_slots_9" type="text" class="box xs"></td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>Przygotowane czary:</strong><br><textarea data-field="prepared_spells" class="plain wide"
+          rows="5"></textarea></td>
+    </tr>
+  </table>
+
+  <!-- ZDOLNOSCI KLAS SPECJALNYCH -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">🗝️ ZDOLNOSCI SPECJALNE</td>
+    </tr>
+    <tr>
+      <td><strong>Zlodziej (test umiejetnosci):</strong></td>
+      <td>
+        <input data-field="thief_skill" type="text" class="box xs">
+        <button data-roll="d100" data-roll-label="Test zlodziejski (<= @thief_skill)" class="roll-btn">🎲 d100</button>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Ranger (tropienie):</strong></td>
+      <td>
+        <input data-field="ranger_track" type="text" class="box xs">
+        <button data-roll="d20+@wis_mod" data-roll-label="Tropienie" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Mnich (obrazenia reczne):</strong></td>
+      <td>
+        <input data-field="monk_damage" type="text" class="plain sm">
+        <button data-roll="@monk_damage" data-roll-label="Mnich - obrazenia reczne" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Odpedzanie nieumarlych:</strong></td>
+      <td><button data-roll="2d6+@wis_mod" data-roll-label="Odpedzanie Nieumarlych" class="roll-btn">🎲 Turn
+          Undead</button></td>
+    </tr>
+    <tr>
+      <td><strong>Druid (zmiennoksztaltnosc):</strong></td>
+      <td><input data-field="druid_forms" type="text" class="plain wide"></td>
+    </tr>
+  </table>
+
+  <!-- ZDOLNOSCI I OGRANICZENIA -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🌟 ZDOLNOSCI KLASOWE</td>
+    </tr>
+    <tr>
+      <td><textarea data-field="class_features" class="plain wide" rows="5"></textarea></td>
+    </tr>
+  </table>
+
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🚫 OGRANICZENIA KLASY</td>
+    </tr>
+    <tr>
+      <td><strong>Dozwolone pancerze:</strong> <input data-field="class_allowed_armor" type="text" class="plain wide">
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Dozwolone bronie:</strong> <input data-field="class_allowed_weapons" type="text" class="plain wide">
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Wymagane min. atrybuty:</strong> <input data-field="class_min_stats" type="text" class="plain wide">
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Dozwolony charakter:</strong> <input data-field="class_allowed_alignment" type="text"
+          class="plain wide"></td>
+    </tr>
+  </table>
+
+  <!-- EKWIPUNEK -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🎒 EKWIPUNEK</td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Monety:</strong>
+        pp <input data-field="coin_pp" type="text" class="box xs">
+        gp <input data-field="coin_gp" type="text" class="box xs">
+        ep <input data-field="coin_ep" type="text" class="box xs">
+        sp <input data-field="coin_sp" type="text" class="box xs">
+        cp <input data-field="coin_cp" type="text" class="box xs">
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Startowe zloto:</strong> 20 gp x CHA = <input data-field="starting_gold" type="text" class="box sm">
+        gp</td>
+    </tr>
+    <tr>
+      <td><textarea data-field="equipment" class="plain wide" rows="7"></textarea></td>
+    </tr>
+  </table>
+
+  <!-- DOSWIADCZENIE DRUZYNY -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">📈 DOSWIADCZENIE DRUZYNY</td>
+    </tr>
+    <tr>
+      <td><strong>Aktualny poziom druzyny:</strong></td>
+      <td class="right"><input data-field="party_level" type="text" class="box sm"></td>
+    </tr>
+    <tr>
+      <td><strong>Aktualne XP druzyny:</strong></td>
+      <td class="right"><input data-field="party_xp_current" type="text" class="plain sm"></td>
+    </tr>
+    <tr>
+      <td><strong>XP do nastepnego poziomu:</strong></td>
+      <td class="right"><input data-field="party_xp_next" type="text" class="plain sm"></td>
+    </tr>
+  </table>
+
+  <!-- ODPOCZYNEK -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">💤 ODPOCZYNEK</td>
+    </tr>
+    <tr>
+      <td>6 godzin -> 1/4 HP i Many</td>
+      <td>12 godzin -> 1/2 HP i Many</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="center">
+        24 godziny -> pelne HP i Mana
+        <button data-roll="1d6" data-roll-label="Losowe wydarzenie podczas odpoczynku" class="roll-btn">🎲 Wydarzenie
+          nocne</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- NOTATKI -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">📝 NOTATKI</td>
+    </tr>
+    <tr>
+      <td><textarea data-field="notes" class="plain wide" rows="8"></textarea></td>
+    </tr>
+  </table>
+
+</body>
+
+</html>

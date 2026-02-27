@@ -89,7 +89,7 @@ function BottomPanel({ activeTab, onTabChange }) {
   return (
     <>
       <div
-        className={`bottom-panel ${isOpen ? 'open' : ''}`}
+        className={`bottom-panel ${isOpen ? 'open' : ''} ${isResizing ? 'resizing' : ''}`}
         style={{ height: isOpen ? `${heightPercent}vh` : '0' }}
       >
         <div className="bottom-panel-toolbar">

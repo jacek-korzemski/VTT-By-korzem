@@ -2136,6 +2136,11 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Wyłącz transition podczas zmiany rozmiaru – wtedy wysokość reaguje od razu na przeciąganie */
+.bottom-panel.resizing {
+  transition: none;
+}
+
 /* Toolbar (tab bar above the panel) */
 .bottom-panel-toolbar {
   position: absolute;
