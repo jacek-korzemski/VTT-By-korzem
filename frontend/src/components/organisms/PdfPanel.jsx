@@ -66,6 +66,7 @@ function PdfPanel() {
   const [loading, setLoading] = useState(false)
   const [missingIds, setMissingIds] = useState(new Set())
   const [numPages, setNumPages] = useState(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const blobUrlRef = useRef(null)
   const serverCacheRef = useRef(new Map())
   const viewerRef = useRef(null)
@@ -119,6 +120,7 @@ function PdfPanel() {
     }
     setNumPages(null)
     setActivePdf({ type: 'server', id: pdf.id, name: pdf.name })
+    setSidebarOpen(false)
 
     const cached = serverCacheRef.current.get(pdf.id)
     if (cached) {
@@ -147,6 +149,7 @@ function PdfPanel() {
     setLoading(true)
     setNumPages(null)
     setActivePdf({ type: 'local', id: meta.id, name: meta.name })
+    setSidebarOpen(false)
 
     if (blobUrlRef.current) {
       URL.revokeObjectURL(blobUrlRef.current)
@@ -186,6 +189,7 @@ function PdfPanel() {
           const url = URL.createObjectURL(blob)
           blobUrlRef.current = url
           setActivePdf({ type: 'local', id: meta.id, name: meta.name })
+          setSidebarOpen(false)
           setPdfUrl(url)
         }
       } catch (err) {
@@ -233,7 +237,7 @@ function PdfPanel() {
 
   return (
     <div className="pdf-panel">
-      <div className="pdf-sidebar">
+      <div className={`pdf-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         {serverPdfs.length > 0 && (
           <div className="pdf-section">
             <div className="pdf-section-title">{t('pdf.serverPdfs')}</div>
@@ -282,6 +286,14 @@ function PdfPanel() {
           </button>
         </div>
       </div>
+
+      <button
+        className={`pdf-sidebar-toggle ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(prev => !prev)}
+        title={sidebarOpen ? t('pdf.collapseSidebar') : t('pdf.expandSidebar')}
+      >
+        {sidebarOpen ? '◀' : '▶'}
+      </button>
 
       <div className="pdf-viewer" ref={viewerRef}>
         {loading && <div className="pdf-placeholder">{t('pdf.loading')}</div>}

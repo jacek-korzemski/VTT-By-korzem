@@ -130,7 +130,9 @@
       "noPdfs": "No PDFs available",
       "selectPdf": "Select a PDF to view",
       "removed": "Removed",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "collapseSidebar": "Collapse file list",
+      "expandSidebar": "Expand file list"
     },
     "ping": {
       "tool": "Attention Ping",
@@ -271,7 +273,9 @@
       "noPdfs": "Brak plików PDF",
       "selectPdf": "Wybierz PDF do wyświetlenia",
       "removed": "Usunięty",
-      "loading": "Ładowanie..."
+      "loading": "Ładowanie...",
+      "collapseSidebar": "Zwiń listę plików",
+      "expandSidebar": "Rozwiń listę plików"
     },
     "ping": {
       "tool": "Przyciągnij uwagę",

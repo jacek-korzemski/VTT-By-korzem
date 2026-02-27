@@ -2324,6 +2324,7 @@ body {
   display: flex;
   flex: 1;
   overflow: hidden;
+  position: relative;
 }
 
 .pdf-sidebar {
@@ -2334,6 +2335,45 @@ body {
   background: #1a1a2e;
   border-right: 1px solid #0f3460;
   overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+}
+
+.pdf-sidebar.closed {
+  width: 0;
+  border-right: none;
+}
+
+.pdf-sidebar-toggle {
+  position: absolute;
+  left: 220px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 64px;
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  color: #888;
+  font-size: 0.8rem;
+  cursor: pointer;
+  z-index: 2;
+  transition: left 0.3s ease, background 0.2s, color 0.2s, width 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdf-sidebar-toggle:hover {
+  background: #1a2a4a;
+  color: white;
+  width: 32px;
+}
+
+.pdf-sidebar-toggle:not(.open) {
+  left: 0;
+  border-left: none;
 }
 
 .pdf-section {
