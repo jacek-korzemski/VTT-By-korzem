@@ -1,8 +1,10 @@
 import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react'
 import NotesPanel from './NotesPanel'
+import { NotesTemplateProvider } from '../../contexts/NotesTemplateContext'
 import { t } from '../../lang'
 
 const PdfPanel = lazy(() => import('./PdfPanel'))
+const MacroEditor = lazy(() => import('./MacroEditor'))
 
 const STORAGE_KEY = 'vtt_bottom_panel_height'
 const MIN_HEIGHT_PERCENT = 30
@@ -12,6 +14,7 @@ const DEFAULT_HEIGHT_PERCENT = 50
 const PANELS = [
   { id: 'notes', icon: '📝', titleKey: 'notes.title' },
   { id: 'pdf', icon: '📄', titleKey: 'pdf.title' },
+  { id: 'macros', icon: '⚡', titleKey: 'macros.title' },
 ]
 
 function BottomPanel({ activeTab, onTabChange }) {
@@ -124,18 +127,27 @@ function BottomPanel({ activeTab, onTabChange }) {
         </div>
 
         <div className="bottom-panel-content">
-          {mountedTabs.has('notes') && (
-            <div className={`bottom-panel-tab-pane ${activeTab !== 'notes' ? 'hidden' : ''}`}>
-              <NotesPanel />
-            </div>
-          )}
-          {mountedTabs.has('pdf') && (
-            <div className={`bottom-panel-tab-pane ${activeTab !== 'pdf' ? 'hidden' : ''}`}>
-              <Suspense fallback={<div className="pdf-placeholder">{t('pdf.loading')}</div>}>
-                <PdfPanel />
-              </Suspense>
-            </div>
-          )}
+          <NotesTemplateProvider>
+            {(mountedTabs.has('notes') || mountedTabs.has('macros')) && (
+              <div className={`bottom-panel-tab-pane ${activeTab !== 'notes' ? 'hidden' : ''}`}>
+                <NotesPanel />
+              </div>
+            )}
+            {mountedTabs.has('pdf') && (
+              <div className={`bottom-panel-tab-pane ${activeTab !== 'pdf' ? 'hidden' : ''}`}>
+                <Suspense fallback={<div className="pdf-placeholder">{t('pdf.loading')}</div>}>
+                  <PdfPanel />
+                </Suspense>
+              </div>
+            )}
+            {mountedTabs.has('macros') && (
+              <div className={`bottom-panel-tab-pane ${activeTab !== 'macros' ? 'hidden' : ''}`}>
+                <Suspense fallback={<div className="macro-editor-placeholder">{t('macros.loading')}</div>}>
+                  <MacroEditor />
+                </Suspense>
+              </div>
+            )}
+          </NotesTemplateProvider>
         </div>
       </div>
 

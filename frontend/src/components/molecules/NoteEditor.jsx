@@ -2,80 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react'
 import SimpleWYSIWYG from '../atoms/SimpleWYSIWYG'
 import { t } from '../../lang'
 import { API_BASE } from '../../../config'
-
-function parseRollExpression(expr, getFieldValue) {
-  const diceRegex = /(\d*)d(\d+)/g
-  const fieldRegex = /@(\w+)/g
-  const conditionalRegex = /\+@(\w+)\?@(\w+)/g
-
-  let modifier = 0
-  const diceList = []
-
-  const withoutConditionals = expr.replace(conditionalRegex, (_, valField, condField) => {
-    const condVal = getFieldValue(condField)
-    if (condVal === true || condVal === 'on' || condVal === 'true') {
-      const val = parseInt(getFieldValue(valField), 10) || 0
-      modifier += val
-    }
-    return ''
-  })
-
-  const withoutFields = withoutConditionals.replace(fieldRegex, (_, name) => {
-    const val = parseInt(getFieldValue(name), 10) || 0
-    modifier += val
-    return ''
-  })
-
-  let match
-  while ((match = diceRegex.exec(withoutFields)) !== null) {
-    const count = parseInt(match[1], 10) || 1
-    const sides = parseInt(match[2], 10)
-    for (let i = 0; i < count; i++) {
-      diceList.push({ type: `d${sides}`, sides })
-    }
-  }
-
-  const remaining = withoutFields.replace(diceRegex, '').replace(/[+\s]/g, '')
-  if (remaining) {
-    const extra = parseInt(remaining, 10)
-    if (!isNaN(extra)) modifier += extra
-  }
-
-  return { diceList, modifier }
-}
-
-function executeDiceRoll(expr, label, getFieldValue) {
-  const { diceList, modifier } = parseRollExpression(expr, getFieldValue)
-  if (diceList.length === 0) return
-
-  const rolls = diceList.map(die => ({
-    type: die.type,
-    sides: die.sides,
-    result: Math.floor(Math.random() * die.sides) + 1
-  }))
-
-  const total = rolls.reduce((sum, r) => sum + r.result, 0) + modifier
-  const playerName = localStorage.getItem('vtt_player_name') || 'Anonymous'
-
-  let resolvedLabel = label
-  if (resolvedLabel) {
-    resolvedLabel = resolvedLabel.replace(/@(\w+)/g, (_, name) => {
-      const v = getFieldValue(name)
-      return (v === true || v === false) ? '' : (v || '')
-    }).trim()
-  }
-
-  const rollData = {
-    player: resolvedLabel ? `${playerName} (${resolvedLabel})` : playerName,
-    type: 'standard',
-    dice: rolls,
-    modifier,
-    total,
-    timestamp: Date.now()
-  }
-
-  window.dispatchEvent(new CustomEvent('vtt:dice-roll', { detail: rollData }))
-}
+import { executeDiceRoll } from '../../utils/diceRollUtils'
 
 function extractBodyContent(html) {
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
@@ -87,7 +14,7 @@ function extractTitle(html) {
   return titleMatch ? titleMatch[1] : ''
 }
 
-function NoteEditor({ id, onRemove, canRemove }) {
+function NoteEditor({ id, noteIndex = 1, onRemove, canRemove, registerNoteTemplate, unregisterNoteTemplate }) {
   const storageKey = `vtt_notes_${id}`
   const editorRef = useRef(null)
   const templateRef = useRef(null)
@@ -228,6 +155,30 @@ function NoteEditor({ id, onRemove, canRemove }) {
       return el.value || ''
     }
 
+    const fieldEntries = [...container.querySelectorAll('[data-field]')]
+      .map(el => {
+        const name = el.getAttribute('data-field')
+        if (!name) return null
+        let label = name
+        let prev = el.previousElementSibling
+        while (prev && prev.tagName === 'BR') prev = prev.previousElementSibling
+        if (prev && prev.tagName === 'STRONG') {
+          label = prev.textContent.replace(/:\s*$/, '').trim() || name
+        } else {
+          const next = el.nextElementSibling
+          if (next && next.tagName === 'STRONG') {
+            label = next.textContent.replace(/:\s*$/, '').trim() || name
+          }
+        }
+        return { name, label }
+      })
+      .filter(Boolean)
+    const fieldNames = [...new Set(fieldEntries.map(e => e.name))]
+    const fieldLabels = Object.fromEntries(fieldEntries.map(e => [e.name, e.label]))
+    if (registerNoteTemplate) {
+      registerNoteTemplate(id, { noteIndex, title, fieldNames, fieldLabels, getFieldValue })
+    }
+
     container.querySelectorAll('[data-roll]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault()
@@ -236,7 +187,11 @@ function NoteEditor({ id, onRemove, canRemove }) {
         executeDiceRoll(expr, label, getFieldValue)
       })
     })
-  }, [mode, templateHtml, templateRenderKey])
+
+    return () => {
+      if (unregisterNoteTemplate) unregisterNoteTemplate(id)
+    }
+  }, [mode, templateHtml, templateRenderKey, id, noteIndex, title, registerNoteTemplate, unregisterNoteTemplate])
 
   // --- Export ---
   const handleExportHtml = useCallback(() => {

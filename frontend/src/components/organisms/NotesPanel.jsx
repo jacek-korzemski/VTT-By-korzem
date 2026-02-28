@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import NoteEditor from '../molecules/NoteEditor'
+import { useNotesTemplate } from '../../contexts/NotesTemplateContext'
 import { t } from '../../lang'
 
 const STORAGE_KEY_CONFIG = 'vtt_notes_config'
@@ -7,6 +8,7 @@ const MAX_EDITORS = 3
 
 function NotesPanel() {
   const [editorIds, setEditorIds] = useState(['1'])
+  const { registerNoteTemplate, unregisterNoteTemplate } = useNotesTemplate() || {}
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY_CONFIG)
@@ -60,12 +62,15 @@ function NotesPanel() {
       </div>
 
       <div className="notes-editors-container">
-        {editorIds.map(id => (
+        {editorIds.map((id, idx) => (
           <NoteEditor
             key={id}
             id={id}
+            noteIndex={idx + 1}
             onRemove={handleRemoveEditor}
             canRemove={editorIds.length > 1}
+            registerNoteTemplate={registerNoteTemplate}
+            unregisterNoteTemplate={unregisterNoteTemplate}
           />
         ))}
       </div>
