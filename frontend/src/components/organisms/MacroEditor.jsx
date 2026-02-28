@@ -138,11 +138,48 @@ function MacroEditor() {
     setIsAddFormOpen(true)
   }, [])
 
+  const handleImport = useCallback(() => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json,application/json'
+    input.onchange = (e) => {
+      const file = e.target?.files?.[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        try {
+          const raw = ev.target?.result
+          if (typeof raw !== 'string') return
+          const data = JSON.parse(raw)
+          const list = Array.isArray(data) ? data : []
+          const normalized = list
+            .filter(m => m && typeof m.expression === 'string' && m.expression.trim())
+            .map((m, i) => ({
+              id: typeof m.id === 'string' ? m.id : `${Date.now()}-${i}`,
+              createdAt: typeof m.createdAt === 'number' ? m.createdAt : Date.now(),
+              name: typeof m.name === 'string' ? m.name : '',
+              expression: String(m.expression).trim(),
+              label: typeof m.label === 'string' ? m.label : '',
+              sourceNoteId: typeof m.sourceNoteId === 'string' ? m.sourceNoteId : undefined
+            }))
+          persist(() => normalized)
+        } catch {
+          // invalid file – ignore
+        }
+      }
+      reader.readAsText(file)
+    }
+    input.click()
+  }, [persist])
+
   return (
     <div className="macro-editor">
       <div className="macro-editor-header">
         <h2>⚡ {t('macros.title')}</h2>
         <div className="macro-editor-actions">
+          <button type="button" className="macro-import-btn" onClick={handleImport} title={t('macros.import')}>
+            {t('macros.import')}
+          </button>
           <button type="button" className="macro-export-btn" onClick={() => {
             const blob = new Blob([JSON.stringify(macros, null, 2)], { type: 'application/json' })
             const url = URL.createObjectURL(blob)
