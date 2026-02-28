@@ -12,6 +12,8 @@ import { t } from '../../lang'
 function Sidebar({ 
   isOpen,
   isGameMaster = false,
+  apiStatus = 'ok',
+  apiFlashTrigger = 0,
   mapPath,
   mapFolders,
   mapFiles,
@@ -74,7 +76,7 @@ function Sidebar({
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
-      <SidebarHeader isGameMaster={isGameMaster} onClear={onClear} />
+      <SidebarHeader isGameMaster={isGameMaster} onClear={onClear} apiStatus={apiStatus} apiFlashTrigger={apiFlashTrigger} />
 
       <div className="sidebar-sections">
         <div className="sidebar-sections-inner">
@@ -83,7 +85,7 @@ function Sidebar({
               <CollapsibleSection 
                 title={t('scenes.title')} 
                 icon="🎬" 
-                defaultOpen={true}
+                defaultOpen={false}
                 badge={scenes.length}
                 onToggle={onDeselectAsset}
               >
@@ -138,7 +140,7 @@ function Sidebar({
             <CollapsibleSection 
               title={t('sidebar.mapElements')} 
               icon="🏠" 
-              defaultOpen={true}
+              defaultOpen={false}
               badge={mapFolders.length + mapFiles.length || null}
               onToggle={onDeselectAsset}
             >
@@ -169,7 +171,7 @@ function Sidebar({
             <CollapsibleSection 
               title={t('sidebar.tokens')} 
               icon="🎭" 
-              defaultOpen={true}
+              defaultOpen={false}
               badge={tokenFolders.length + tokenFiles.length || null}
               onToggle={onDeselectAsset}
             >

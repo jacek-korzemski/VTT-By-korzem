@@ -4,6 +4,10 @@
       "title": "Simple VTT",
       "loading": "Loading..."
     },
+    "status": {
+      "connected": "Connected to server",
+      "error": "Connection error"
+    },
     "sidebar": {
       "clearMap": "Clear map",
       "clearMapConfirm": "Are you sure you want to clear the entire map (including background)?",
@@ -208,6 +212,10 @@
     "app": {
       "title": "Simple VTT",
       "loading": "Ładowanie..."
+    },
+    "status": {
+      "connected": "Połączono z serwerem",
+      "error": "Błąd połączenia"
     },
     "sidebar": {
       "clearMap": "Wyczyść mapę",

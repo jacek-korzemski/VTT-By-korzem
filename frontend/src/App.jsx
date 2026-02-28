@@ -55,7 +55,9 @@ function App() {
   const mapNavigationForwardRef = useRef(false)
   const tokenNavigationForwardRef = useRef(false)
   const [isGameMaster, setIsGameMaster] = useState(false)
-  
+  const [apiStatus, setApiStatus] = useState('ok')
+  const [apiFlashTrigger, setApiFlashTrigger] = useState(0)
+
   const fogUpdateTimeoutRef = useRef(null)
   const backgroundUpdateTimeoutRef = useRef(null)
   const backgroundRemovedRef = useRef(false)
@@ -245,33 +247,54 @@ useEffect(() => {
   
   useEffect(() => {
     const interval = setInterval(() => {
-      fetch(`${API_BASE}?action=check&version=${version}`, { credentials: 'include' })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.hasChanges) {
-            setScenes(data.data.scenes || [])
-            // Sprawdź czy zmieniono aktywną scenę
-            if (data.data.activeSceneId !== activeSceneId) {
-              setActiveSceneId(data.data.activeSceneId)
-              updateSceneState(data.data.scene)
-              // Reset narzędzi przy zmianie sceny
-              setSelectedAsset(null)
-              setSelectedType(null)
-              setIsEraserActive(false)
-              setFogEditMode(false)
-            } else if (!fogEditMode) {
-              // Aktualizuj tylko jeśli nie edytujemy mgły
-              updateSceneState(data.data.scene)
-            }
-            setVersion(data.data.version)
-          }
-        })
-        .catch(console.error)
+      const onSuccess = () => {
+        setApiStatus('ok')
+        setApiFlashTrigger(t => t + 1)
+      }
+      const onError = () => {
+        setApiStatus('error')
+        setApiFlashTrigger(t => t + 1)
+      }
 
-      fetch(`${API_BASE}?action=ping`, { credentials: 'include' })
-        .then(res => res.json())
+      fetch(`${API_BASE}?action=check&version=${version}`, { credentials: 'include' })
+        .then(res => {
+          if (!res.ok) onError()
+          return res.json()
+        })
         .then(data => {
           if (data.success) {
+            onSuccess()
+            if (data.hasChanges) {
+              setScenes(data.data.scenes || [])
+              // Sprawdź czy zmieniono aktywną scenę
+              if (data.data.activeSceneId !== activeSceneId) {
+                setActiveSceneId(data.data.activeSceneId)
+                updateSceneState(data.data.scene)
+                // Reset narzędzi przy zmianie sceny
+                setSelectedAsset(null)
+                setSelectedType(null)
+                setIsEraserActive(false)
+                setFogEditMode(false)
+              } else if (!fogEditMode) {
+                // Aktualizuj tylko jeśli nie edytujemy mgły
+                updateSceneState(data.data.scene)
+              }
+              setVersion(data.data.version)
+            }
+          } else {
+            onError()
+          }
+        })
+        .catch(() => { onError(); console.error })
+
+      fetch(`${API_BASE}?action=ping`, { credentials: 'include' })
+        .then(res => {
+          if (!res.ok) onError()
+          return res.json()
+        })
+        .then(data => {
+          if (data.success) {
+            onSuccess()
             if (data.ping) {
               setActivePing(data.ping)
               if (data.ping.timestamp > lastPingTimestampRef.current) {
@@ -281,19 +304,27 @@ useEffect(() => {
             } else {
               setActivePing(null)
             }
+          } else {
+            onError()
           }
         })
-        .catch(console.error)
+        .catch(() => { onError(); console.error })
       
       // Pobierz rzuty
       fetch(`${API_BASE}?action=rolls`, { credentials: 'include' })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) onError()
+          return res.json()
+        })
         .then(data => {
           if (data.success) {
+            onSuccess()
             setRollHistory(data.rolls || [])
+          } else {
+            onError()
           }
         })
-        .catch(console.error)
+        .catch(() => { onError(); console.error })
     }, 2000)
 
     return () => clearInterval(interval)
@@ -900,6 +931,8 @@ useEffect(() => {
       <Sidebar
         isOpen={sidebarOpen}
         isGameMaster={isGameMaster}
+        apiStatus={apiStatus}
+        apiFlashTrigger={apiFlashTrigger}
         mapPath={mapPath}
         mapFolders={mapFolders}
         mapFiles={mapFiles}
