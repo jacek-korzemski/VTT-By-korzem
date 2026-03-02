@@ -1,9 +1,19 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useNotesTemplate } from '../../contexts/NotesTemplateContext'
 import { executeDiceRoll, parseRollExpression } from '../../utils/diceRollUtils'
 import { t } from '../../lang'
 
 const STORAGE_KEY = 'vtt_macros'
+
+const MACRO_EMOJI_GROUPS = [
+  { name: '⚔️', emojis: ['⚔️', '🗡️', '🏹', '🛡️', '🪓', '🔱'] },
+  { name: '🔮', emojis: ['🔮', '🪄', '✨', '🧪', '📜'] },
+  { name: '🧙', emojis: ['🧙', '🧝', '🧛', '🧟', '👻', '💀'] },
+  { name: '🐉', emojis: ['🐉', '🐲', '🦇', '🕷️', '🦂', '🐺'] },
+  { name: '💰', emojis: ['💰', '💎', '🏆', '🪙'] },
+  { name: '❤️', emojis: ['❤️', '🖤', '✅', '❌', '⚠️', '🎲'] }
+]
 
 function loadMacros() {
   try {
@@ -18,6 +28,150 @@ function loadMacros() {
 
 function saveMacros(macros) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(macros))
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('vtt:macros-changed'))
+  }
+}
+
+function MacroIconPicker({ value, onChange }) {
+  const buttonRef = useRef(null)
+  const [open, setOpen] = useState(false)
+  const [position, setPosition] = useState(null)
+
+  const handleSelect = (emoji) => {
+    if (!onChange) return
+    onChange(emoji === value ? '' : emoji)
+    setOpen(false)
+  }
+
+  useEffect(() => {
+    if (!open) {
+      setPosition(null)
+      return
+    }
+    const anchor = buttonRef.current
+    if (!anchor) return
+
+    const run = () => {
+      const rect = anchor.getBoundingClientRect()
+      const MARGIN = 8
+      const PANEL_MAX_WIDTH = 280
+      const PANEL_MAX_HEIGHT = 260
+
+      const spaceBelow = window.innerHeight - rect.bottom - MARGIN
+      const spaceAbove = rect.top - MARGIN
+      const openUp = spaceBelow < 160 && spaceAbove >= spaceBelow
+
+      let top
+      let bottom
+      let maxHeight = PANEL_MAX_HEIGHT
+
+      if (openUp) {
+        bottom = window.innerHeight - rect.top + 4
+        maxHeight = Math.min(PANEL_MAX_HEIGHT, spaceAbove)
+      } else {
+        top = rect.bottom + 4
+        if (top + maxHeight > window.innerHeight - MARGIN) {
+          maxHeight = Math.min(PANEL_MAX_HEIGHT, window.innerHeight - top - MARGIN)
+        }
+      }
+
+      if (top !== undefined && top < MARGIN) {
+        top = MARGIN
+        maxHeight = Math.min(PANEL_MAX_HEIGHT, window.innerHeight - MARGIN * 2)
+      }
+
+      let left = rect.left
+      const panelWidth = Math.min(PANEL_MAX_WIDTH, window.innerWidth - MARGIN * 2)
+      if (left + panelWidth > window.innerWidth - MARGIN) {
+        left = window.innerWidth - panelWidth - MARGIN
+      }
+      if (left < MARGIN) left = MARGIN
+
+      setPosition({ top, bottom, left, maxHeight, width: panelWidth })
+    }
+
+    const id = requestAnimationFrame(run)
+    return () => cancelAnimationFrame(id)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const handleClickOutside = (e) => {
+      if (buttonRef.current && buttonRef.current.contains(e.target)) return
+      if (e.target.closest('.macro-icon-menu')) return
+      setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  const button = (
+    <div className="macro-icon-picker">
+      <label>
+        {t('macros.iconLabel')}
+        <div className="macro-icon-picker-row">
+          <button
+            ref={buttonRef}
+            type="button"
+            className={`macro-icon-current ${value ? 'has-icon' : ''}`}
+            onClick={() => setOpen(o => !o)}
+            title={value ? t('macros.iconClear') : t('macros.iconLabel')}
+          >
+            {value || '—'}
+          </button>
+        </div>
+      </label>
+    </div>
+  )
+
+  if (!open || !position) {
+    return button
+  }
+
+  return (
+    <>
+      {button}
+      {typeof document !== 'undefined' && createPortal(
+        <div
+          className="macro-icon-menu"
+          style={{
+            position: 'fixed',
+            ...(position.top !== undefined ? { top: position.top } : {}),
+            ...(position.bottom !== undefined ? { bottom: position.bottom } : {}),
+            left: position.left,
+            maxHeight: position.maxHeight,
+            width: position.width,
+            zIndex: 999999
+          }}
+        >
+          <div className="macro-icon-menu-inner">
+            <div className="macro-icon-groups">
+              {MACRO_EMOJI_GROUPS.map(group => (
+                <div key={group.name} className="macro-icon-group">
+                  <span className="macro-icon-group-label">{group.name}</span>
+                  <div className="macro-icon-group-emojis">
+                    {group.emojis.map(emoji => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        className={`macro-icon-btn ${value === emoji ? 'active' : ''}`}
+                        onClick={() => handleSelect(emoji)}
+                        title={emoji}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
+  )
 }
 
 function MacroEditor() {
@@ -29,7 +183,9 @@ function MacroEditor() {
   const [formExpression, setFormExpression] = useState('')
   const [formLabel, setFormLabel] = useState('')
   const [formSourceNoteId, setFormSourceNoteId] = useState('')
+  const [formIcon, setFormIcon] = useState('')
   const [sortBy, setSortBy] = useState('date-desc')
+  const [fieldsOpen, setFieldsOpen] = useState(true)
   const { sources, getFieldValue: ctxGetFieldValue } = useNotesTemplate() || {}
 
   const sortedMacros = useMemo(() => {
@@ -66,6 +222,7 @@ function MacroEditor() {
     setFormExpression('')
     setFormLabel('')
     setFormSourceNoteId('')
+    setFormIcon('')
   }, [])
 
   const startEdit = useCallback((macro) => {
@@ -74,6 +231,7 @@ function MacroEditor() {
     setFormExpression(macro.expression || '')
     setFormLabel(macro.label || '')
     setFormSourceNoteId(macro.sourceNoteId || '')
+    setFormIcon(macro.icon || '')
   }, [])
 
   const saveMacro = useCallback(() => {
@@ -83,7 +241,7 @@ function MacroEditor() {
 
     if (editingId) {
       persist(prev => prev.map(m => m.id === editingId
-        ? { ...m, name, expression, label: formLabel.trim(), sourceNoteId: formSourceNoteId || undefined }
+        ? { ...m, name, expression, label: formLabel.trim(), sourceNoteId: formSourceNoteId || undefined, icon: formIcon || undefined }
         : m
       ))
     } else {
@@ -93,7 +251,8 @@ function MacroEditor() {
         name,
         expression,
         label: formLabel.trim(),
-        sourceNoteId: formSourceNoteId || undefined
+        sourceNoteId: formSourceNoteId || undefined,
+        icon: formIcon || undefined
       }])
     }
     setEditingId(null)
@@ -102,7 +261,8 @@ function MacroEditor() {
     setFormExpression('')
     setFormLabel('')
     setFormSourceNoteId('')
-  }, [editingId, formName, formExpression, formLabel, formSourceNoteId, persist])
+    setFormIcon('')
+  }, [editingId, formName, formExpression, formLabel, formSourceNoteId, formIcon, persist])
 
   const closeForm = useCallback(() => {
     setEditingId(null)
@@ -111,6 +271,7 @@ function MacroEditor() {
     setFormExpression('')
     setFormLabel('')
     setFormSourceNoteId('')
+    setFormIcon('')
   }, [])
 
   const deleteMacro = useCallback((id) => {
@@ -160,7 +321,8 @@ function MacroEditor() {
               name: typeof m.name === 'string' ? m.name : '',
               expression: String(m.expression).trim(),
               label: typeof m.label === 'string' ? m.label : '',
-              sourceNoteId: typeof m.sourceNoteId === 'string' ? m.sourceNoteId : undefined
+              sourceNoteId: typeof m.sourceNoteId === 'string' ? m.sourceNoteId : undefined,
+              icon: typeof m.icon === 'string' && m.icon ? m.icon : undefined
             }))
           persist(() => normalized)
         } catch {
@@ -234,7 +396,7 @@ function MacroEditor() {
 
       <div className="macro-editor-columns">
         {sources && sources.length > 0 && (
-          <div className="macro-editor-fields">
+          <div className={`macro-editor-fields ${fieldsOpen ? 'open' : 'closed'}`}>
             <h3>{t('macros.fieldsFromNotes')}</h3>
             {sources.map(src => (
               <div key={src.noteId} className="macro-note-source">
@@ -261,6 +423,17 @@ function MacroEditor() {
               </div>
             ))}
           </div>
+        )}
+
+        {sources && sources.length > 0 && (
+          <button
+            type="button"
+            className={`macro-fields-toggle ${fieldsOpen ? 'open' : ''}`}
+            onClick={() => setFieldsOpen(prev => !prev)}
+            title={fieldsOpen ? t('pdf.collapseSidebar') : t('pdf.expandSidebar')}
+          >
+            {fieldsOpen ? '◀' : '▶'}
+          </button>
         )}
 
         <div className="macro-editor-main">
@@ -295,6 +468,7 @@ function MacroEditor() {
                     placeholder={t('macros.labelPlaceholder')}
                   />
                 </label>
+                <MacroIconPicker value={formIcon} onChange={setFormIcon} />
                 {sources && sources.length > 0 && (
                   <label>
                     {t('macros.sourceNote')}
@@ -343,7 +517,10 @@ function MacroEditor() {
                 {sortedMacros.map(macro => (
                   <li key={macro.id} className="macro-list-item">
                     <div className="macro-item-info">
-                      <span className="macro-item-name">{macro.name || macro.expression}</span>
+                      <span className="macro-item-name">
+                        {macro.icon && <span className="macro-item-icon">{macro.icon}</span>}
+                        {macro.name || macro.expression}
+                      </span>
                       <span className="macro-item-expr">{macro.expression}</span>
                       {macro.sourceNoteId && sources?.length > 0 && (
                         <span className="macro-item-source">

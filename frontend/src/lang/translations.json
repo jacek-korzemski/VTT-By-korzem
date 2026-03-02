@@ -199,7 +199,9 @@
       "infoEx3": "Roll 2d6 and add the @str modifier.",
       "infoEx4": "Roll a die with sides from the @wpn1_die field (e.g. weapon damage die).",
       "infoExamplesNote": "Field names must match those from the template (e.g. str, dex, hp_current). Choose the correct source notepad so the macro reads from the right character sheet.",
-      "infoClose": "Close"
+      "infoClose": "Close",
+      "iconLabel": "Icon",
+      "iconClear": "Clear icon"
     },
     "ping": {
       "tool": "Attention Ping",
@@ -434,7 +436,9 @@
       "infoEx3": "Rzut 2d6 plus modyfikator @str.",
       "infoEx4": "Rzut kością o liczbie ścian z pola @wpn1_die (np. kość obrażeń broni).",
       "infoExamplesNote": "Nazwy pól muszą odpowiadać szablonowi (np. str, dex, hp_current). Wybierz właściwy notatnik źródłowy, żeby makro czytało z właściwej karty postaci.",
-      "infoClose": "Zamknij"
+      "infoClose": "Zamknij",
+      "iconLabel": "Ikona",
+      "iconClear": "Wyczyść ikonę"
     },
     "ping": {
       "tool": "Przyciągnij uwagę",

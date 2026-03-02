@@ -215,6 +215,11 @@ if %errorlevel% neq 0 (
 
 (
     echo Options -Indexes
+    echo.
+    echo ^<IfModule mod_mime.c^>
+    echo     AddType application/javascript .js
+    echo     AddType application/javascript .mjs
+    echo ^</IfModule^>
 ) > "build\.htaccess"
 
 echo.

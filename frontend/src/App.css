@@ -1841,6 +1841,53 @@ body {
   padding: 1rem;
   border-bottom: 1px solid #0f3460;
 }
+
+.dice-macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.dice-macro-btn {
+  flex: 1 1 calc(50% - 0.25rem);
+  min-width: 120px;
+  max-width: 100%;
+  padding: 0.45rem 0.6rem;
+  background: radial-gradient(circle at 0 0, rgba(233, 69, 96, 0.4), rgba(15, 52, 96, 0.9));
+  border-radius: 6px;
+  border: 1px solid rgba(233, 69, 96, 0.6);
+  color: #fefefe;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dice-macro-icon {
+  margin-right: 0.35rem;
+}
+
+.dice-macro-label {
+  vertical-align: middle;
+}
+
+.dice-macro-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  background: radial-gradient(circle at 0 0, rgba(233, 69, 96, 0.7), rgba(15, 52, 96, 1));
+  border-color: #ff6b6b;
+}
+
+.dice-macro-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
 .dice-type-btn {
   flex: 1;
   min-width: 40px;
@@ -2597,19 +2644,29 @@ body {
   display: flex;
   flex: 1;
   min-height: 0;
+  position: relative;
   overflow-x: auto;
   overflow-y: hidden;
 }
 
 .macro-editor-fields {
   flex-shrink: 0;
-  min-width: 220px;
   width: 220px;
+  flex-basis: 220px;
   padding: 0.75rem 1rem;
   background: #16213e;
   border-right: 1px solid #0f3460;
   overflow-y: auto;
   overflow-x: hidden;
+  transition: width 0.3s ease, flex-basis 0.3s ease, padding 0.3s ease, border-right-color 0.3s ease;
+}
+
+.macro-editor-fields.closed {
+  width: 0;
+  flex-basis: 0;
+  padding: 0;
+  border-right: none;
+  overflow: hidden;
 }
 
 .macro-editor-fields h3 {
@@ -2624,7 +2681,40 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.macro-fields-toggle {
+  position: absolute;
+  left: 220px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 64px;
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  color: #888;
+  font-size: 0.8rem;
+  cursor: pointer;
+  z-index: 2;
+  transition: left 0.3s ease, background 0.2s, color 0.2s, width 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.macro-fields-toggle:hover {
+  background: #1a2a4a;
+  color: white;
+  width: 32px;
+}
+
+.macro-fields-toggle:not(.open) {
+  left: 0;
+  border-left: none;
 }
 
 .macro-note-source {
@@ -2668,7 +2758,7 @@ body {
 
 .macro-form-panel {
   flex-shrink: 0;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1rem 0.75rem 1.5rem;
   background: #1a1a2e;
   border-bottom: 1px solid #0f3460;
 }
@@ -2754,8 +2844,8 @@ body {
 
 .macro-list {
   flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+  min-height: auto;
+  overflow: visible;
   padding: 0.75rem 1rem;
 }
 
@@ -2835,6 +2925,106 @@ body {
   font-weight: 600;
   color: #ccc;
   font-size: 0.9rem;
+}
+
+.macro-item-icon {
+  display: inline-block;
+  margin-right: 0.35rem;
+}
+
+.macro-icon-picker {
+  min-width: 180px;
+}
+
+.macro-icon-picker-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.macro-icon-current {
+  align-self: flex-start;
+  min-width: 48px;
+  padding: 0.25rem 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.macro-icon-current.has-icon {
+  background: rgba(233, 69, 96, 0.15);
+  border-color: rgba(233, 69, 96, 0.4);
+  color: #e94560;
+}
+
+.macro-icon-current:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.macro-icon-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.macro-icon-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+}
+
+.macro-icon-group-label {
+  font-size: 0.9rem;
+}
+
+.macro-icon-group-emojis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+}
+
+.macro-icon-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  color: #eee;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.macro-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.macro-icon-btn.active {
+  background: rgba(233, 69, 96, 0.3);
+  border-color: #e94560;
+}
+
+.macro-icon-menu {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.macro-icon-menu-inner {
+  padding: 0.5rem 0.6rem;
+  max-height: inherit;
+  overflow-y: auto;
 }
 
 .macro-item-expr {

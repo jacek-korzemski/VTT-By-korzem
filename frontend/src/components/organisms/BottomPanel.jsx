@@ -52,19 +52,32 @@ function BottomPanel({ activeTab, onTabChange }) {
   }, [])
 
   const handleResizeStart = useCallback((e) => {
-    e.preventDefault()
+    // Obsługa zarówno myszy jak i dotyku
+    if (e.type === 'touchstart') {
+      // Na mobilkach zapobiegamy scrollowaniu strony podczas zmiany rozmiaru
+      e.preventDefault()
+    }
     setIsResizing(true)
   }, [])
 
   useEffect(() => {
     if (!isResizing) return
 
-    const handleMouseMove = (e) => {
+    const updateFromClientY = (clientY) => {
       const windowHeight = window.innerHeight
-      const mouseY = e.clientY
-      const newHeightPercent = ((windowHeight - mouseY) / windowHeight) * 100
+      const newHeightPercent = ((windowHeight - clientY) / windowHeight) * 100
       const clamped = Math.min(MAX_HEIGHT_PERCENT, Math.max(MIN_HEIGHT_PERCENT, newHeightPercent))
       setHeightPercent(clamped)
+    }
+
+    const handleMouseMove = (e) => {
+      updateFromClientY(e.clientY)
+    }
+
+    const handleTouchMove = (e) => {
+      if (!e.touches || e.touches.length === 0) return
+      const touch = e.touches[0]
+      updateFromClientY(touch.clientY)
     }
 
     const handleMouseUp = () => {
@@ -72,12 +85,23 @@ function BottomPanel({ activeTab, onTabChange }) {
       saveHeight(heightPercent)
     }
 
+    const handleTouchEnd = () => {
+      setIsResizing(false)
+      saveHeight(heightPercent)
+    }
+
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchend', handleTouchEnd)
+    document.addEventListener('touchcancel', handleTouchEnd)
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+      document.removeEventListener('touchcancel', handleTouchEnd)
     }
   }, [isResizing, heightPercent, saveHeight])
 
@@ -122,6 +146,7 @@ function BottomPanel({ activeTab, onTabChange }) {
         <div
           className={`bottom-panel-resize-handle ${isResizing ? 'active' : ''}`}
           onMouseDown={handleResizeStart}
+          onTouchStart={handleResizeStart}
         >
           <div className="bottom-panel-resize-bar" />
         </div>

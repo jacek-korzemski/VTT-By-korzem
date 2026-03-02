@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { t } from '../../lang'
 import L5RDicePanel from '../molecules/L5RDicePanel'
+import { parseRollExpression } from '../../utils/diceRollUtils'
+import { useNotesTemplate } from '../../contexts/NotesTemplateContext'
 
 const DICE_TYPES = [
   { type: 'd4', sides: 4, color: '#e74c3c' },
@@ -12,17 +14,55 @@ const DICE_TYPES = [
   { type: 'd100', sides: 100, color: '#1abc9c' },
 ]
 
+const MACRO_STORAGE_KEY = 'vtt_macros'
+
+function loadMacros() {
+  try {
+    const raw = localStorage.getItem(MACRO_STORAGE_KEY)
+    if (!raw) return []
+    const data = JSON.parse(raw)
+    return Array.isArray(data) ? data : []
+  } catch {
+    return []
+  }
+}
+
 function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
   const [mode, setMode] = useState('standard')
   const [selectedDice, setSelectedDice] = useState([])
   const [modifier, setModifier] = useState(0)
   const [playerName, setPlayerName] = useState('')
   const [isRolling, setIsRolling] = useState(false)
+  const [macros, setMacros] = useState([])
+  const { getFieldValue: ctxGetFieldValue } = useNotesTemplate() || {}
 
   useEffect(() => {
     const saved = localStorage.getItem('vtt_player_name')
     if (saved) setPlayerName(saved)
   }, [])
+
+  useEffect(() => {
+    setMacros(loadMacros())
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handler = () => {
+      const list = loadMacros()
+      setMacros(list)
+      if (list.length === 0 && mode === 'macros') {
+        setMode('standard')
+      }
+    }
+    window.addEventListener('vtt:macros-changed', handler)
+    return () => window.removeEventListener('vtt:macros-changed', handler)
+  }, [mode])
+
+  useEffect(() => {
+    if (isOpen) {
+      setMacros(loadMacros())
+    }
+  }, [isOpen])
 
   const handleNameChange = useCallback((e) => {
     const name = e.target.value
@@ -45,6 +85,28 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
     setSelectedDice([])
     setModifier(0)
   }, [])
+
+  const applyMacro = useCallback((macro) => {
+    if (!macro || !macro.expression) return
+
+    const getFieldValue = macro.sourceNoteId && ctxGetFieldValue
+      ? (fieldName) => ctxGetFieldValue(macro.sourceNoteId, fieldName)
+      : () => ''
+
+    const { diceList, modifier: exprModifier } = parseRollExpression(macro.expression, getFieldValue)
+
+    if (diceList.length === 0) {
+      return
+    }
+
+    const withIds = diceList.map(die => ({
+      ...die,
+      id: Date.now() + Math.random()
+    }))
+
+    setSelectedDice(withIds)
+    setModifier(exprModifier)
+  }, [ctxGetFieldValue])
 
   const rollDice = useCallback(() => {
     if (selectedDice.length === 0) return
@@ -150,6 +212,14 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           >
             {t('dice.standardMode')}
           </button>
+          {macros.length > 0 && (
+            <button
+              className={mode === 'macros' ? 'active' : ''}
+              onClick={() => setMode('macros')}
+            >
+              Makra
+            </button>
+          )}
           <button 
             className={mode === 'l5r' ? 'active' : ''}
             onClick={() => setMode('l5r')}
@@ -158,10 +228,10 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
           </button>
         </div>
 
-        {mode === 'standard' && (
+        {(mode === 'standard' || mode === 'macros') && (
           <>
             <div className="dice-types">
-              {DICE_TYPES.map(die => (
+              {mode === 'standard' && DICE_TYPES.map(die => (
                 <button
                   key={die.type}
                   className="dice-type-btn"
@@ -172,6 +242,33 @@ function DicePanel({ isOpen, onToggle, rollHistory, onRoll }) {
                   {die.type}
                 </button>
               ))}
+              {mode === 'macros' && (
+                <>
+                  {macros.length === 0 ? (
+                    <p className="dice-placeholder">{t('macros.noMacros')}</p>
+                  ) : (
+                    <div className="dice-macros">
+                      {macros
+                        .slice()
+                        .sort((a, b) => {
+                          const aName = (a.name || a.expression || '').toLowerCase()
+                          const bName = (b.name || b.expression || '').toLowerCase()
+                          return aName.localeCompare(bName)
+                        })
+                        .map(macro => (
+                        <button
+                          key={macro.id}
+                          className="dice-macro-btn"
+                          onClick={() => applyMacro(macro)}
+                        >
+                          {macro.icon && <span className="dice-macro-icon">{macro.icon}</span>}
+                          <span className="dice-macro-label">{macro.name || macro.expression}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             <div className="dice-selected">
