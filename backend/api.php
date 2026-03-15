@@ -939,6 +939,78 @@ try {
                     echo json_encode(['success' => true, 'version' => $state['version']]);
                     break;
 
+                case 'delete-template':
+                    if (!isGameMaster()) {
+                        http_response_code(403);
+                        echo json_encode(['success' => false, 'error' => 'Forbidden']);
+                        break;
+                    }
+                    $id = $input['id'] ?? '';
+                    $id = is_string($id) ? basename(trim($id)) : '';
+                    if ($id === '' || !preg_match('/\.html?$/i', $id)) {
+                        http_response_code(400);
+                        echo json_encode(['success' => false, 'error' => 'Invalid template id']);
+                        break;
+                    }
+                    $templatesDir = __DIR__ . '/assets/templates';
+                    $filePath = $templatesDir . '/' . $id;
+                    if (!is_file($filePath)) {
+                        http_response_code(404);
+                        echo json_encode(['success' => false, 'error' => 'Template not found']);
+                        break;
+                    }
+                    if (!unlink($filePath)) {
+                        http_response_code(500);
+                        echo json_encode(['success' => false, 'error' => 'Failed to delete template']);
+                        break;
+                    }
+                    echo json_encode(['success' => true]);
+                    break;
+
+                case 'save-template':
+                    if (!isGameMaster()) {
+                        http_response_code(403);
+                        echo json_encode(['success' => false, 'error' => 'Forbidden']);
+                        break;
+                    }
+                    $name = $input['name'] ?? '';
+                    $name = is_string($name) ? trim($name) : '';
+                    $html = $input['html'] ?? '';
+                    $html = is_string($html) ? $html : '';
+                    if ($name === '') {
+                        http_response_code(400);
+                        echo json_encode(['success' => false, 'error' => 'Template name is required']);
+                        break;
+                    }
+                    if (preg_match('/<\\s*script\\b/i', $html)) {
+                        http_response_code(400);
+                        echo json_encode(['success' => false, 'error' => 'Template rejected – contains <script> tag']);
+                        break;
+                    }
+                    $slug = preg_replace('/[^A-Za-z0-9_-]/', '_', $name);
+                    if ($slug === '') {
+                        $slug = 'template';
+                    }
+                    $filename = $slug . '.html';
+                    $templatesDir = __DIR__ . '/assets/templates';
+                    if (!is_dir($templatesDir)) {
+                        mkdir($templatesDir, 0755, true);
+                    }
+                    $filePath = $templatesDir . '/' . $filename;
+                    $i = 1;
+                    while (file_exists($filePath)) {
+                        $filename = $slug . '-' . $i . '.html';
+                        $filePath = $templatesDir . '/' . $filename;
+                        $i++;
+                    }
+                    if (file_put_contents($filePath, $html) === false) {
+                        http_response_code(500);
+                        echo json_encode(['success' => false, 'error' => 'Failed to save template']);
+                        break;
+                    }
+                    echo json_encode(['success' => true, 'id' => $filename]);
+                    break;
+
                 case 'upload-asset':
                     // Upload materiałów – tylko dla Mistrza Gry
                     if (!isGameMaster()) {

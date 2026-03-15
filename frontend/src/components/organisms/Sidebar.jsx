@@ -1,3 +1,5 @@
+import { useScrollToSection } from '../../hooks/useScrollToSection'
+import { useBackgroundZoom } from '../../hooks/useBackgroundZoom'
 import CollapsibleSection from '../atoms/CollapsibleSection'
 import SceneManager from './SceneManager'
 import SidebarHeader from '../atoms/SidebarHeader'
@@ -6,8 +8,7 @@ import FogOfWarSection from './FogOfWarSection'
 import AssetBrowser from './AssetBrowser'
 import ZoomControls from '../atoms/ZoomControls'
 import UploadSection from './UploadSection'
-import { useScrollToSection } from '../../hooks/useScrollToSection'
-import { useBackgroundZoom } from '../../hooks/useBackgroundZoom'
+import TemplateManager from './TemplateManager'
 import { t } from '../../lang'
 
 function Sidebar({ 
@@ -105,6 +106,18 @@ function Sidebar({
                   onUploadedTemplates={null}
                   onUploadedPapers={onRefreshPapers}
                 />
+              </CollapsibleSection>
+            )}
+
+            
+            {isGameMaster && (
+              <CollapsibleSection
+                title={t('templates.title')}
+                icon="📄"
+                defaultOpen={false}
+                onToggle={onDeselectAsset}
+              >
+                <TemplateManager />
               </CollapsibleSection>
             )}
 
