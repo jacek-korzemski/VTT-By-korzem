@@ -33,17 +33,20 @@ function isAuthenticated() {
 }
 
 function isGameMaster() {
-    // W trybie deweloperskim sprawdź parametr URL lub cookie, w przeciwnym razie domyślnie false
+    // Bypass tylko z localhost + nagłówek X-Dev-GM (localStorage na froncie → nagłówek w main.jsx)
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    if (isset($_SERVER['HTTP_X_DEV_GM']) && $_SERVER['HTTP_X_DEV_GM'] === '1'
+        && preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#i', $origin)) {
+        return true;
+    }
+    // W trybie deweloperskim (origin/localhost) sprawdź parametr URL lub cookie
     if (isDevMode()) {
-        // Możliwość ustawienia przez parametr URL dla testów (np. ?action=auth&gm=1)
         if (isset($_GET['gm']) && $_GET['gm'] === '1') {
             return true;
         }
-        // Lub przez cookie (można ustawić w konsoli przeglądarki: document.cookie = "dev_gm=1")
         if (isset($_COOKIE['dev_gm']) && $_COOKIE['dev_gm'] === '1') {
             return true;
         }
-        // Domyślnie w trybie dev zwracaj false (gracz)
         return false;
     }
     // W trybie produkcyjnym sprawdź sesję
@@ -92,7 +95,7 @@ if (in_array($origin, $allowedOrigins) || in_array('*', $allowedOrigins)) {
 }
 
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-Dev-GM');
 header('Access-Control-Allow-Credentials: true');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -210,7 +213,11 @@ $action = $_GET['action'] ?? '';
 
 try {
     // Sprawdź autoryzację dla wszystkich endpointów oprócz 'auth'
-    if ($action !== 'auth' && !isAuthenticated()) {
+    $isDevBypass = (
+        isset($_SERVER['HTTP_X_DEV_GM']) && $_SERVER['HTTP_X_DEV_GM'] === '1'
+        && preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#i', $_SERVER['HTTP_ORIGIN'] ?? '')
+    );
+    if ($action !== 'auth' && !isAuthenticated() && !$isDevBypass) {
         http_response_code(401);
         echo json_encode(['success' => false, 'error' => 'Unauthorized']);
         exit;
