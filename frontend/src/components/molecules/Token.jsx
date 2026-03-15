@@ -1,19 +1,29 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { t } from '../../lang'
+import TokenNoteEditor from './TokenNoteEditor'
 
-function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePath, onTokenUpdate, onRemoveToken, isTokenEraserActive = false, onTokenErase }) {
+function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePath, onTokenUpdate, onRemoveToken, onDuplicateToken, isGameMaster = false, isTokenEraserActive = false, onTokenErase }) {
   const [isHovered, setIsHovered] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [isDeleteConfirmMode, setIsDeleteConfirmMode] = useState(false)
+  const [isCharacterPanelOpen, setIsCharacterPanelOpen] = useState(false)
+  const [panelPlacement, setPanelPlacement] = useState(null)
   const [editSize, setEditSize] = useState(token.size ?? 1)
   const [editUpperLabel, setEditUpperLabel] = useState(token.upperLabel ?? '')
   const [editLowerLabel, setEditLowerLabel] = useState(token.lowerLabel ?? '')
   
+  const tokenRef = useRef(null)
   const dragStartPosRef = useRef(null)
   const dragStartTimeRef = useRef(null)
   const longPressTimerRef = useRef(null)
   const isLongPressRef = useRef(false)
   const hasMovedRef = useRef(false)
+
+  const POPOVER_WIDTH = 420
+  const POPOVER_MAX_HEIGHT_PX = 400
+  const POPOVER_MARGIN = 8
+  const MOBILE_BREAKPOINT = 640
 
   useEffect(() => {
     setEditSize(token.size ?? 1)
@@ -48,6 +58,51 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
     setIsEditMode(false)
     setIsHovered(false)
   }, [])
+
+  const handleCharacterPanelClick = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT
+    if (isMobile) {
+      setIsCharacterPanelOpen(true)
+      setPanelPlacement({ isModal: true })
+    } else {
+      const rect = tokenRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const maxH = Math.min(POPOVER_MAX_HEIGHT_PX, window.innerHeight * 0.7)
+      const spaceRight = window.innerWidth - rect.right - POPOVER_MARGIN
+      const spaceLeft = rect.left - POPOVER_MARGIN
+      const spaceBelow = window.innerHeight - rect.bottom - POPOVER_MARGIN
+      const spaceAbove = rect.top - POPOVER_MARGIN
+      let left
+      if (spaceRight >= POPOVER_WIDTH) left = rect.right + POPOVER_MARGIN
+      else if (spaceLeft >= POPOVER_WIDTH) left = rect.left - POPOVER_WIDTH - POPOVER_MARGIN
+      else left = Math.max(POPOVER_MARGIN, rect.right - POPOVER_WIDTH)
+      left = Math.min(left, window.innerWidth - POPOVER_WIDTH - POPOVER_MARGIN)
+      left = Math.max(POPOVER_MARGIN, left)
+      let top
+      if (spaceBelow >= maxH) top = rect.bottom + POPOVER_MARGIN
+      else if (spaceAbove >= maxH) top = rect.top - maxH - POPOVER_MARGIN
+      else if (spaceBelow >= spaceAbove) top = rect.bottom + POPOVER_MARGIN
+      else top = rect.top - maxH - POPOVER_MARGIN
+      top = Math.max(POPOVER_MARGIN, Math.min(top, window.innerHeight - maxH - POPOVER_MARGIN))
+      setIsCharacterPanelOpen(true)
+      setPanelPlacement({ isModal: false, left, top, maxHeight: maxH })
+    }
+    setIsHovered(false)
+  }, [])
+
+  const handleCloseCharacterPanel = useCallback(() => {
+    setIsCharacterPanelOpen(false)
+    setPanelPlacement(null)
+  }, [])
+
+  const handleDuplicateClick = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onDuplicateToken) onDuplicateToken(token)
+    setIsHovered(false)
+  }, [token, onDuplicateToken])
 
   const handleSave = useCallback(() => {
     if (onTokenUpdate) {
@@ -95,9 +150,9 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
 
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return
-    if (isEditMode || isDeleteConfirmMode || isTokenEraserActive) return
-    
-    if (e.target.closest('.token-gear, .token-trash, .token-edit-controls, .token-size-controls, .token-labels, .token-save-controls, .token-delete-controls, .token-delete-buttons')) {
+    if (isCharacterPanelOpen || isEditMode || isDeleteConfirmMode || isTokenEraserActive) return
+
+    if (e.target.closest('.token-top-actions, .token-gear, .token-trash, .token-character-panel, .token-duplicate, .token-edit-controls, .token-size-controls, .token-labels, .token-save-controls, .token-delete-controls, .token-delete-buttons')) {
       return
     }
 
@@ -128,12 +183,12 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
     
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
-  }, [token, onDragStart, isEditMode, isDeleteConfirmMode, isTokenEraserActive])
+  }, [token, onDragStart, isCharacterPanelOpen, isEditMode, isDeleteConfirmMode, isTokenEraserActive])
 
   const handleTouchStart = useCallback((e) => {
-    if (isEditMode || isDeleteConfirmMode || isTokenEraserActive) return
-    
-    if (e.target.closest('.token-gear, .token-trash, .token-edit-controls, .token-size-controls, .token-labels, .token-save-controls, .token-delete-controls, .token-delete-buttons')) {
+    if (isCharacterPanelOpen || isEditMode || isDeleteConfirmMode || isTokenEraserActive) return
+
+    if (e.target.closest('.token-top-actions, .token-gear, .token-trash, .token-character-panel, .token-duplicate, .token-edit-controls, .token-size-controls, .token-labels, .token-save-controls, .token-delete-controls, .token-delete-buttons')) {
       return
     }
 
@@ -182,7 +237,7 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
     
     document.addEventListener('touchmove', handleTouchMove)
     document.addEventListener('touchend', handleTouchEnd)
-  }, [token, onDragStart, isEditMode, isDeleteConfirmMode])
+  }, [token, onDragStart, isCharacterPanelOpen, isEditMode, isDeleteConfirmMode])
 
   const handleTokenClickInEraseMode = useCallback((e) => {
     if (!isTokenEraserActive || !onTokenErase) return
@@ -212,7 +267,8 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
 
   return (
     <div
-      className={`token ${isDragging ? 'dragging' : ''} ${(isEditMode || isDeleteConfirmMode) ? 'edit-mode' : ''}`}
+      ref={tokenRef}
+      className={`token ${isDragging ? 'dragging' : ''} ${(isEditMode || isDeleteConfirmMode) ? 'edit-mode' : ''} ${isCharacterPanelOpen ? 'token-panel-open' : ''}`}
       style={{
         left: posX,
         top: posY
@@ -244,18 +300,39 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
       )}
 
       {isHovered && !isEditMode && !isDeleteConfirmMode && !isDragging && (
-        <button
-          className="token-gear"
-          onClick={handleGearClick}
-          onMouseDown={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-          }}
-          onTouchStart={(e) => e.stopPropagation()}
-          title={t('token.editTitle')}
-        >
-          ⚙️
-        </button>
+        <div className="token-top-actions">
+          <button
+            className="token-gear"
+            onClick={handleGearClick}
+            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault() }}
+            onTouchStart={(e) => e.stopPropagation()}
+            title={t('token.editTitle')}
+          >
+            ⚙️
+          </button>
+          {isGameMaster && (
+            <>
+              <button
+                className="token-character-panel"
+                onClick={handleCharacterPanelClick}
+                onMouseDown={(e) => { e.stopPropagation(); e.preventDefault() }}
+                onTouchStart={(e) => e.stopPropagation()}
+                title={t('token.characterPanelTitle')}
+              >
+                📋
+              </button>
+              <button
+                className="token-duplicate"
+                onClick={handleDuplicateClick}
+                onMouseDown={(e) => { e.stopPropagation(); e.preventDefault() }}
+                onTouchStart={(e) => e.stopPropagation()}
+                title={t('token.duplicateTitle')}
+              >
+                📋+
+              </button>
+            </>
+          )}
+        </div>
       )}
 
       {isHovered && !isEditMode && !isDeleteConfirmMode && !isDragging && (
@@ -374,6 +451,71 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
             <span>{token.lowerLabel}</span>
           )}
         </div>
+      )}
+
+      {isCharacterPanelOpen && panelPlacement && createPortal(
+        panelPlacement.isModal ? (
+          <div
+            className="token-note-modal-overlay note-template-modal"
+            onClick={handleCloseCharacterPanel}
+          >
+            <div
+              className="token-note-modal-content note-template-modal-content"
+            onMouseDown={e => e.stopPropagation()}
+            onMouseMove={e => e.stopPropagation()}
+            onMouseUp={e => e.stopPropagation()}
+            onTouchStart={e => e.stopPropagation()}
+            onTouchMove={e => e.stopPropagation()}
+            onTouchEnd={e => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="token-note-modal-title">
+                {t('token.panelTitle')}{token.upperLabel || token.lowerLabel ? `: ${token.upperLabel || token.lowerLabel}` : ''}
+              </div>
+              <TokenNoteEditor
+                tokenId={token.id}
+                tokenLabel={token.upperLabel || token.lowerLabel || ''}
+                onClose={handleCloseCharacterPanel}
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <div
+              className="token-note-popover-backdrop"
+              onClick={handleCloseCharacterPanel}
+              aria-hidden
+            />
+            <div
+              className="token-note-popover note-template-modal-content"
+              style={{
+                position: 'fixed',
+                left: panelPlacement.left,
+                top: panelPlacement.top,
+                width: POPOVER_WIDTH,
+                maxHeight: panelPlacement.maxHeight,
+                zIndex: 7910002
+              }}
+              onMouseDown={e => e.stopPropagation()}
+              onMouseMove={e => e.stopPropagation()}
+              onMouseUp={e => e.stopPropagation()}
+              onTouchStart={e => e.stopPropagation()}
+              onTouchMove={e => e.stopPropagation()}
+              onTouchEnd={e => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="token-note-modal-title">
+                {t('token.panelTitle')}{token.upperLabel || token.lowerLabel ? `: ${token.upperLabel || token.lowerLabel}` : ''}
+              </div>
+              <TokenNoteEditor
+                tokenId={token.id}
+                tokenLabel={token.upperLabel || token.lowerLabel || ''}
+                onClose={handleCloseCharacterPanel}
+              />
+            </div>
+          </>
+        ),
+        document.body
       )}
     </div>
   )

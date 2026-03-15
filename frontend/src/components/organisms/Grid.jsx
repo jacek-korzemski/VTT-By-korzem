@@ -26,6 +26,7 @@ const Grid = forwardRef(function Grid(props, ref) {
     onTokenUpdate,
     onRemoveMapElement,
     onRemoveToken,
+    onDuplicateToken,
     onDropPlace,
     onDeselectPlacement,
     basePath,
@@ -88,6 +89,10 @@ const Grid = forwardRef(function Grid(props, ref) {
 
   const canStartPanning = useCallback((e) => {
     if (e.target.closest('.token')) return false
+    if (e.target.closest('.token-note-popover')) return false
+    if (e.target.closest('.token-note-modal-content')) return false
+    if (e.target.closest('.token-note-editor')) return false
+    if (e.target.closest('.swysiwyg-wrapper')) return false
     if (e.target.closest('.map-element.erasable')) return false
     if (e.target.closest('.fog-canvas.editing')) return false
     if (selectedAsset) return false
@@ -176,6 +181,10 @@ const Grid = forwardRef(function Grid(props, ref) {
   const handleGridClick = useCallback((e) => {
     if (e.button !== 0) return
     if (e.target.closest('.token')) return
+    if (e.target.closest('.token-note-popover')) return
+    if (e.target.closest('.token-note-modal-content')) return
+    if (e.target.closest('.token-note-editor')) return
+    if (e.target.closest('.swysiwyg-wrapper')) return
     if (e.target.closest('.map-element')) return
     if (e.target.closest('.fog-canvas')) return
     if (draggedToken) return
@@ -338,6 +347,8 @@ const Grid = forwardRef(function Grid(props, ref) {
               onDragStart={handleTokenDragStart}
               onTokenUpdate={onTokenUpdate}
               onRemoveToken={onRemoveToken}
+              onDuplicateToken={onDuplicateToken}
+              isGameMaster={isGameMaster}
               isTokenEraserActive={isTokenEraserActive}
               onTokenErase={onRemoveToken}
               basePath={basePath}

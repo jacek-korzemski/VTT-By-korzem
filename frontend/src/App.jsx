@@ -838,6 +838,9 @@ useEffect(() => {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
+          try {
+            localStorage.removeItem(TOKEN_NOTE_STORAGE_PREFIX + tokenId)
+          } catch (_) {}
           setTokens(prev => {
             const next = prev.filter(t => t.id !== tokenId)
             if (next.length === 0 && isTokenEraserActive) {
@@ -851,6 +854,66 @@ useEffect(() => {
       .catch(console.error)
   }, [isTokenEraserActive])
 
+  const TOKEN_NOTE_STORAGE_PREFIX = 'vtt_token_note_'
+
+  const handleDuplicateToken = useCallback((token) => {
+    const candidates = [
+      { x: token.x + 1, y: token.y },
+      { x: token.x - 1, y: token.y },
+      { x: token.x, y: token.y + 1 },
+      { x: token.x, y: token.y - 1 }
+    ]
+    const free = candidates.find(({ x, y }) => !isOccupiedByToken(x, y))
+    if (!free) {
+      return
+    }
+    fetch(`${API_BASE}?action=add-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        assetId: token.assetId,
+        src: token.src,
+        x: free.x,
+        y: free.y
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.token) {
+          setTokens(prev => [...prev, data.token])
+          setVersion(data.version)
+          try {
+            const raw = localStorage.getItem(TOKEN_NOTE_STORAGE_PREFIX + token.id)
+            if (raw) {
+              localStorage.setItem(TOKEN_NOTE_STORAGE_PREFIX + data.token.id, raw)
+            }
+          } catch (_) {}
+          const updates = {}
+          if (token.size != null) updates.size = token.size
+          if (token.upperLabel != null) updates.upperLabel = token.upperLabel
+          if (token.lowerLabel != null) updates.lowerLabel = token.lowerLabel
+          if (Object.keys(updates).length > 0) {
+            fetch(`${API_BASE}?action=update-token`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ id: data.token.id, ...updates })
+            })
+              .then(r => r.json())
+              .then(d => {
+                if (d.success) {
+                  setVersion(d.version)
+                  setTokens(prev => prev.map(t => t.id === data.token.id ? { ...t, ...updates } : t))
+                }
+              })
+              .catch(console.error)
+          }
+        }
+      })
+      .catch(console.error)
+  }, [isOccupiedByToken])
+
   
   const handleClear = useCallback(() => {
     if (!confirm(t('sidebar.clearMapConfirm'))) return
@@ -863,6 +926,9 @@ useEffect(() => {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
+          try {
+            tokens.forEach(token => localStorage.removeItem(TOKEN_NOTE_STORAGE_PREFIX + token.id))
+          } catch (_) {}
           setBackground(null)
           setMapElements([])
           setTokens([])
@@ -875,7 +941,7 @@ useEffect(() => {
         }
       })
       .catch(console.error)
-  }, [])
+  }, [tokens])
 
   const handleToggleFog = useCallback((enabled) => {
     fetch(`${API_BASE}?action=toggle-fog`, {
@@ -1105,6 +1171,7 @@ useEffect(() => {
           onTokenUpdate={handleTokenUpdate}
           onRemoveMapElement={handleRemoveMapElement}
           onRemoveToken={handleRemoveToken}
+          onDuplicateToken={handleDuplicateToken}
           onDropPlace={handleDropOnGrid}
           onDeselectPlacement={handleDeselectAsset}
           basePath={BASE_PATH}

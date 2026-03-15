@@ -978,11 +978,32 @@ body {
   outline-offset: 2px;
 }
 
-/* Token gear icon */
-.token-gear {
+/* Token top actions row (gear + character panel + duplicate) */
+.token-top-actions {
   position: absolute;
   top: -8px;
-  right: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  z-index: 20;
+}
+
+.token-top-actions .token-gear,
+.token-top-actions .token-character-panel,
+.token-top-actions .token-duplicate {
+  position: relative;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+}
+
+.token-gear,
+.token-character-panel,
+.token-duplicate {
   width: 24px;
   height: 24px;
   background: rgba(0, 0, 0, 0.8);
@@ -994,13 +1015,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 20;
   padding: 0;
   line-height: 1;
   transition: background 0.2s ease;
+  flex-shrink: 0;
 }
 
-.token-gear:hover {
+.token-gear:hover,
+.token-character-panel:hover,
+.token-duplicate:hover {
   background: rgba(0, 0, 0, 0.95);
 }
 
@@ -4034,6 +4057,72 @@ body {
 
 .note-template-cancel:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* When character panel is open, token must not capture pointer events so the editor can receive focus and clicks */
+.token.token-panel-open {
+  pointer-events: none;
+}
+
+/* Token character panel: popover (desktop) and modal (mobile) */
+.token-note-popover-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 7910001;
+  background: transparent;
+  pointer-events: auto;
+}
+
+.token-note-popover {
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+  pointer-events: auto;
+}
+
+.token-note-popover .token-note-editor {
+  flex: 1;
+  min-height: 0;
+}
+
+.token-note-modal-overlay {
+  z-index: 7910001;
+}
+
+.token-note-modal-content {
+  max-width: 520px;
+  max-height: 75vh;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.token-note-modal-title {
+  margin: 0 0 8px 0;
+  color: #e94560;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.token-note-editor {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.token-note-editor .note-editor-header {
+  flex-shrink: 0;
+}
+
+.token-note-editor-content {
+  flex: 1;
+  min-height: 180px;
+  overflow: auto;
 }
 
 .note-mismatch-message {

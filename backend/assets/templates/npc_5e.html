@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Potwór - Locheły i Smokeły</title>
+</head>
+
+<body>
+
+  <!-- STATYSTYKI BOJOWE -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">⚔️ STATYSTYKI BOJOWE</td>
+    </tr>
+    <tr>
+      <td class="center"><strong>KP</strong><br><input data-field="ac" type="text" class="circle"></td>
+      <td class="center"><strong>Inicjatywa</strong><br><input data-field="initiative" type="text" class="circle">
+        <button data-roll="d20+@initiative" data-roll-label="Inicjatywa" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+    <tr>
+      <td class="center"><strong>Szybkość</strong><br><input data-field="speed" type="text" class="plain sm"></td>
+      <td class="center"><strong>PW</strong><br><input data-field="hp_current" type="text" class="box sm"> / <input
+          data-field="hp_max" type="text" class="box sm"></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="center">
+        <strong>Kości PW:</strong> <input data-field="hit_dice" type="text" class="plain sm">
+        <button data-roll="@hit_dice" data-roll-label="Rzut na PW" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- CECHY -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="3" class="section-header">📊 CECHY</td>
+    </tr>
+    <tr>
+      <td class="center"><strong>SIŁ</strong></td>
+      <td class="center"><strong>ZRC</strong></td>
+      <td class="center"><strong>KON</strong></td>
+    </tr>
+    <tr>
+      <td class="center">
+        <input data-field="str_score" type="text" class="circle"><br>(<input data-field="str_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@str_mod" data-roll-label="Siła" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="dex_score" type="text" class="circle"><br>(<input data-field="dex_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@dex_mod" data-roll-label="Zręczność" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="con_score" type="text" class="circle"><br>(<input data-field="con_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@con_mod" data-roll-label="Kondycja" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+    <tr>
+      <td class="center"><strong>INT</strong></td>
+      <td class="center"><strong>MDR</strong></td>
+      <td class="center"><strong>CHA</strong></td>
+    </tr>
+    <tr>
+      <td class="center">
+        <input data-field="int_score" type="text" class="circle"><br>(<input data-field="int_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@int_mod" data-roll-label="Inteligencja" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="wis_score" type="text" class="circle"><br>(<input data-field="wis_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@wis_mod" data-roll-label="Mądrość" class="roll-btn">🎲</button>
+      </td>
+      <td class="center">
+        <input data-field="cha_score" type="text" class="circle"><br>(<input data-field="cha_mod" type="text"
+          class="box xs">)
+        <button data-roll="d20+@cha_mod" data-roll-label="Charyzma" class="roll-btn">🎲</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- RZUTY OBRONNE (opcjonalnie wypełniane) -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">🛡️ RZUTY OBRONNE</td>
+    </tr>
+    <tr>
+      <td><strong>Rzuty obronne:</strong></td>
+      <td><input data-field="saving_throws" type="text" class="plain wide"></td>
+    </tr>
+  </table>
+
+  <!-- OBRONA I ODPORNOŚCI -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">🛡️ ODPORNOŚCI</td>
+    </tr>
+    <tr>
+      <td><strong>Odporności:</strong></td>
+      <td><input data-field="resistances" type="text" class="plain wide"></td>
+    </tr>
+    <tr>
+      <td><strong>Immunitet (obrażenia):</strong></td>
+      <td><input data-field="dmg_immunities" type="text" class="plain wide"></td>
+    </tr>
+    <tr>
+      <td><strong>Immunitet (stany):</strong></td>
+      <td><input data-field="cond_immunities" type="text" class="plain wide"></td>
+    </tr>
+    <tr>
+      <td><strong>Podatności:</strong></td>
+      <td><input data-field="vulnerabilities" type="text" class="plain wide"></td>
+    </tr>
+  </table>
+
+  <!-- ZMYSŁY -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">👁️ ZMYSŁY</td>
+    </tr>
+    <tr>
+      <td><strong>Zmysły:</strong></td>
+      <td><input data-field="senses" type="text" class="plain wide"></td>
+    </tr>
+    <tr>
+      <td><strong>Bierna percepcja:</strong></td>
+      <td><input data-field="passive_perception" type="text" class="box sm"></td>
+    </tr>
+  </table>
+
+  <!-- ATAKI -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="5" class="section-header">⚔️ ATAKI</td>
+    </tr>
+    <tr>
+      <td><strong>Nazwa</strong></td>
+      <td class="center"><strong>Trafienie</strong></td>
+      <td class="center"><strong>Zasięg</strong></td>
+      <td class="center"><strong>Obrażenia</strong></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><input data-field="atk1_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk1_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk1_range" type="text" class="plain xs"></td>
+      <td class="center"><input data-field="atk1_dmg" type="text" class="plain sm"></td>
+      <td class="center">
+        <button data-roll="d20+@atk1_hit" data-roll-label="Atak: @atk1_name" class="roll-btn">🎲</button>
+        <button data-roll="@atk1_dmg" data-roll-label="Obrażenia: @atk1_name" class="roll-btn">💥</button>
+      </td>
+    </tr>
+    <tr>
+      <td><input data-field="atk2_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk2_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk2_range" type="text" class="plain xs"></td>
+      <td class="center"><input data-field="atk2_dmg" type="text" class="plain sm"></td>
+      <td class="center">
+        <button data-roll="d20+@atk2_hit" data-roll-label="Atak: @atk2_name" class="roll-btn">🎲</button>
+        <button data-roll="@atk2_dmg" data-roll-label="Obrażenia: @atk2_name" class="roll-btn">💥</button>
+      </td>
+    </tr>
+    <tr>
+      <td><input data-field="atk3_name" type="text" class="plain"></td>
+      <td class="center"><input data-field="atk3_hit" type="text" class="box xs"></td>
+      <td class="center"><input data-field="atk3_range" type="text" class="plain xs"></td>
+      <td class="center"><input data-field="atk3_dmg" type="text" class="plain sm"></td>
+      <td class="center">
+        <button data-roll="d20+@atk3_hit" data-roll-label="Atak: @atk3_name" class="roll-btn">🎲</button>
+        <button data-roll="@atk3_dmg" data-roll-label="Obrażenia: @atk3_name" class="roll-btn">💥</button>
+      </td>
+    </tr>
+  </table>
+
+  <!-- WIELOATAK -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🗡️ WIELOATAK</td>
+    </tr>
+    <tr>
+      <td><input data-field="multiattack" type="text" class="plain wide"></td>
+    </tr>
+  </table>
+
+  <!-- SPECJALNE ZDOLNOŚCI -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">🌟 ZDOLNOŚCI SPECJALNE</td>
+    </tr>
+    <tr>
+      <td><textarea data-field="abilities" class="plain wide" rows="4"></textarea></td>
+    </tr>
+  </table>
+
+  <!-- AKCJE LEGENDARNE (opcjonalnie) -->
+  <table class="tpl-table">
+    <tr>
+      <td colspan="2" class="section-header">👑 AKCJE LEGENDARNE</td>
+    </tr>
+    <tr>
+      <td><strong>Punkty:</strong></td>
+      <td>
+        <input data-field="legendary_current" type="text" class="box xs"> /
+        <input data-field="legendary_max" type="text" class="box xs">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><textarea data-field="legendary_actions" class="plain wide" rows="3"></textarea></td>
+    </tr>
+  </table>
+
+  <!-- NOTATKI MG -->
+  <table class="tpl-table">
+    <tr>
+      <td class="section-header">📝 NOTATKI MG</td>
+    </tr>
+    <tr>
+      <td><textarea data-field="notes" class="plain wide" rows="3"></textarea></td>
+    </tr>
+  </table>
+
+</body>
+
+</html>

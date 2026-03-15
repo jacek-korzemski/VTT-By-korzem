@@ -248,7 +248,12 @@
       "deleteConfirmTitle": "Confirm token removal",
       "deleteConfirmQuestion": "Do you want to delete this token?",
       "deleteConfirm": "Delete",
-      "deleteCancel": "Cancel"
+      "deleteCancel": "Cancel",
+      "characterPanelTitle": "Character panel",
+      "duplicateTitle": "Duplicate token",
+      "panelTitle": "Character panel",
+      "panelClose": "Close panel",
+      "duplicateNoSpace": "No free cell next to token"
     }
   },
   "pl": {
@@ -500,7 +505,12 @@
       "deleteConfirmTitle": "Potwierdź usunięcie tokena",
       "deleteConfirmQuestion": "Czy chcesz usunąć ten token?",
       "deleteConfirm": "Usuń",
-      "deleteCancel": "Anuluj"
+      "deleteCancel": "Anuluj",
+      "characterPanelTitle": "Panel postaci",
+      "duplicateTitle": "Duplikuj token",
+      "panelTitle": "Panel postaci",
+      "panelClose": "Zamknij panel",
+      "duplicateNoSpace": "Brak wolnej kratki obok tokena"
     }
   }
 }
