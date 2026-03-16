@@ -89,6 +89,24 @@ export function buildRollData(diceList, modifier, label, getFieldValue) {
 }
 
 /**
+ * Build effective roll expression from a roll button in a template cell.
+ * - If data-roll is empty: use only the value of the input in the same cell (e.g. user typed "d4").
+ * - If data-roll is set and same-cell input has value: use formula + "+" + input value (e.g. "d20" + "d4" → "d20+d4"),
+ *   unless the formula already references that field via @fieldId (then parseRollExpression substitutes it).
+ */
+export function getEffectiveRollExpression(rollButton) {
+  if (!rollButton || typeof rollButton.closest !== 'function') return ''
+  const expr = (rollButton.getAttribute('data-roll') || '').trim()
+  const td = rollButton.closest('td')
+  const input = td && td.querySelector('input[data-field]')
+  const fieldId = (input && input.getAttribute('data-field')) || ''
+  const userVal = input ? String(input.value || '').trim() : ''
+  if (!expr) return userVal
+  if (userVal && (!fieldId || !expr.includes('@' + fieldId))) return expr + '+' + userVal
+  return expr
+}
+
+/**
  * Parse expression, roll dice, build rollData and dispatch 'vtt:dice-roll'.
  */
 export function executeDiceRoll(expr, label, getFieldValue) {

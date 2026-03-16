@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react'
 import SimpleWYSIWYG from '../atoms/SimpleWYSIWYG'
 import { t } from '../../lang'
 import { API_BASE } from '../../../config'
-import { executeDiceRoll } from '../../utils/diceRollUtils'
+import { executeDiceRoll, getEffectiveRollExpression } from '../../utils/diceRollUtils'
 
 function extractBodyContent(html) {
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
@@ -182,7 +182,7 @@ function NoteEditor({ id, noteIndex = 1, onRemove, canRemove, registerNoteTempla
     container.querySelectorAll('[data-roll]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault()
-        const expr = btn.getAttribute('data-roll')
+        const expr = getEffectiveRollExpression(btn)
         const label = btn.getAttribute('data-roll-label') || ''
         executeDiceRoll(expr, label, getFieldValue)
       })

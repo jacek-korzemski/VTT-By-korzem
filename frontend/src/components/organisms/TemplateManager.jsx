@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { API_BASE } from '../../../config'
 import { t } from '../../lang'
 import TemplateEditor from './TemplateEditor'
-import { executeDiceRoll } from '../../utils/diceRollUtils'
+import { executeDiceRoll, getEffectiveRollExpression } from '../../utils/diceRollUtils'
 import { detectTemplateKind, htmlToModel } from '../../utils/templateEditorUtils'
 
 function extractBodyContent(html) {
@@ -162,7 +162,7 @@ function TemplateManager() {
       btn.parentNode.replaceChild(clone, btn)
       clone.addEventListener('click', (e) => {
         e.preventDefault()
-        const expr = clone.getAttribute('data-roll')
+        const expr = getEffectiveRollExpression(clone)
         const label = clone.getAttribute('data-roll-label') || ''
         executeDiceRoll(expr, label, getFieldValue)
       })

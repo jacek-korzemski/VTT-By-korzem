@@ -26,7 +26,7 @@ const defaultCell = (type = 'text') => ({
   fieldId: '',
   size: 'normal',
   style: 'plain',
-  rollFormula: type === 'textWithRoll' ? 'd20+@mod' : 'd20',
+  rollFormula: '', // empty allowed; for textWithRoll user can leave empty and use only field value
   rollLabel: '',
 })
 

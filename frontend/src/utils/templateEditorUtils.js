@@ -35,7 +35,7 @@ function renderCell(cell) {
     return `<td><strong>${label}</strong><br><textarea data-field="${fieldId}" class="plain wide" rows="2"></textarea></td>`
   }
   if (type === 'textWithRoll') {
-    const formula = escapeHtml((cell.rollFormula || 'd20').trim())
+    const formula = escapeHtml((cell.rollFormula || '').trim())
     const rollLabel = escapeHtml((cell.rollLabel || '').trim())
     const cls = inputClass(size, style)
     return `<td class="center"><strong>${label}</strong><br><input data-field="${fieldId}" type="text" class="${cls}"> <button data-roll="${formula}" data-roll-label="${rollLabel}" class="roll-btn">🎲</button></td>`
@@ -201,7 +201,7 @@ function parseCell(td) {
     if (cls.includes('box')) style = 'box'
     else if (cls.includes('circle')) style = 'circle'
     if (rollBtn) {
-      const rollFormula = (rollBtn.getAttribute('data-roll') || 'd20').trim()
+      const rollFormula = (rollBtn.getAttribute('data-roll') || '').trim()
       const rollLabel = (rollBtn.getAttribute('data-roll-label') || '').trim()
       return { type: 'textWithRoll', label, fieldId, rollFormula, rollLabel, size, style }
     }
