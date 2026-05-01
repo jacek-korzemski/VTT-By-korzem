@@ -328,7 +328,7 @@ function Token({ token, cellSize, isDragging, dragPosition, onDragStart, basePat
                 onTouchStart={(e) => e.stopPropagation()}
                 title={t('token.duplicateTitle')}
               >
-                📋+
+                ➕
               </button>
             </>
           )}
